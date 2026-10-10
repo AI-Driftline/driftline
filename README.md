@@ -2,6 +2,8 @@
 
 See how your prompts change **before** an AI model is retired.
 
+![Driftline flags retired and retiring models on the exact line of a pull request, then lists them in the job summary](docs/demo.gif)
+
 Driftline is a GitHub Action. It finds the OpenAI, Anthropic and Google model IDs in your code, checks them against the providers' published retirement dates, and runs your real prompts on both the current and the replacement model so you can see what changes before you switch.
 
 It runs inside your own CI with your own API keys. There is no Driftline server: prompts go straight from your runner to your AI provider.
