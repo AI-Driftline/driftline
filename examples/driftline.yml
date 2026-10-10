@@ -17,8 +17,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: AI-Driftline/driftline@v0
         with:
-          license-key: ${{ secrets.DRIFTLINE_LICENSE_KEY }}   # optional: enables drift tests
-          create-issue: "true"
+          license-key: ${{ secrets.DRIFTLINE_LICENSE_KEY }}   # optional (Pro): the code printed by `driftline activate`
+          create-issue: ${{ github.event_name != 'pull_request' }}   # PRs annotate; only main updates the issue
           fail-on: retired
         env:                                                # only the providers you use
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

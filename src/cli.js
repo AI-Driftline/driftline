@@ -1,15 +1,44 @@
 #!/usr/bin/env node
-// Local use: node src/cli.js [directory]
-// Runs the same scan as the Action and prints the report. Drift tests run when
-// .driftline/prompts.yml exists, DRIFTLINE_LICENSE_KEY is set, and provider keys are in the environment.
+// Local use:
+//   driftline [directory]              scan and print the report (drift tests run when
+//                                      .driftline/prompts.yml, DRIFTLINE_LICENSE_KEY and provider keys exist)
+//   driftline activate <license-key>   register this GitHub account; prints the code to save as DRIFTLINE_LICENSE_KEY
+//   driftline deactivate <code>        free that account's slot (a key works on up to 3 accounts)
 import { resolve } from "node:path";
+import { execFileSync } from "node:child_process";
 import { run } from "./run.js";
+import { activate, deactivate } from "./license.js";
 
-const root = resolve(process.argv[2] || ".");
-const result = await run({
-  root,
-  licenseKey: process.env.DRIFTLINE_LICENSE_KEY || "",
-  log: (m) => console.error(m),
-});
-console.log(result.markdown);
-process.exitCode = result.findings.some((f) => f.status === "retired") ? 1 : 0;
+const [cmd, arg] = process.argv.slice(2);
+const flag = (name) => { const i = process.argv.indexOf(`--${name}`); return i > 0 ? process.argv[i + 1] : ""; };
+
+// "git@github.com:acme/app.git" or "https://github.com/acme/app" -> "acme"
+function accountFromGit() {
+  try {
+    const url = execFileSync("git", ["remote", "get-url", "origin"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    return url.match(/github\.com[:/]([^/]+)\//i)?.[1] || "";
+  } catch { return ""; }
+}
+
+if (cmd === "activate") {
+  const account = flag("account") || accountFromGit();
+  const r = await activate(arg, account);
+  if (!r.ok) { console.error(r.reason); process.exitCode = 1; }
+  else {
+    console.log(`Activated for GitHub account "${account}"${r.limit ? ` (${r.used} of ${r.limit} used)` : ""}.\n`);
+    console.log("Save this as a repository or organization secret named DRIFTLINE_LICENSE_KEY:\n");
+    console.log(`  ${r.code}\n`);
+  }
+} else if (cmd === "deactivate") {
+  const r = await deactivate(arg);
+  if (!r.ok) { console.error(r.reason); process.exitCode = 1; }
+  else console.log("Deactivated. That slot is free for another GitHub account.");
+} else {
+  const result = await run({
+    root: resolve(cmd || "."),
+    licenseKey: process.env.DRIFTLINE_LICENSE_KEY || "",
+    log: (m) => console.error(m),
+  });
+  console.log(result.markdown);
+  process.exitCode = result.findings.some((f) => f.status === "retired" && !f.doc) ? 1 : 0;
+}

@@ -23,6 +23,9 @@ inputs:
   create-issue:
     description: Open or update a GitHub issue with the report ("true" or "false").
     default: "false"
+  show-answers:
+    description: Include model answers in the job summary ("true" or "false"). They are never put in the issue.
+    default: "true"
   github-token:
     description: Token used to open the issue. Needs issues:write.
     default: ${{ github.token }}

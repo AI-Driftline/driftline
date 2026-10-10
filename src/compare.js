@@ -4,8 +4,13 @@
 const SAME = 0.9;
 const CHANGED = 0.6;
 
+// Words, except in scripts written without spaces (Chinese, Japanese, Thai), where each character
+// is a token; the word-pair pass below then compares them as character pairs.
+const NO_SPACES = "\\p{sc=Han}\\p{sc=Hiragana}\\p{sc=Katakana}\\p{sc=Thai}";
+const TOKEN = new RegExp(`[${NO_SPACES}]|(?:(?![${NO_SPACES}])[\\p{L}\\p{N}])+`, "gu");
+
 function tokens(text) {
-  return (text.toLowerCase().match(/[\p{L}\p{N}]+/gu) || []);
+  return text.toLowerCase().match(TOKEN) || [];
 }
 
 function vector(text) {
@@ -30,10 +35,13 @@ export function extractJson(text) {
   const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
   const candidate = (fenced ? fenced[1] : text).trim();
   try { return { ok: true, value: JSON.parse(candidate) }; } catch {}
-  const start = candidate.search(/[[{]/);
+  // JSON after a sentence, which may itself contain braces: try each opening bracket in turn.
   const end = Math.max(candidate.lastIndexOf("}"), candidate.lastIndexOf("]"));
-  if (start >= 0 && end > start) {
+  let tries = 0;
+  for (let start = candidate.search(/[[{]/); start >= 0 && start < end && tries < 50; tries++) {
     try { return { ok: true, value: JSON.parse(candidate.slice(start, end + 1)) }; } catch {}
+    const next = candidate.slice(start + 1).search(/[[{]/);
+    start = next < 0 ? -1 : start + 1 + next;
   }
   return { ok: false };
 }
@@ -64,6 +72,10 @@ export function jsonSimilarity(a, b) {
  * Returns { score, result, note } where result is: same | changed | broken
  */
 export function compare(before, after, expect = "text") {
+  const emptyBefore = !String(before ?? "").trim(), emptyAfter = !String(after ?? "").trim();
+  if (emptyBefore && emptyAfter) return { score: 0, result: "error", note: "Both models returned an empty answer" };
+  if (emptyAfter) return { score: 0, result: "broken", note: "Replacement returned an empty answer" };
+  if (emptyBefore) return { score: 0, result: "changed", note: "Current model returned an empty answer; review the replacement's" };
   if (expect === "json") {
     const a = extractJson(before), b = extractJson(after);
     if (!b.ok) return { score: 0, result: "broken", note: "Replacement did not return valid JSON" };

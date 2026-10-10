@@ -1,4 +1,5 @@
 import { readFileSync, existsSync } from "node:fs";
+import { normalizeId } from "./registry.js";
 
 /**
  * Load the prompt file. JSON is parsed as-is. YAML supports the documented subset:
@@ -12,16 +13,24 @@ import { readFileSync, existsSync } from "node:fs";
  *     prompt: |
  *       Extract the fields from this invoice as JSON:
  *       ...
+ *
+ * Block values can be literal (|) or folded (>), with optional chomping (+ or -).
  */
 export function loadPrompts(path) {
   if (!existsSync(path)) return null;
   const text = readFileSync(path, "utf8");
-  const data = path.endsWith(".json") ? JSON.parse(text) : parseYamlSubset(text);
+  const data = path.toLowerCase().endsWith(".json") ? JSON.parse(text) : parseYamlSubset(text);
   const list = Array.isArray(data) ? data : data?.prompts;
   if (!Array.isArray(list)) throw new Error(`${path}: expected a "prompts:" list`);
   return list.map((p, i) => {
     if (!p.prompt) throw new Error(`${path}: prompt #${i + 1} has no "prompt" field`);
-    return { id: p.id || `prompt-${i + 1}`, expect: p.expect || "text", ...p };
+    return {
+      ...p,
+      id: String(p.id || `prompt-${i + 1}`).replace(/[\r\n]+/g, " "),
+      expect: String(p.expect || "text").toLowerCase(),
+      ...(p.model ? { model: normalizeId(String(p.model).replace(/\s+/g, "")) } : {}),
+      ...(p.compare_to ? { compare_to: normalizeId(String(p.compare_to).replace(/\s+/g, "")) } : {}),
+    };
   });
 }
 
@@ -32,14 +41,22 @@ export function parseYamlSubset(text) {
   let block = null; // { key, indent, lines }
 
   const flushBlock = () => {
-    if (block && item) item[block.key] = block.lines.join("\n").replace(/\n+$/, "");
+    if (block && item) {
+      const lines = block.lines.join("\n").replace(/\n+$/, "").split("\n");
+      // Folded (>): lines join with spaces; a blank line starts a new paragraph.
+      item[block.key] = block.folded
+        ? lines.join("\n").split(/\n{2,}/).map((para) => para.split("\n").join(" ")).join("\n")
+        : lines.join("\n");
+    }
     block = null;
   };
   const scalar = (v) => {
-    v = v.replace(/\s+#.*$/, "").trim();
-    if (/^".*"$/.test(v)) return JSON.parse(v);
-    if (/^'.*'$/.test(v)) return v.slice(1, -1).replace(/''/g, "'");
-    return v;
+    v = v.trim();
+    let q = v.match(/^"((?:[^"\\]|\\.)*)"\s*(?:#.*)?$/);
+    if (q) return JSON.parse(`"${q[1]}"`);
+    q = v.match(/^'((?:[^']|'')*)'\s*(?:#.*)?$/);
+    if (q) return q[1].replace(/''/g, "'");
+    return v.replace(/\s+#.*$/, "").trim();
   };
 
   for (const raw of lines) {
@@ -56,7 +73,8 @@ export function parseYamlSubset(text) {
       flushBlock();
     }
     if (line === "" || line.startsWith("#")) continue;
-    if (/^prompts:\s*$/.test(line) && indent === 0) continue;
+    if (indent === 0 && /^(---|\.\.\.)(\s.*)?$/.test(line)) continue; // YAML document markers
+    if (/^prompts:\s*(\[\s*\])?\s*(#.*)?$/.test(line) && indent === 0) continue;
 
     let m = line.match(/^-\s+([\w-]+):\s*(.*)$/);
     if (m) {
@@ -67,9 +85,10 @@ export function parseYamlSubset(text) {
       if (!m || !item) throw new Error(`Cannot read prompt file line: "${raw}"`);
     }
     const [, key, value] = m;
-    if (value === "|" || value === "|-") {
+    const blockStart = value.replace(/\s+#.*$/, "").match(/^([|>])[+-]?$/);
+    if (blockStart) {
       const keyCol = indent + (raw.trimStart().startsWith("-") ? 2 : 0);
-      block = { key, keyCol, indent: null, lines: [] };
+      block = { key, keyCol, indent: null, lines: [], folded: blockStart[1] === ">" };
     } else {
       item[key] = scalar(value);
     }
