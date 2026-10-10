@@ -3,7 +3,7 @@ description: Find AI model IDs in your code, warn before they are retired, and t
 author: Mirza Tontowi
 branding:
   icon: activity
-  color: blue
+  color: green
 inputs:
   path:
     description: Directory to scan, relative to the repository root.
@@ -18,7 +18,7 @@ inputs:
     description: Prompt file for drift tests (YAML or JSON).
     default: .driftline/prompts.yml
   license-key:
-    description: Driftline Pro license key. Without it, only the scan runs.
+    description: Driftline Pro license code printed by `npx github:AI-Driftline/driftline activate <key>`. Without it, only the scan runs.
     default: ""
   create-issue:
     description: Open or update a GitHub issue with the report ("true" or "false").
