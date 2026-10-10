@@ -1,0 +1,1710 @@
+{
+  "checked": "2026-10-10",
+  "note": "Hand-maintained from the official deprecation pages. Re-check before each release. Entries with a 'kind' other than text are scanned and reported but never drift-tested. gpt-4-1106-preview is listed on OpenAI's page under both 2026-03-26 and 2026-10-23; the later date is used so builds are not failed on a conflicting record.",
+  "sources": {
+    "openai": "https://developers.openai.com/api/docs/deprecations",
+    "anthropic": "https://platform.claude.com/docs/en/about-claude/model-deprecations",
+    "google": "https://ai.google.dev/gemini-api/docs/deprecations"
+  },
+  "models": [
+    {
+      "id": "gpt-5.3-codex",
+      "provider": "openai",
+      "retires": "2027-04-01",
+      "qualifier": "exact",
+      "replacement": "gpt-6-sol",
+      "announced": "2026-10-01"
+    },
+    {
+      "id": "gpt-5.1",
+      "provider": "openai",
+      "retires": "2027-04-01",
+      "qualifier": "exact",
+      "replacement": "gpt-6-sol",
+      "announced": "2026-10-01"
+    },
+    {
+      "id": "gpt-5.4-nano",
+      "provider": "openai",
+      "retires": "2027-04-01",
+      "qualifier": "exact",
+      "replacement": "gpt-6-luna",
+      "announced": "2026-10-01"
+    },
+    {
+      "id": "gpt-5-2025-08-07",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-06-11"
+    },
+    {
+      "id": "gpt-5-pro-2025-10-06",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-06-11"
+    },
+    {
+      "id": "o3-2025-04-16",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-06-11"
+    },
+    {
+      "id": "o3-pro-2025-06-10",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-06-11"
+    },
+    {
+      "id": "gpt-5-mini-2025-08-07",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2026-06-11"
+    },
+    {
+      "id": "gpt-5-nano-2025-08-07",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-luna",
+      "announced": "2026-06-11"
+    },
+    {
+      "id": "gpt-3.5-turbo-0125",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-3.5-turbo",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "o4-mini",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "o4-mini-2025-04-16",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4-0613",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4-turbo",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4-turbo-2024-04-09",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4o-2024-05-13",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "o1",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "o1-2024-12-17",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "o1-pro",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "o1-pro-2025-03-19",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "o3-mini",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "o3-mini-2025-01-31",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4.1-nano",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-luna",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4.1-nano-2025-04-14",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-luna",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-5.2-chat-latest",
+      "provider": "openai",
+      "retires": "2026-08-10",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-05-08"
+    },
+    {
+      "id": "gpt-5.3-chat-latest",
+      "provider": "openai",
+      "retires": "2026-08-10",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-05-08"
+    },
+    {
+      "id": "gpt-5-chat-latest",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-5-codex",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-5.1-chat-latest",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-5.1-codex",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-5.1-codex-max",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-5.2-codex",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-5.1-codex-mini",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4o-mini-search-preview-2025-03-11",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4o-search-preview-2025-03-11",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-3.5-turbo-instruct",
+      "provider": "openai",
+      "retires": "2026-09-28",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2025-09-26"
+    },
+    {
+      "id": "babbage-002",
+      "provider": "openai",
+      "retires": "2026-09-28",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2025-09-26"
+    },
+    {
+      "id": "davinci-002",
+      "provider": "openai",
+      "retires": "2026-09-28",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2025-09-26"
+    },
+    {
+      "id": "gpt-3.5-turbo-1106",
+      "provider": "openai",
+      "retires": "2026-09-28",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2025-09-26"
+    },
+    {
+      "id": "gpt-4-0314",
+      "provider": "openai",
+      "retires": "2026-03-26",
+      "qualifier": "exact",
+      "replacement": "gpt-5",
+      "announced": "2025-09-26"
+    },
+    {
+      "id": "gpt-4-0125-preview",
+      "provider": "openai",
+      "retires": "2026-03-26",
+      "qualifier": "exact",
+      "replacement": "gpt-5",
+      "announced": "2025-09-26"
+    },
+    {
+      "id": "gpt-4-turbo-preview",
+      "provider": "openai",
+      "retires": "2026-03-26",
+      "qualifier": "exact",
+      "replacement": "gpt-5",
+      "announced": "2025-09-26"
+    },
+    {
+      "id": "chatgpt-4o-latest",
+      "provider": "openai",
+      "retires": "2026-02-17",
+      "qualifier": "exact",
+      "replacement": "gpt-5.1-chat-latest",
+      "announced": "2025-11-18"
+    },
+    {
+      "id": "gpt-4.5-preview",
+      "provider": "openai",
+      "retires": "2025-07-14",
+      "qualifier": "exact",
+      "replacement": "gpt-4.1",
+      "announced": "2025-04-14"
+    },
+    {
+      "id": "o1-preview",
+      "provider": "openai",
+      "retires": "2025-07-28",
+      "qualifier": "exact",
+      "replacement": "o3",
+      "announced": "2025-04-28"
+    },
+    {
+      "id": "o1-mini",
+      "provider": "openai",
+      "retires": "2025-10-27",
+      "qualifier": "exact",
+      "replacement": "o4-mini",
+      "announced": "2025-04-28"
+    },
+    {
+      "id": "claude-sonnet-4-5-20250929",
+      "provider": "anthropic",
+      "retires": "2026-11-30",
+      "qualifier": "exact",
+      "replacement": "claude-sonnet-5-5",
+      "announced": "2026-09-30"
+    },
+    {
+      "id": "claude-opus-4-1-20250805",
+      "provider": "anthropic",
+      "retires": "2026-08-05",
+      "qualifier": "exact",
+      "replacement": "claude-opus-4-8",
+      "announced": "2026-06-05"
+    },
+    {
+      "id": "claude-opus-4-20250514",
+      "provider": "anthropic",
+      "retires": "2026-06-15",
+      "qualifier": "exact",
+      "replacement": "claude-opus-4-8",
+      "announced": "2026-04-14"
+    },
+    {
+      "id": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "retires": "2026-06-15",
+      "qualifier": "exact",
+      "replacement": "claude-sonnet-5-5",
+      "announced": "2026-04-14"
+    },
+    {
+      "id": "claude-3-7-sonnet-20250219",
+      "provider": "anthropic",
+      "retires": "2026-02-19",
+      "qualifier": "exact",
+      "replacement": "claude-sonnet-5-5",
+      "announced": "2025-10-28"
+    },
+    {
+      "id": "claude-3-5-haiku-20241022",
+      "provider": "anthropic",
+      "retires": "2026-02-19",
+      "qualifier": "exact",
+      "replacement": "claude-haiku-4-5-20251001",
+      "announced": "2025-12-19"
+    },
+    {
+      "id": "claude-3-haiku-20240307",
+      "provider": "anthropic",
+      "retires": "2026-04-20",
+      "qualifier": "exact",
+      "replacement": "claude-haiku-4-5-20251001",
+      "announced": "2026-02-19"
+    },
+    {
+      "id": "claude-opus-4-5-20251101",
+      "provider": "anthropic",
+      "retires": "2026-11-24",
+      "qualifier": "not-before",
+      "replacement": null
+    },
+    {
+      "id": "claude-haiku-4-5-20251001",
+      "provider": "anthropic",
+      "retires": "2026-10-15",
+      "qualifier": "not-before",
+      "replacement": null
+    },
+    {
+      "id": "claude-sonnet-4-6",
+      "provider": "anthropic",
+      "retires": "2027-02-17",
+      "qualifier": "not-before",
+      "replacement": null
+    },
+    {
+      "id": "claude-opus-4-6",
+      "provider": "anthropic",
+      "retires": "2027-02-05",
+      "qualifier": "not-before",
+      "replacement": null
+    },
+    {
+      "id": "claude-opus-4-7",
+      "provider": "anthropic",
+      "retires": "2027-04-16",
+      "qualifier": "not-before",
+      "replacement": null
+    },
+    {
+      "id": "claude-opus-4-8",
+      "provider": "anthropic",
+      "retires": "2027-05-28",
+      "qualifier": "not-before",
+      "replacement": null
+    },
+    {
+      "id": "claude-sonnet-5",
+      "provider": "anthropic",
+      "retires": "2027-06-30",
+      "qualifier": "not-before",
+      "replacement": null
+    },
+    {
+      "id": "claude-opus-5",
+      "provider": "anthropic",
+      "retires": "2027-07-24",
+      "qualifier": "not-before",
+      "replacement": null
+    },
+    {
+      "id": "claude-sonnet-5-5",
+      "provider": "anthropic",
+      "retires": "2027-09-28",
+      "qualifier": "not-before",
+      "replacement": null
+    },
+    {
+      "id": "claude-opus-5-5",
+      "provider": "anthropic",
+      "retires": "2027-09-22",
+      "qualifier": "not-before",
+      "replacement": null
+    },
+    {
+      "id": "claude-haiku-5-5",
+      "provider": "anthropic",
+      "retires": "2027-10-07",
+      "qualifier": "not-before",
+      "replacement": null
+    },
+    {
+      "id": "gemini-2.0-flash",
+      "provider": "google",
+      "retires": "2026-06-01",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.6-flash"
+    },
+    {
+      "id": "gemini-2.0-flash-001",
+      "provider": "google",
+      "retires": "2026-06-01",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.6-flash"
+    },
+    {
+      "id": "gemini-2.0-flash-lite",
+      "provider": "google",
+      "retires": "2026-06-01",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.1-flash-lite"
+    },
+    {
+      "id": "gemini-2.0-flash-lite-001",
+      "provider": "google",
+      "retires": "2026-06-01",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.1-flash-lite"
+    },
+    {
+      "id": "gemini-2.5-pro-preview-03-25",
+      "provider": "google",
+      "retires": "2025-12-02",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.1-pro-preview"
+    },
+    {
+      "id": "gemini-2.5-pro-preview-05-06",
+      "provider": "google",
+      "retires": "2025-12-02",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.1-pro-preview"
+    },
+    {
+      "id": "gemini-2.5-pro-preview-06-05",
+      "provider": "google",
+      "retires": "2025-12-02",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.1-pro-preview"
+    },
+    {
+      "id": "gemini-2.5-flash-preview-05-20",
+      "provider": "google",
+      "retires": "2025-11-18",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.6-flash"
+    },
+    {
+      "id": "gemini-2.5-flash-preview-09-25",
+      "provider": "google",
+      "retires": "2026-02-17",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.6-flash"
+    },
+    {
+      "id": "gemini-2.5-flash-lite-preview-09-2025",
+      "provider": "google",
+      "retires": "2026-03-31",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.1-flash-lite"
+    },
+    {
+      "id": "gemini-3-pro-preview",
+      "provider": "google",
+      "retires": "2026-03-09",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.1-pro-preview"
+    },
+    {
+      "id": "gemini-3.1-flash-lite-preview",
+      "provider": "google",
+      "retires": "2026-05-25",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.1-flash-lite"
+    },
+    {
+      "id": "gemini-3.1-flash-lite",
+      "provider": "google",
+      "retires": "2027-05-07",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.5-flash-lite"
+    },
+    {
+      "id": "text-embedding-004",
+      "provider": "google",
+      "retires": "2026-01-14",
+      "qualifier": "earliest",
+      "replacement": "gemini-embedding-2",
+      "kind": "embedding"
+    },
+    {
+      "id": "gpt-4-1106-preview",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol"
+    },
+    {
+      "id": "gpt-5.4-cyber",
+      "provider": "openai",
+      "retires": "2026-10-01",
+      "qualifier": "exact"
+    },
+    {
+      "id": "computer-use-preview",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra"
+    },
+    {
+      "id": "computer-use-preview-2025-03-11",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra"
+    },
+    {
+      "id": "o3-deep-research",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol"
+    },
+    {
+      "id": "o3-deep-research-2025-06-26",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol"
+    },
+    {
+      "id": "o4-mini-deep-research",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol"
+    },
+    {
+      "id": "o4-mini-deep-research-2025-06-26",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol"
+    },
+    {
+      "id": "codex-mini-latest",
+      "provider": "openai",
+      "retires": "2026-02-12",
+      "qualifier": "exact",
+      "replacement": "gpt-5-codex-mini"
+    },
+    {
+      "id": "gpt-4-32k",
+      "provider": "openai",
+      "retires": "2025-06-06",
+      "qualifier": "exact",
+      "replacement": "gpt-4o"
+    },
+    {
+      "id": "gpt-4-32k-0613",
+      "provider": "openai",
+      "retires": "2025-06-06",
+      "qualifier": "exact",
+      "replacement": "gpt-4o"
+    },
+    {
+      "id": "gpt-4-32k-0314",
+      "provider": "openai",
+      "retires": "2025-06-06",
+      "qualifier": "exact",
+      "replacement": "gpt-4o"
+    },
+    {
+      "id": "gpt-4-vision-preview",
+      "provider": "openai",
+      "retires": "2024-12-06",
+      "qualifier": "exact",
+      "replacement": "gpt-4o"
+    },
+    {
+      "id": "gpt-4-1106-vision-preview",
+      "provider": "openai",
+      "retires": "2024-12-06",
+      "qualifier": "exact",
+      "replacement": "gpt-4o"
+    },
+    {
+      "id": "gpt-3.5-turbo-0613",
+      "provider": "openai",
+      "retires": "2024-09-13",
+      "qualifier": "exact",
+      "replacement": "gpt-3.5-turbo"
+    },
+    {
+      "id": "gpt-3.5-turbo-16k-0613",
+      "provider": "openai",
+      "retires": "2024-09-13",
+      "qualifier": "exact",
+      "replacement": "gpt-3.5-turbo"
+    },
+    {
+      "id": "gpt-3.5-turbo-0301",
+      "provider": "openai",
+      "retires": "2024-09-13",
+      "qualifier": "exact",
+      "replacement": "gpt-3.5-turbo"
+    },
+    {
+      "id": "text-ada-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "gpt-3.5-turbo-instruct"
+    },
+    {
+      "id": "text-babbage-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "gpt-3.5-turbo-instruct"
+    },
+    {
+      "id": "text-curie-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "gpt-3.5-turbo-instruct"
+    },
+    {
+      "id": "text-davinci-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "gpt-3.5-turbo-instruct"
+    },
+    {
+      "id": "text-davinci-002",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "gpt-3.5-turbo-instruct"
+    },
+    {
+      "id": "text-davinci-003",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "gpt-3.5-turbo-instruct"
+    },
+    {
+      "id": "code-davinci-002",
+      "provider": "openai",
+      "retires": "2023-03-23",
+      "qualifier": "exact",
+      "replacement": "gpt-4o"
+    },
+    {
+      "id": "code-davinci-001",
+      "provider": "openai",
+      "retires": "2023-03-23",
+      "qualifier": "exact",
+      "replacement": "gpt-4o"
+    },
+    {
+      "id": "code-cushman-002",
+      "provider": "openai",
+      "retires": "2023-03-23",
+      "qualifier": "exact",
+      "replacement": "gpt-4o"
+    },
+    {
+      "id": "code-cushman-001",
+      "provider": "openai",
+      "retires": "2023-03-23",
+      "qualifier": "exact",
+      "replacement": "gpt-4o"
+    },
+    {
+      "id": "text-davinci-edit-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "gpt-4o"
+    },
+    {
+      "id": "code-davinci-edit-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "gpt-4o"
+    },
+    {
+      "id": "tts-1",
+      "provider": "openai",
+      "retires": "2027-01-06",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1-mini",
+      "kind": "audio"
+    },
+    {
+      "id": "tts-1-hd",
+      "provider": "openai",
+      "retires": "2027-01-06",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1-mini",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-mini-tts-2025-03-20",
+      "provider": "openai",
+      "retires": "2027-01-06",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1-mini",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-mini-tts-2025-12-15",
+      "provider": "openai",
+      "retires": "2027-01-06",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1-mini",
+      "kind": "audio"
+    },
+    {
+      "id": "whisper-1",
+      "provider": "openai",
+      "retires": "2027-02-26",
+      "qualifier": "exact",
+      "replacement": "gpt-transcribe",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-transcribe",
+      "provider": "openai",
+      "retires": "2027-02-26",
+      "qualifier": "exact",
+      "replacement": "gpt-transcribe",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-mini-transcribe",
+      "provider": "openai",
+      "retires": "2027-02-26",
+      "qualifier": "exact",
+      "replacement": "gpt-transcribe",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-transcribe-diarize",
+      "provider": "openai",
+      "retires": "2027-02-26",
+      "qualifier": "exact",
+      "replacement": "gpt-transcribe",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-realtime",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-realtime",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-audio",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-audio-1.5",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-audio",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-audio-1.5",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-audio-mini",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-audio-1.5",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-mini-audio",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-audio-1.5",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-realtime-mini",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1-mini",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-mini-realtime",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1-mini",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-mini-transcribe-2025-03-20",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-4o-mini-transcribe-2025-12-15",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-audio-mini-2025-10-06",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-audio-1.5",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-realtime-mini-2025-10-06",
+      "provider": "openai",
+      "retires": "2026-07-23",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1-mini",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-realtime-preview",
+      "provider": "openai",
+      "retires": "2026-05-07",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-1.5",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-realtime-preview-2025-06-03",
+      "provider": "openai",
+      "retires": "2026-05-07",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-1.5",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-realtime-preview-2024-12-17",
+      "provider": "openai",
+      "retires": "2026-05-07",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-1.5",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-mini-realtime-preview",
+      "provider": "openai",
+      "retires": "2026-05-07",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-mini",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-audio-preview",
+      "provider": "openai",
+      "retires": "2026-05-07",
+      "qualifier": "exact",
+      "replacement": "gpt-audio-1.5",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-mini-audio-preview",
+      "provider": "openai",
+      "retires": "2026-05-07",
+      "qualifier": "exact",
+      "replacement": "gpt-audio-mini",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-realtime-preview-2024-10-01",
+      "provider": "openai",
+      "retires": "2025-10-10",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-1.5",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-4o-audio-preview-2024-10-01",
+      "provider": "openai",
+      "retires": "2025-10-10",
+      "qualifier": "exact",
+      "replacement": "gpt-audio-1.5",
+      "kind": "audio"
+    },
+    {
+      "id": "dall-e-2",
+      "provider": "openai",
+      "retires": "2026-05-12",
+      "qualifier": "exact",
+      "replacement": "gpt-image-2",
+      "kind": "image"
+    },
+    {
+      "id": "dall-e-3",
+      "provider": "openai",
+      "retires": "2026-05-12",
+      "qualifier": "exact",
+      "replacement": "gpt-image-2",
+      "kind": "image"
+    },
+    {
+      "id": "gpt-image-1",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-image-2.5-sunburst",
+      "kind": "image"
+    },
+    {
+      "id": "gpt-image-1-mini",
+      "provider": "openai",
+      "retires": "2026-12-01",
+      "qualifier": "exact",
+      "replacement": "gpt-image-2.5-sunburst",
+      "kind": "image"
+    },
+    {
+      "id": "gpt-image-1.5",
+      "provider": "openai",
+      "retires": "2026-12-01",
+      "qualifier": "exact",
+      "replacement": "gpt-image-2.5-sunburst",
+      "kind": "image"
+    },
+    {
+      "id": "chatgpt-image-latest",
+      "provider": "openai",
+      "retires": "2026-12-01",
+      "qualifier": "exact",
+      "replacement": "gpt-image-2.5-sunburst",
+      "kind": "image"
+    },
+    {
+      "id": "sora-2",
+      "provider": "openai",
+      "retires": "2026-09-24",
+      "qualifier": "exact",
+      "kind": "video"
+    },
+    {
+      "id": "sora-2-pro",
+      "provider": "openai",
+      "retires": "2026-09-24",
+      "qualifier": "exact",
+      "kind": "video"
+    },
+    {
+      "id": "sora-2-2025-10-06",
+      "provider": "openai",
+      "retires": "2026-09-24",
+      "qualifier": "exact",
+      "kind": "video"
+    },
+    {
+      "id": "sora-2-2025-12-08",
+      "provider": "openai",
+      "retires": "2026-09-24",
+      "qualifier": "exact",
+      "kind": "video"
+    },
+    {
+      "id": "sora-2-pro-2025-10-06",
+      "provider": "openai",
+      "retires": "2026-09-24",
+      "qualifier": "exact",
+      "kind": "video"
+    },
+    {
+      "id": "text-moderation-007",
+      "provider": "openai",
+      "retires": "2025-10-27",
+      "qualifier": "exact",
+      "replacement": "omni-moderation-latest",
+      "kind": "moderation"
+    },
+    {
+      "id": "text-moderation-stable",
+      "provider": "openai",
+      "retires": "2025-10-27",
+      "qualifier": "exact",
+      "replacement": "omni-moderation-latest",
+      "kind": "moderation"
+    },
+    {
+      "id": "text-moderation-latest",
+      "provider": "openai",
+      "retires": "2025-10-27",
+      "qualifier": "exact",
+      "replacement": "omni-moderation-latest",
+      "kind": "moderation"
+    },
+    {
+      "id": "text-similarity-ada-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "text-search-ada-doc-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "text-search-ada-query-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "code-search-ada-code-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "code-search-ada-text-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "text-similarity-babbage-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "text-search-babbage-doc-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "text-search-babbage-query-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "code-search-babbage-code-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "code-search-babbage-text-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "text-similarity-curie-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "text-search-curie-doc-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "text-search-curie-query-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "text-similarity-davinci-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "text-search-davinci-doc-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "text-search-davinci-query-001",
+      "provider": "openai",
+      "retires": "2024-01-04",
+      "qualifier": "exact",
+      "replacement": "text-embedding-3-small",
+      "kind": "embedding"
+    },
+    {
+      "id": "claude-3-5-sonnet-20240620",
+      "provider": "anthropic",
+      "retires": "2025-10-28",
+      "qualifier": "exact",
+      "replacement": "claude-sonnet-5-5"
+    },
+    {
+      "id": "claude-3-5-sonnet-20241022",
+      "provider": "anthropic",
+      "retires": "2025-10-28",
+      "qualifier": "exact",
+      "replacement": "claude-sonnet-5-5"
+    },
+    {
+      "id": "claude-3-opus-20240229",
+      "provider": "anthropic",
+      "retires": "2026-01-05",
+      "qualifier": "exact",
+      "replacement": "claude-opus-4-8"
+    },
+    {
+      "id": "claude-2.0",
+      "provider": "anthropic",
+      "retires": "2025-07-21",
+      "qualifier": "exact",
+      "replacement": "claude-opus-4-8"
+    },
+    {
+      "id": "claude-2.1",
+      "provider": "anthropic",
+      "retires": "2025-07-21",
+      "qualifier": "exact",
+      "replacement": "claude-opus-4-8"
+    },
+    {
+      "id": "claude-3-sonnet-20240229",
+      "provider": "anthropic",
+      "retires": "2025-07-21",
+      "qualifier": "exact",
+      "replacement": "claude-sonnet-5-5"
+    },
+    {
+      "id": "claude-1.0",
+      "provider": "anthropic",
+      "retires": "2024-11-06",
+      "qualifier": "exact",
+      "replacement": "claude-haiku-4-5-20251001"
+    },
+    {
+      "id": "claude-1.1",
+      "provider": "anthropic",
+      "retires": "2024-11-06",
+      "qualifier": "exact",
+      "replacement": "claude-haiku-4-5-20251001"
+    },
+    {
+      "id": "claude-1.2",
+      "provider": "anthropic",
+      "retires": "2024-11-06",
+      "qualifier": "exact",
+      "replacement": "claude-haiku-4-5-20251001"
+    },
+    {
+      "id": "claude-1.3",
+      "provider": "anthropic",
+      "retires": "2024-11-06",
+      "qualifier": "exact",
+      "replacement": "claude-haiku-4-5-20251001"
+    },
+    {
+      "id": "claude-instant-1.0",
+      "provider": "anthropic",
+      "retires": "2024-11-06",
+      "qualifier": "exact",
+      "replacement": "claude-haiku-4-5-20251001"
+    },
+    {
+      "id": "claude-instant-1.1",
+      "provider": "anthropic",
+      "retires": "2024-11-06",
+      "qualifier": "exact",
+      "replacement": "claude-haiku-4-5-20251001"
+    },
+    {
+      "id": "claude-instant-1.2",
+      "provider": "anthropic",
+      "retires": "2024-11-06",
+      "qualifier": "exact",
+      "replacement": "claude-haiku-4-5-20251001"
+    },
+    {
+      "id": "claude-fable-5-1",
+      "provider": "anthropic",
+      "retires": "2027-09-01",
+      "qualifier": "not-before"
+    },
+    {
+      "id": "claude-mythos-5-1",
+      "provider": "anthropic",
+      "retires": "2027-09-01",
+      "qualifier": "not-before"
+    },
+    {
+      "id": "claude-fable-5",
+      "provider": "anthropic",
+      "retires": "2027-06-09",
+      "qualifier": "not-before"
+    },
+    {
+      "id": "claude-mythos-5",
+      "provider": "anthropic",
+      "retires": "2027-06-09",
+      "qualifier": "not-before"
+    },
+    {
+      "id": "gemini-2.0-flash-lite-preview",
+      "provider": "google",
+      "retires": "2025-12-09",
+      "qualifier": "earliest",
+      "replacement": "gemini-2.5-flash-lite"
+    },
+    {
+      "id": "gemini-2.0-flash-lite-preview-02-05",
+      "provider": "google",
+      "retires": "2025-12-09",
+      "qualifier": "earliest",
+      "replacement": "gemini-2.5-flash-lite"
+    },
+    {
+      "id": "gemini-2.5-computer-use-preview-10-2025",
+      "provider": "google",
+      "retires": "2026-07-28",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.8-flash"
+    },
+    {
+      "id": "gemini-2.0-flash-live-001",
+      "provider": "google",
+      "retires": "2025-12-09",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.8-live",
+      "kind": "audio"
+    },
+    {
+      "id": "gemini-live-2.5-flash-preview",
+      "provider": "google",
+      "retires": "2025-12-09",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.8-live",
+      "kind": "audio"
+    },
+    {
+      "id": "gemini-3.1-flash-live-preview",
+      "provider": "google",
+      "retires": "2026-11-17",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.8-live",
+      "kind": "audio"
+    },
+    {
+      "id": "gemini-2.5-flash-native-audio-preview-12-2025",
+      "provider": "google",
+      "retires": "2026-11-17",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.8-live",
+      "kind": "audio"
+    },
+    {
+      "id": "gemini-3.1-flash-tts-preview",
+      "provider": "google",
+      "retires": "2026-11-17",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.8-flash-tts",
+      "kind": "audio"
+    },
+    {
+      "id": "gemini-2.5-flash-preview-tts",
+      "provider": "google",
+      "retires": "2026-11-17",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.8-flash-tts",
+      "kind": "audio"
+    },
+    {
+      "id": "gemini-2.5-pro-preview-tts",
+      "provider": "google",
+      "retires": "2026-11-17",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.8-flash-tts",
+      "kind": "audio"
+    },
+    {
+      "id": "gemini-embedding-001",
+      "provider": "google",
+      "retires": "2028-05-14",
+      "qualifier": "earliest",
+      "replacement": "gemini-embedding-2",
+      "kind": "embedding"
+    },
+    {
+      "id": "embedding-2-preview",
+      "provider": "google",
+      "retires": "2026-08-10",
+      "qualifier": "earliest",
+      "replacement": "gemini-embedding-2",
+      "kind": "embedding"
+    },
+    {
+      "id": "embedding-001",
+      "provider": "google",
+      "retires": "2025-10-30",
+      "qualifier": "earliest",
+      "replacement": "gemini-embedding-2",
+      "kind": "embedding"
+    },
+    {
+      "id": "embedding-gecko-001",
+      "provider": "google",
+      "retires": "2025-10-30",
+      "qualifier": "earliest",
+      "replacement": "gemini-embedding-2",
+      "kind": "embedding"
+    },
+    {
+      "id": "gemini-embedding-exp",
+      "provider": "google",
+      "retires": "2025-10-30",
+      "qualifier": "earliest",
+      "replacement": "gemini-embedding-2",
+      "kind": "embedding"
+    },
+    {
+      "id": "gemini-embedding-exp-03-07",
+      "provider": "google",
+      "retires": "2025-10-30",
+      "qualifier": "earliest",
+      "replacement": "gemini-embedding-2",
+      "kind": "embedding"
+    },
+    {
+      "id": "gemini-2.5-flash-image",
+      "provider": "google",
+      "retires": "2027-03-15",
+      "qualifier": "earliest",
+      "replacement": "gemini-3.1-flash-lite-image",
+      "kind": "image"
+    },
+    {
+      "id": "gemini-3.1-flash-image-preview",
+      "provider": "google",
+      "retires": "2026-06-25",
+      "qualifier": "earliest",
+      "replacement": "gemini-nano-banana-2.1",
+      "kind": "image"
+    },
+    {
+      "id": "gemini-3-pro-image-preview",
+      "provider": "google",
+      "retires": "2026-06-25",
+      "qualifier": "earliest",
+      "replacement": "gemini-3-pro-image",
+      "kind": "image"
+    },
+    {
+      "id": "gemini-2.5-flash-image-preview",
+      "provider": "google",
+      "retires": "2026-01-15",
+      "qualifier": "earliest",
+      "replacement": "gemini-nano-banana-2.1",
+      "kind": "image"
+    },
+    {
+      "id": "gemini-2.0-flash-preview-image-generation",
+      "provider": "google",
+      "retires": "2025-11-14",
+      "qualifier": "earliest",
+      "replacement": "gemini-nano-banana-2.1",
+      "kind": "image"
+    },
+    {
+      "id": "imagen-4.0-generate-001",
+      "provider": "google",
+      "retires": "2026-08-17",
+      "qualifier": "earliest",
+      "replacement": "gemini-nano-banana-2.1",
+      "kind": "image"
+    },
+    {
+      "id": "imagen-4.0-ultra-generate-001",
+      "provider": "google",
+      "retires": "2026-08-17",
+      "qualifier": "earliest",
+      "replacement": "gemini-nano-banana-2.1",
+      "kind": "image"
+    },
+    {
+      "id": "imagen-4.0-fast-generate-001",
+      "provider": "google",
+      "retires": "2026-08-17",
+      "qualifier": "earliest",
+      "replacement": "gemini-nano-banana-2.1",
+      "kind": "image"
+    },
+    {
+      "id": "imagen-3.0-generate-002",
+      "provider": "google",
+      "retires": "2025-11-10",
+      "qualifier": "earliest",
+      "replacement": "imagen-4.0-generate-001",
+      "kind": "image"
+    },
+    {
+      "id": "imagen-4.0-generate-preview-06-06",
+      "provider": "google",
+      "retires": "2026-02-17",
+      "qualifier": "earliest",
+      "replacement": "imagen-4.0-generate-001",
+      "kind": "image"
+    },
+    {
+      "id": "imagen-4.0-ultra-generate-preview-06-06",
+      "provider": "google",
+      "retires": "2026-02-17",
+      "qualifier": "earliest",
+      "replacement": "imagen-4.0-ultra-generate-001",
+      "kind": "image"
+    },
+    {
+      "id": "veo-3.0-generate-001",
+      "provider": "google",
+      "retires": "2026-06-30",
+      "qualifier": "earliest",
+      "replacement": "veo-3.1-generate-preview",
+      "kind": "video"
+    },
+    {
+      "id": "veo-2.0-generate-001",
+      "provider": "google",
+      "retires": "2026-06-30",
+      "qualifier": "earliest",
+      "replacement": "veo-3.1-generate-preview",
+      "kind": "video"
+    },
+    {
+      "id": "veo-3.0-fast-generate-001",
+      "provider": "google",
+      "retires": "2026-06-30",
+      "qualifier": "earliest",
+      "replacement": "veo-3.1-fast-generate-preview",
+      "kind": "video"
+    },
+    {
+      "id": "veo-3.1-lite-generate-preview",
+      "provider": "google",
+      "retires": "2026-10-22",
+      "qualifier": "earliest",
+      "replacement": "gemini-omni-1.1-flash",
+      "kind": "video"
+    },
+    {
+      "id": "veo-3.1-generate-preview",
+      "provider": "google",
+      "retires": "2026-10-22",
+      "qualifier": "earliest",
+      "replacement": "gemini-omni-1.1-flash",
+      "kind": "video"
+    },
+    {
+      "id": "veo-3.1-fast-generate-preview",
+      "provider": "google",
+      "retires": "2026-10-22",
+      "qualifier": "earliest",
+      "replacement": "gemini-omni-1.1-flash",
+      "kind": "video"
+    },
+    {
+      "id": "gemini-omni-flash-preview",
+      "provider": "google",
+      "retires": "2026-10-22",
+      "qualifier": "earliest",
+      "replacement": "gemini-omni-1.1-flash",
+      "kind": "video"
+    },
+    {
+      "id": "veo-3.0-generate-preview",
+      "provider": "google",
+      "retires": "2025-11-12",
+      "qualifier": "earliest",
+      "replacement": "veo-3.1-generate-preview",
+      "kind": "video"
+    },
+    {
+      "id": "veo-3.0-fast-generate-preview",
+      "provider": "google",
+      "retires": "2025-11-12",
+      "qualifier": "earliest",
+      "replacement": "veo-3.1-fast-generate-preview",
+      "kind": "video"
+    },
+    {
+      "id": "gemini-robotics-er-1.6-preview",
+      "provider": "google",
+      "retires": "2026-08-31",
+      "qualifier": "earliest",
+      "replacement": "gemini-robotics-er-2-preview"
+    },
+    {
+      "id": "gemini-robotics-er-1.5-preview",
+      "provider": "google",
+      "retires": "2026-04-30",
+      "qualifier": "earliest",
+      "replacement": "gemini-robotics-er-1.6-preview"
+    },
+    {
+      "id": "deep-research-pro-preview-12-2025",
+      "provider": "google",
+      "retires": "2026-10-23",
+      "qualifier": "earliest",
+      "replacement": "deep-research-preview-04-2026",
+      "kind": "agent"
+    },
+    {
+      "id": "antigravity-preview-05-2026",
+      "provider": "google",
+      "retires": "2026-10-05",
+      "qualifier": "earliest",
+      "replacement": "antigravity-preview-09-2026",
+      "kind": "agent"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# Prompts Driftline replays on the replacement model
+prompts:
+  - id: invoice-json
+    model: gpt-4o-2024-05-13
+    expect: json
+    system: You extract invoice fields.
+    prompt: |
+      Extract vendor, total and currency from this invoice as JSON:
+
+      ACME GmbH, Total: 1.250,00 EUR
+  - id: ticket-summary
+    model: claude-sonnet-4-5-20250929
+    prompt: "Summarise: the printer is jammed again"

@@ -1,0 +1,36 @@
+name: Driftline
+description: Find AI model IDs in your code, warn before they are retired, and test your prompts on the replacement model.
+author: Mirza Tontowi
+branding:
+  icon: activity
+  color: blue
+inputs:
+  path:
+    description: Directory to scan, relative to the repository root.
+    default: "."
+  warn-days:
+    description: Flag models retiring within this many days as "at risk".
+    default: "90"
+  fail-on:
+    description: "Fail the job when a model is: retired, at-risk, or never."
+    default: retired
+  prompts-file:
+    description: Prompt file for drift tests (YAML or JSON).
+    default: .driftline/prompts.yml
+  license-key:
+    description: Driftline Pro license key. Without it, only the scan runs.
+    default: ""
+  create-issue:
+    description: Open or update a GitHub issue with the report ("true" or "false").
+    default: "false"
+  github-token:
+    description: Token used to open the issue. Needs issues:write.
+    default: ${{ github.token }}
+outputs:
+  findings:
+    description: Number of model references found.
+  at-risk:
+    description: Number of references to retired or soon-to-retire models.
+runs:
+  using: node24
+  main: src/index.js

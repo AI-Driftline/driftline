@@ -1,0 +1,15 @@
+# Copy to .driftline/prompts.yml. List 5–20 prompts your app really sends.
+prompts:
+  - id: invoice-json
+    model: gpt-4o-2024-05-13        # optional: defaults to the retiring models Driftline finds
+    expect: json                    # optional: json checks that the answer still parses
+    system: You extract invoice fields and reply with JSON only.
+    prompt: |
+      Extract vendor, total and currency from this invoice:
+
+      ACME GmbH, Total: 1.250,00 EUR
+
+  - id: ticket-summary
+    model: claude-sonnet-4-5-20250929
+    compare_to: claude-sonnet-5-5   # optional: defaults to the provider's recommended replacement
+    prompt: "Summarise this support ticket in one sentence: the printer is jammed again."

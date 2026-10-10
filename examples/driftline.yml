@@ -1,0 +1,26 @@
+# Copy to .github/workflows/driftline.yml in your repository.
+name: Driftline
+on:
+  schedule:
+    - cron: "17 6 * * 1"   # every Monday, 06:17 UTC
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write            # only needed with create-issue: "true"
+
+jobs:
+  driftline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: AI-Driftline/driftline@v0
+        with:
+          license-key: ${{ secrets.DRIFTLINE_LICENSE_KEY }}   # optional: enables drift tests
+          create-issue: "true"
+          fail-on: retired
+        env:                                                # only the providers you use
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
