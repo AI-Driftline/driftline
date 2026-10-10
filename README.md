@@ -60,3 +60,7 @@ npm test
 ```
 
 No dependencies. Node 20 or later.
+
+## License
+
+[Elastic License 2.0](LICENSE). You can use Driftline for free in your own CI. You may not offer it as a hosted service, or remove or work around the Pro license-key check.
