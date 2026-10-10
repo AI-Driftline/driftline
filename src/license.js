@@ -5,9 +5,10 @@
 // `driftline activate <key>` registers one account and prints a license code: "<key>:<instance id>".
 // The Action checks that code on every run and that it was activated for the account it runs in.
 
-// Fill in after creating the Driftline product in Lemon Squeezy, so keys for
-// other products in other stores are rejected. Empty = accept any valid key.
-export const DRIFTLINE_PRODUCT_IDS = [];
+// Only keys from Driftline's own store and product unlock Pro. A key bought in another store,
+// or for another product in this store, is rejected. (null / [] = no check; tests use that.)
+// Test mode product: 1428709. Add the live product ID after "Copy to Live Mode".
+export const LICENSE = { storeId: 494524, productIds: [1428709] };
 
 const API = "https://api.lemonsqueezy.com/v1/licenses";
 const ACTIVATE_HELP = "Run `npx github:AI-Driftline/driftline activate <your-license-key>` once for this GitHub account and save the code it prints as DRIFTLINE_LICENSE_KEY.";
@@ -30,7 +31,8 @@ async function call(fetchImpl, action, fields) {
 }
 
 const productOk = (data) =>
-  !DRIFTLINE_PRODUCT_IDS.length || DRIFTLINE_PRODUCT_IDS.map(Number).includes(Number(data.meta?.product_id));
+  (LICENSE.storeId == null || Number(data.meta?.store_id) === Number(LICENSE.storeId)) &&
+  (!LICENSE.productIds.length || LICENSE.productIds.map(Number).includes(Number(data.meta?.product_id)));
 
 /**
  * Checks a license code on each run. `account` is the GitHub owner the workflow runs in

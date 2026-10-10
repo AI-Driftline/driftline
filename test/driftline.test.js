@@ -6,7 +6,11 @@ import { loadRegistry, classify, normalizeId } from "../src/registry.js";
 import { scanDirectory, scanText } from "../src/scan.js";
 import { parseYamlSubset, loadPrompts } from "../src/prompts.js";
 import { compare, extractJson, textSimilarity } from "../src/compare.js";
-import { checkLicense } from "../src/license.js";
+import { checkLicense, LICENSE } from "../src/license.js";
+
+// Most tests use fake keys without store/product data; the real check is tested on its own below.
+const REAL_LICENSE = { ...LICENSE };
+Object.assign(LICENSE, { storeId: null, productIds: [] });
 import { run } from "../src/run.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -442,4 +446,19 @@ test("run: a code copied to another company runs the scan but not the drift test
   assert.equal(r.findings.length, 1);
   assert.equal(aiCalls, 0);
   assert.ok(r.notices.some((n) => n.includes('activated for "acme"')));
+});
+
+test("only keys from Driftline's store and product unlock Pro", async () => {
+  Object.assign(LICENSE, REAL_LICENSE);
+  try {
+    const key = (meta) => checkLicense("k:i", { account: "acme", fetchImpl: async () =>
+      reply(200, { valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" }, meta }) });
+    assert.equal((await key({ store_id: 494524, product_id: 1428709 })).ok, true);
+    assert.equal((await key({ store_id: "494524", product_id: "1428709" })).ok, true);    // strings from the API are fine
+    assert.match((await key({ store_id: 999, product_id: 1428709 })).reason, /different product/);   // someone else's store
+    assert.match((await key({ store_id: 494524, product_id: 555 })).reason, /different product/);    // another product of ours
+    assert.match((await key({})).reason, /different product/);
+  } finally {
+    Object.assign(LICENSE, { storeId: null, productIds: [] });
+  }
 });
