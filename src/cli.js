@@ -37,6 +37,7 @@ if (cmd === "activate") {
   const result = await run({
     root: resolve(cmd || "."),
     licenseKey: process.env.DRIFTLINE_LICENSE_KEY || "",
+    account: process.env.GITHUB_REPOSITORY_OWNER || accountFromGit(),
     log: (m) => console.error(m),
   });
   console.log(result.markdown);

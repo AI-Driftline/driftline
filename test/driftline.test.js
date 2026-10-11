@@ -109,10 +109,10 @@ test("JSON comparison: fenced JSON parses, broken JSON is broken", () => {
 const fakeLicense = (body) => async () => ({ json: async () => body });
 
 test("license: valid, invalid, missing", async () => {
-  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense({ valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" } }) })).ok, true);
-  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense({ valid: false, error: "license_key not found." }) })).ok, false);
+  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense({ valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" } }), account: "acme" })).ok, true);
+  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense({ valid: false, error: "license_key not found." }), account: "acme" })).ok, false);
   assert.equal((await checkLicense("", {})).ok, false);
-  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense({ valid: true, license_key: { status: "expired" } }) })).ok, false);
+  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense({ valid: true, license_key: { status: "expired" } }), account: "acme" })).ok, false);
 });
 
 // ---------- end to end with mocked providers ----------
@@ -138,7 +138,7 @@ function fakeProviders(calls) {
 test("run: scan + drift report end to end", async () => {
   const calls = [];
   const result = await run({
-    root: SAMPLE, today: TODAY, licenseKey: "test-key:i",
+    root: SAMPLE, today: TODAY, licenseKey: "test-key:i", account: "acme",
     env: { OPENAI_API_KEY: "x", ANTHROPIC_API_KEY: "y" },
     fetchImpl: fakeProviders(calls),
   });
@@ -172,7 +172,7 @@ test("run without license: scan only, with a notice", async () => {
 
 test("run without provider key reports a clear error per prompt", async () => {
   const result = await run({
-    root: SAMPLE, today: TODAY, licenseKey: "k:i", env: { OPENAI_API_KEY: "x" },
+    root: SAMPLE, today: TODAY, licenseKey: "k:i", account: "acme", env: { OPENAI_API_KEY: "x" },
     fetchImpl: fakeProviders([]),
   });
   const sum = result.drift.find((d) => d.id === "ticket-summary");
@@ -235,9 +235,40 @@ test("provider routing for embedding models", () => {
   assert.equal(providerOf("text-embedding-004"), "google");
 });
 
+// Real license codes are "<key uuid>:<instance uuid>".
+const REAL_CODE = "38b1460a-5104-4067-a91d-77b872934d51:f90ec370-fd83-46a5-8bbd-44a241e78665";
+
 test("license: a Lemon Squeezy outage does not lock out paying users", async () => {
-  const r = await checkLicense("k:i", { fetchImpl: async () => ({ status: 503, json: async () => { throw new Error("html"); } }) });
+  const r = await checkLicense(REAL_CODE, { fetchImpl: async () => ({ status: 503, json: async () => { throw new Error("html"); } }), account: "acme" });
   assert.equal(r.ok, true);
+  const offline = await checkLicense(REAL_CODE.toUpperCase(), { fetchImpl: async () => { throw new TypeError("fetch failed"); }, account: "acme" });
+  assert.equal(offline.ok, true);
+});
+
+test("license: without a known GitHub account, a valid code does not unlock Pro", async () => {
+  const fetchImpl = async () => reply(200, { valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" }, meta: {} });
+  for (const account of [undefined, "", "  ", "globex"]) {
+    assert.equal((await checkLicense(REAL_CODE, { fetchImpl, account })).ok, false, `account ${JSON.stringify(account)}`);
+  }
+  assert.equal((await checkLicense(REAL_CODE, { fetchImpl, account: " ACME " })).ok, true);
+  const offline = async () => { throw new TypeError("fetch failed"); };
+  assert.equal((await checkLicense(REAL_CODE, { fetchImpl: offline })).ok, false, "no outage pass without an account either");
+});
+
+test("license: blocking Lemon Squeezy with a made-up code unlocks nothing", async () => {
+  const blocked = async () => { throw new TypeError("fetch failed"); };
+  const down = async () => ({ status: 503, json: async () => ({}) });
+  const busy = async () => ({ status: 429, json: async () => ({}) });
+  const [key, inst] = REAL_CODE.split(":");
+  const fakes = ["a:b", "k:i", ":", "x:" + inst, key + ":x", key + ":" + inst + "x", key + "::" + inst,
+    key.replace(/-/g, "") + ":" + inst, key + ":" + inst.slice(0, -1) + "g", " " + key + " : " + inst,
+    key + ":" + inst + "\n" + key, "{{secrets.X}}:" + inst, key];
+  for (const code of fakes) {
+    for (const fetchImpl of [blocked, down, busy]) {
+      const r = await checkLicense(code, { fetchImpl, account: "acme" });
+      assert.equal(r.ok, false, `${JSON.stringify(code)} must not unlock Pro`);
+    }
+  }
 });
 
 test("run: a broken prompt file is reported, the scan still runs", async () => {
@@ -261,7 +292,7 @@ test("run: prompts without a model cost two calls each, on the soonest-retiring 
   });
   let calls = 0;
   const fetchImpl = async (url, opts) => { if (!url.includes("lemonsqueezy")) calls++; return licensed("hi")(url, opts); };
-  const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", fetchImpl, env: { OPENAI_API_KEY: "x", ANTHROPIC_API_KEY: "y" } });
+  const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl, env: { OPENAI_API_KEY: "x", ANTHROPIC_API_KEY: "y" } });
   assert.equal(calls, 10);
   assert.ok(r.drift.every((d) => d.from === "gpt-4"));
 });
@@ -290,14 +321,14 @@ retry.delayMs = 0;
 const reply = (status, body) => ({ ok: status < 400, status, headers: { get: () => null }, text: async () => JSON.stringify(body), json: async () => body });
 
 test("license: new (inactive) keys work; expired and disabled don't; odd replies don't crash", async () => {
-  const lic = (body, status = 200) => checkLicense("k:i", { fetchImpl: async () => reply(status, body) });
+  const lic = (body, status = 200) => checkLicense("k:i", { fetchImpl: async () => reply(status, body), account: "acme" });
   assert.equal((await lic({ valid: true, license_key: { status: "inactive" }, instance: { id: "i", name: "github:acme" } })).ok, true);
   assert.equal((await lic({ valid: true, license_key: { status: "expired" } })).ok, false);
   assert.equal((await lic({ valid: true, license_key: { status: "disabled" } })).ok, false);
   assert.equal((await lic(null)).ok, false);                       // unreadable reply: no crash, not unlocked
-  const html = await checkLicense("k:i", { fetchImpl: async () => ({ status: 403, json: async () => { throw new Error("html"); } }) });
+  const html = await checkLicense("k:i", { fetchImpl: async () => ({ status: 403, json: async () => { throw new Error("html"); } }), account: "acme" });
   assert.equal(html.ok, false);                                      // a WAF/HTML error page is not a bypass
-  const busy = await checkLicense("k:i", { fetchImpl: async () => ({ status: 429, json: async () => ({}) }) });
+  const busy = await checkLicense(REAL_CODE, { fetchImpl: async () => ({ status: 429, json: async () => ({}) }), account: "acme" });
   assert.equal(busy.ok, true);                                       // rate limit: don't punish paying users
 });
 
@@ -325,7 +356,7 @@ test("a current model's empty answer keeps the replacement's answer", async () =
     const model = JSON.parse(opts.body).model;
     return reply(200, model === "gpt-4" ? { output_text: "" } : { output_text: "hello" });
   };
-  const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", fetchImpl, env: { OPENAI_API_KEY: "x" } });
+  const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl, env: { OPENAI_API_KEY: "x" } });
   assert.equal(r.drift[0].result, "changed");
   assert.equal(r.drift[0].after, "hello");
 });
@@ -373,7 +404,7 @@ test("issue: closed with the all-clear when nothing is flagged", async () => {
 
 test("run: license crash, empty prompt file, prompts: [] and .JSON never kill the scan", async () => {
   const boom = tempRepo({ "a.py": 'm = "gpt-4"\n', ".driftline/prompts.yml": "prompts:\n  - id: a\n    prompt: hi\n" });
-  const r1 = await run({ root: boom, today: TODAY, registry, licenseKey: "k:i", fetchImpl: async () => ({ status: 200, json: async () => { throw new TypeError("weird"); } }) });
+  const r1 = await run({ root: boom, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl: async () => ({ status: 200, json: async () => { throw new TypeError("weird"); } }) });
   assert.equal(r1.findings.length, 1);
   for (const [name, text] of [["prompts.yml", "# nothing yet\n"], ["prompts.yml", "prompts: []\n"]]) {
     const dir = tempRepo({ "a.py": 'm = "gpt-4"\n', [`.driftline/${name}`]: text });
@@ -422,7 +453,7 @@ test("license code: must be activated, and for the account the workflow runs in"
     assert.match(String(opts.body), /instance_id=inst-1/);
     return reply(200, { valid: true, license_key: { status: "active" }, instance: name ? { id: "inst-1", name } : null, meta: {} });
   };
-  assert.match((await checkLicense("plain-key", { fetchImpl: valid("github:acme") })).reason, /not activated yet/);
+  assert.match((await checkLicense("plain-key", { fetchImpl: valid("github:acme"), account: "acme" })).reason, /not activated yet/);
   assert.equal((await checkLicense("k:inst-1", { fetchImpl: valid("github:acme"), account: "Acme" })).ok, true);
   const other = await checkLicense("k:inst-1", { fetchImpl: valid("github:acme"), account: "globex" });
   assert.equal(other.ok, false);

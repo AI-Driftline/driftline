@@ -7,7 +7,8 @@
 
 // Only keys from Driftline's own store and product unlock Pro. A key bought in another store,
 // or for another product in this store, is rejected. (null / [] = no check; tests use that.)
-// Test mode product: 1428709. Add the live product ID after "Copy to Live Mode".
+// Test mode product: 1428709. After "Copy to Live Mode", REPLACE it with the live product ID
+// (keeping it would let free test-mode keys unlock Pro).
 export const LICENSE = { storeId: 494524, productIds: [1428709] };
 
 const API = "https://api.lemonsqueezy.com/v1/licenses";
@@ -20,6 +21,10 @@ export function parseCode(code) {
   const i = s.lastIndexOf(":");
   return i > 0 ? { key: s.slice(0, i), instanceId: s.slice(i + 1) } : { key: s, instanceId: "" };
 }
+
+// Lemon Squeezy license keys and instance ids are UUIDs (per its API docs).
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const looksReal = (key, instanceId) => UUID.test(key) && UUID.test(instanceId);
 
 async function call(fetchImpl, action, fields) {
   return fetchImpl(`${API}/${action}`, {
@@ -35,24 +40,27 @@ const productOk = (data) =>
   (!LICENSE.productIds.length || LICENSE.productIds.map(Number).includes(Number(data.meta?.product_id)));
 
 /**
- * Checks a license code on each run. `account` is the GitHub owner the workflow runs in
- * (GITHUB_REPOSITORY_OWNER); without it (local CLI use) only the code itself is checked.
+ * Checks a license code on each run. `account` is the GitHub owner the code runs in
+ * (GITHUB_REPOSITORY_OWNER in CI, else the origin remote); Pro needs it, or one key would work everywhere.
  */
 export async function checkLicense(code, { fetchImpl = fetch, account = "" } = {}) {
   if (!code) return { ok: false, reason: "No license key. The scan ran; drift tests need Driftline Pro." };
   const { key, instanceId } = parseCode(code);
   if (!instanceId) return { ok: false, reason: `This license key is not activated yet. ${ACTIVATE_HELP}` };
+  if (!String(account).trim()) return { ok: false, reason: "Could not tell which GitHub account this runs in, so drift tests were skipped. Run inside a repository whose origin is on GitHub." };
 
+  // Do not punish paying users for a network blip: allow the run and say so. Only for codes shaped
+  // like a real one, so blocking api.lemonsqueezy.com with a made-up code like "a:b" unlocks nothing.
+  const outage = (why) => looksReal(key, instanceId)
+    ? { ok: true, reason: `License server ${why}; drift tests ran anyway.` }
+    : { ok: false, reason: `License server ${why}, and this is not a Driftline license code. ${ACTIVATE_HELP}` };
   let res;
   try {
     res = await call(fetchImpl, "validate", { license_key: key, instance_id: instanceId });
   } catch (e) {
-    // Do not punish paying users for a network blip: allow the run and say so.
-    return { ok: true, reason: `License server unreachable (${e.message}); drift tests ran anyway.` };
+    return outage(`unreachable (${e.message})`);
   }
-  if (res.status === 429 || res.status >= 500) {
-    return { ok: true, reason: `License server unavailable (HTTP ${res.status}); drift tests ran anyway.` };
-  }
+  if (res.status === 429 || res.status >= 500) return outage(`unavailable (HTTP ${res.status})`);
   let data = null;
   try { data = await res.json(); } catch {}
   if (!data || typeof data !== "object") return { ok: false, reason: `License key could not be checked (HTTP ${res.status}).` };
@@ -65,7 +73,7 @@ export async function checkLicense(code, { fetchImpl = fetch, account = "" } = {
   if (status && !["active", "inactive"].includes(status)) return { ok: false, reason: `License key is ${status}.` };
   if (!productOk(data)) return { ok: false, reason: "License key belongs to a different product." };
   if (!data.instance) return { ok: false, reason: `This activation was removed. ${ACTIVATE_HELP}` };
-  if (account && data.instance.name !== instanceName(account)) {
+  if (data.instance.name !== instanceName(account)) {
     const where = String(data.instance.name || "").replace(/^github:/, "");
     return { ok: false, reason: `This license code was activated for "${where}", not "${account}". A key works on up to 3 GitHub accounts or organizations. ${ACTIVATE_HELP}` };
   }
