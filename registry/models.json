@@ -1,5 +1,5 @@
 {
-  "checked": "2026-10-10",
+  "checked": "2026-10-12",
   "note": "Hand-maintained from the official deprecation pages. Re-check before each release. Entries with a 'kind' other than text are scanned and reported but never drift-tested. gpt-4-1106-preview is listed on OpenAI's page under both 2026-03-26 and 2026-10-23; the later date is used so builds are not failed on a conflicting record.",
   "sources": {
     "openai": "https://developers.openai.com/api/docs/deprecations",

@@ -511,3 +511,16 @@ test("only keys from Driftline's store and product unlock Pro", async () => {
     Object.assign(LICENSE, { storeId: null, productIds: [] });
   }
 });
+
+test("CLI: --help and --version answer instead of scanning a folder named after the flag", async () => {
+  const { execFileSync, spawnSync } = await import("node:child_process");
+  const cli = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "cli.js");
+  const pkg = JSON.parse((await import("node:fs")).readFileSync(join(dirname(cli), "..", "package.json"), "utf8"));
+  assert.equal(execFileSync("node", [cli, "--version"], { encoding: "utf8" }).trim(), pkg.version);
+  assert.equal(execFileSync("node", [cli, "-v"], { encoding: "utf8" }).trim(), pkg.version);
+  assert.match(execFileSync("node", [cli, "--help"], { encoding: "utf8" }), /Usage:[\s\S]*activate <license-key>/);
+  const bad = spawnSync("node", [cli, "--nope"], { encoding: "utf8" });
+  assert.equal(bad.status, 2);
+  assert.match(bad.stderr, /Unknown option --nope/);
+  assert.doesNotMatch(bad.stdout, /Scanned/);
+});
