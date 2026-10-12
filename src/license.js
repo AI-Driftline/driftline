@@ -7,9 +7,8 @@
 
 // Only keys from Driftline's own store and product unlock Pro. A key bought in another store,
 // or for another product in this store, is rejected. (null / [] = no check; tests use that.)
-// Test mode product: 1428709. After "Copy to Live Mode", REPLACE it with the live product ID
-// (keeping it would let free test-mode keys unlock Pro).
-export const LICENSE = { storeId: 494524, productIds: [1428709] };
+// Live product only. Never add the test-mode product (1428709): free test keys would unlock Pro.
+export const LICENSE = { storeId: 494524, productIds: [1432580] };
 
 const API = "https://api.lemonsqueezy.com/v1/licenses";
 const ACTIVATE_HELP = "Run `npx github:AI-Driftline/driftline activate <your-license-key>` once for this GitHub account and save the code it prints as DRIFTLINE_LICENSE_KEY.";

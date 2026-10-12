@@ -484,10 +484,11 @@ test("only keys from Driftline's store and product unlock Pro", async () => {
   try {
     const key = (meta) => checkLicense("k:i", { account: "acme", fetchImpl: async () =>
       reply(200, { valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" }, meta }) });
-    assert.equal((await key({ store_id: 494524, product_id: 1428709 })).ok, true);
-    assert.equal((await key({ store_id: "494524", product_id: "1428709" })).ok, true);    // strings from the API are fine
-    assert.match((await key({ store_id: 999, product_id: 1428709 })).reason, /different product/);   // someone else's store
+    assert.equal((await key({ store_id: 494524, product_id: 1432580 })).ok, true);
+    assert.equal((await key({ store_id: "494524", product_id: "1432580" })).ok, true);    // strings from the API are fine
+    assert.match((await key({ store_id: 999, product_id: 1432580 })).reason, /different product/);   // someone else's store
     assert.match((await key({ store_id: 494524, product_id: 555 })).reason, /different product/);    // another product of ours
+    assert.match((await key({ store_id: 494524, product_id: 1428709 })).reason, /different product/);  // test-mode product
     assert.match((await key({})).reason, /different product/);
   } finally {
     Object.assign(LICENSE, { storeId: null, productIds: [] });
