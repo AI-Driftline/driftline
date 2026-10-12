@@ -1,4 +1,4 @@
-name: Driftline
+name: Driftline AI Model Check
 description: Find AI model IDs in your code, warn before they are retired, and test your prompts on the replacement model.
 author: Mirza Tontowi
 branding:
