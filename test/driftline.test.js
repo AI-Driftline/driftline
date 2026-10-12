@@ -461,6 +461,23 @@ test("license code: must be activated, and for the account the workflow runs in"
   assert.match((await checkLicense("k:inst-1", { fetchImpl: valid(null), account: "acme" })).reason, /activation was removed/);
 });
 
+test("refunded or lapsed key: says Pro has ended, not \"activate again\"", async () => {
+  // Lemon Squeezy deletes activations on expiry/refund; the code check then only says "instance_id not found".
+  const ls = (keyStatus) => async (url, opts) => String(opts.body).includes("instance_id")
+    ? reply(404, { valid: false, error: "instance_id not found.", license_key: null, instance: null, meta: null })
+    : reply(400, { valid: false, error: "This license key is expired.", license_key: { status: keyStatus }, meta: {} });
+  for (const status of ["expired", "disabled"]) {
+    const r = await checkLicense("k:inst-1", { fetchImpl: ls(status), account: "acme" });
+    assert.equal(r.ok, false);
+    assert.match(r.reason, new RegExp(`Pro has ended.*${status}`));
+    assert.doesNotMatch(r.reason, /activate/);
+  }
+  // Key still active: the slot was freed with deactivate, so activating again is the right advice.
+  assert.match((await checkLicense("k:inst-1", { fetchImpl: ls("active"), account: "acme" })).reason, /instance_id not found.*activate/);
+  const expired = await activate("k", "acme", { fetchImpl: async () => reply(400, { activated: false, error: "This license key is expired.", license_key: { status: "expired" } }) });
+  assert.match(expired.reason, /Pro has ended/);
+});
+
 test("deactivate frees a slot", async () => {
   assert.equal((await deactivate("k:inst-1", { fetchImpl: async () => reply(200, { deactivated: true }) })).ok, true);
   assert.equal((await deactivate("k", {})).ok, false); // a bare key is not a license code

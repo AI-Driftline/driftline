@@ -13,6 +13,10 @@ export const LICENSE = { storeId: 494524, productIds: [1432580] };
 const API = "https://api.lemonsqueezy.com/v1/licenses";
 const ACTIVATE_HELP = "Run `npx github:AI-Driftline/driftline activate <your-license-key>` once for this GitHub account and save the code it prints as DRIFTLINE_LICENSE_KEY.";
 
+// "expired": the subscription ended. "disabled": refunded or blocked.
+const ENDED = ["expired", "disabled"];
+const endedReason = (status) => `Driftline Pro has ended for this license key (${status}: the subscription ran out or was refunded). The scan still runs; drift tests are off. Renew at https://aidriftline.com.`;
+
 export const instanceName = (account) => `github:${String(account).trim().toLowerCase()}`;
 
 export function parseCode(code) {
@@ -64,11 +68,13 @@ export async function checkLicense(code, { fetchImpl = fetch, account = "" } = {
   try { data = await res.json(); } catch {}
   if (!data || typeof data !== "object") return { ok: false, reason: `License key could not be checked (HTTP ${res.status}).` };
   if (!data.valid) {
+    const ended = await keyStatus(fetchImpl, key);
+    if (ENDED.includes(ended)) return { ok: false, reason: endedReason(ended) };
     const why = data.error ? `: ${String(data.error).replace(/\.+$/, "")}` : "";
     return { ok: false, reason: `License not valid${why}. ${ACTIVATE_HELP}` };
   }
-  // "expired": the subscription ended. "disabled": refunded or blocked.
   const status = data.license_key?.status;
+  if (ENDED.includes(status)) return { ok: false, reason: endedReason(status) };
   if (status && !["active", "inactive"].includes(status)) return { ok: false, reason: `License key is ${status}.` };
   if (!productOk(data)) return { ok: false, reason: "License key belongs to a different product." };
   if (!data.instance) return { ok: false, reason: `This activation was removed. ${ACTIVATE_HELP}` };
@@ -77,6 +83,17 @@ export async function checkLicense(code, { fetchImpl = fetch, account = "" } = {
     return { ok: false, reason: `This license code was activated for "${where}", not "${account}". A key works on up to 3 GitHub accounts or organizations. ${ACTIVATE_HELP}` };
   }
   return { ok: true };
+}
+
+// When a key expires or is refunded, Lemon Squeezy deletes its activations, so a code check only says
+// "instance_id not found". Asking about the key alone tells that apart from a slot freed with `deactivate`.
+async function keyStatus(fetchImpl, key) {
+  try {
+    const data = await (await call(fetchImpl, "validate", { license_key: key })).json();
+    return data?.license_key?.status;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Registers one GitHub account. Returns { ok, code } or { ok: false, reason }. */
@@ -91,6 +108,8 @@ export async function activate(key, account, { fetchImpl = fetch } = {}) {
     return { ok: false, reason: `Could not reach Lemon Squeezy: ${e.message}` };
   }
   if (!data?.activated) {
+    const status = data?.license_key?.status;
+    if (ENDED.includes(status)) return { ok: false, reason: endedReason(status) };
     const limit = /activation limit/i.test(data?.error || "")
       ? " This key is already used on 3 GitHub accounts. Deactivate one with `npx github:AI-Driftline/driftline deactivate <code>`, or write to hello@aidriftline.com."
       : "";
