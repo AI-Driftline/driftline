@@ -1,5 +1,5 @@
 {
-  "checked": "2026-10-12",
+  "checked": "2026-10-21",
   "note": "Hand-maintained from the official deprecation pages. Re-check before each release. Entries with a 'kind' other than text are scanned and reported but never drift-tested. gpt-4-1106-preview is listed on OpenAI's page under both 2026-03-26 and 2026-10-23; the later date is used so builds are not failed on a conflicting record.",
   "sources": {
     "openai": "https://developers.openai.com/api/docs/deprecations",
@@ -7,6 +7,46 @@
     "google": "https://ai.google.dev/gemini-api/docs/deprecations"
   },
   "models": [
+    {
+      "id": "gpt-4o-2024-08-06",
+      "provider": "openai",
+      "retires": "2027-01-14",
+      "qualifier": "exact",
+      "replacement": "gpt-6-luna",
+      "announced": "2026-10-14"
+    },
+    {
+      "id": "gpt-4o-2024-11-20",
+      "provider": "openai",
+      "retires": "2027-01-14",
+      "qualifier": "exact",
+      "replacement": "gpt-6-luna",
+      "announced": "2026-10-14"
+    },
+    {
+      "id": "gpt-4o-mini-2024-07-18",
+      "provider": "openai",
+      "retires": "2027-01-14",
+      "qualifier": "exact",
+      "replacement": "gpt-6-luna",
+      "announced": "2026-10-14"
+    },
+    {
+      "id": "gpt-4.1-2025-04-14",
+      "provider": "openai",
+      "retires": "2027-01-14",
+      "qualifier": "exact",
+      "replacement": "gpt-6-luna",
+      "announced": "2026-10-14"
+    },
+    {
+      "id": "gpt-4.1-mini-2025-04-14",
+      "provider": "openai",
+      "retires": "2027-01-14",
+      "qualifier": "exact",
+      "replacement": "gpt-6-luna",
+      "announced": "2026-10-14"
+    },
     {
       "id": "gpt-5.3-codex",
       "provider": "openai",
@@ -1396,14 +1436,14 @@
       "provider": "google",
       "retires": "2025-12-09",
       "qualifier": "earliest",
-      "replacement": "gemini-2.5-flash-lite"
+      "replacement": "gemini-3.1-flash-lite"
     },
     {
       "id": "gemini-2.0-flash-lite-preview-02-05",
       "provider": "google",
       "retires": "2025-12-09",
       "qualifier": "earliest",
-      "replacement": "gemini-2.5-flash-lite"
+      "replacement": "gemini-3.1-flash-lite"
     },
     {
       "id": "gemini-2.5-computer-use-preview-10-2025",
@@ -1585,7 +1625,7 @@
       "provider": "google",
       "retires": "2025-11-10",
       "qualifier": "earliest",
-      "replacement": "imagen-4.0-generate-001",
+      "replacement": "gemini-nano-banana-2.1",
       "kind": "image"
     },
     {
@@ -1593,7 +1633,7 @@
       "provider": "google",
       "retires": "2026-02-17",
       "qualifier": "earliest",
-      "replacement": "imagen-4.0-generate-001",
+      "replacement": "gemini-nano-banana-2.1",
       "kind": "image"
     },
     {
@@ -1601,7 +1641,7 @@
       "provider": "google",
       "retires": "2026-02-17",
       "qualifier": "earliest",
-      "replacement": "imagen-4.0-ultra-generate-001",
+      "replacement": "gemini-nano-banana-2.1",
       "kind": "image"
     },
     {
@@ -1609,7 +1649,7 @@
       "provider": "google",
       "retires": "2026-06-30",
       "qualifier": "earliest",
-      "replacement": "veo-3.1-generate-preview",
+      "replacement": "gemini-omni-1.1-flash",
       "kind": "video"
     },
     {
@@ -1617,7 +1657,7 @@
       "provider": "google",
       "retires": "2026-06-30",
       "qualifier": "earliest",
-      "replacement": "veo-3.1-generate-preview",
+      "replacement": "gemini-omni-1.1-flash",
       "kind": "video"
     },
     {
@@ -1625,7 +1665,7 @@
       "provider": "google",
       "retires": "2026-06-30",
       "qualifier": "earliest",
-      "replacement": "veo-3.1-fast-generate-preview",
+      "replacement": "gemini-omni-1.1-flash",
       "kind": "video"
     },
     {
@@ -1665,7 +1705,7 @@
       "provider": "google",
       "retires": "2025-11-12",
       "qualifier": "earliest",
-      "replacement": "veo-3.1-generate-preview",
+      "replacement": "gemini-omni-1.1-flash",
       "kind": "video"
     },
     {
@@ -1673,7 +1713,7 @@
       "provider": "google",
       "retires": "2025-11-12",
       "qualifier": "earliest",
-      "replacement": "veo-3.1-fast-generate-preview",
+      "replacement": "gemini-omni-1.1-flash",
       "kind": "video"
     },
     {
@@ -1688,7 +1728,7 @@
       "provider": "google",
       "retires": "2026-04-30",
       "qualifier": "earliest",
-      "replacement": "gemini-robotics-er-1.6-preview"
+      "replacement": "gemini-robotics-er-2-preview"
     },
     {
       "id": "deep-research-pro-preview-12-2025",
