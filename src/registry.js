@@ -21,7 +21,22 @@ export function loadRegistry(path = join(here, "..", "registry", "models.json"))
     }
     if (next !== m.replacement && next !== m.id) { m.via = m.replacement; m.replacement = next; }
   }
-  return { ...data, models: [...byId.values()], byId };
+  // Anthropic short names point at a dated snapshot: "claude-sonnet-4-5" and "-latest" -> claude-sonnet-4-5-20250929,
+  // "claude-sonnet-4-0" -> claude-sonnet-4-20250514. The deprecation page lists only snapshots, so a short name
+  // is added only when every snapshot behind it shares one date. Aliases go in the lookup, not in `models`.
+  const groups = new Map();
+  for (const m of byId.values()) {
+    const base = m.provider === "anthropic" && m.id.match(/^(claude-.+)-\d{8}$/)?.[1];
+    if (base) groups.set(base, [...(groups.get(base) || []), m]);
+  }
+  const lookup = new Map(byId);
+  for (const [base, snaps] of groups) {
+    if (snaps.some((s) => s.retires !== snaps[0].retires || s.qualifier !== snaps[0].qualifier)) continue;
+    const latest = snaps.reduce((a, b) => (a.id > b.id ? a : b));
+    const names = [base, `${base}-latest`, ...(/-[a-z]+-\d$/.test(base) ? [`${base}-0`] : [])];
+    for (const n of names) if (!lookup.has(n)) lookup.set(n, { ...latest, aliasOf: latest.id });
+  }
+  return { ...data, models: [...byId.values()], byId: lookup };
 }
 
 // Strip prefixes people put in front of model IDs, e.g. "models/gemini-2.0-flash" or "openai/gpt-4",
@@ -37,7 +52,8 @@ export function normalizeId(raw) {
   do { prev = id; id = id.replace(/^(models|openai|anthropic|google|gemini|vertex_ai|bedrock|openrouter)\//, ""); } while (id !== prev);
   const bedrock = /^(?:(?:us|eu|apac|global)\.)?anthropic\./;
   if (bedrock.test(id)) id = id.replace(bedrock, "").replace(/-v\d+(?::\d+)?$/, "");
-  return id.replace(/(?:-v\d+)?@(\d{8})$/, "-$1");   // Vertex: claude-3-5-sonnet-v2@20241022
+  id = id.replace(/(?:-v\d+)?@(\d{8})$/, "-$1");     // Vertex: claude-3-5-sonnet-v2@20241022
+  return id.startsWith("claude-") ? id.replace(/(\d)\.(\d)/g, "$1-$2") : id; // OpenRouter: claude-sonnet-4.5
 }
 
 // Is this string shaped like a model ID from one of the three providers?

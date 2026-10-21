@@ -1,6 +1,6 @@
 {
   "name": "driftline",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "GitHub Action that finds AI model IDs in your code, warns before they are retired, and tests your prompts on the replacement model.",
   "type": "module",
   "bin": { "driftline": "src/cli.js" },

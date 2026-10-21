@@ -7,6 +7,10 @@ const STATUS_LABEL = {
 };
 const RESULT_LABEL = { same: "✅ Same", changed: "🟡 Changed", broken: "🔴 Broken", error: "⚠️ Error", skipped: "⏭️ Skipped" };
 
+// Google gives only earliest dates; once one has passed the model may be gone already, so "retires soon" would be wrong.
+const label = (c) => c.status === "at-risk" && c.entry?.qualifier === "earliest" && c.days <= 0
+  ? "🟠 May already be off" : STATUS_LABEL[c.status];
+
 function when(c) {
   if (!c.entry) return "";
   const q = c.entry.qualifier === "earliest" ? " (earliest)" : c.entry.qualifier === "not-before" ? " (not before)" : "";
@@ -59,7 +63,7 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
     for (const r of rows) {
       const places = r.places.slice(0, 3).join(", ") + (r.places.length > 3 ? ` +${r.places.length - 3} more` : "");
       const docsOnly = r.places.length && byModel.get(r.id).docs === r.places.length ? " · docs only" : "";
-      lines.push(`| ${code(r.id)}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${STATUS_LABEL[r.status]}${docsOnly} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) : ""} | ${places} |`);
+      lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) : ""} | ${places} |`);
     }
     if (all.length > rows.length) lines.push("", `_${all.length - rows.length} more model ID(s) with no retirement listed are not shown._`);
   }

@@ -524,3 +524,32 @@ test("CLI: --help and --version answer instead of scanning a folder named after 
   assert.match(bad.stderr, /Unknown option --nope/);
   assert.doesNotMatch(bad.stdout, /Scanned/);
 });
+
+test("Anthropic short names and OpenRouter dotted names map to the dated snapshot", () => {
+  const today = new Date("2026-10-21T00:00:00Z");
+  for (const raw of ["claude-sonnet-4-5", "claude-sonnet-4-5-latest", "anthropic/claude-sonnet-4.5", "openrouter/anthropic/claude-sonnet-4.5"]) {
+    const c = classify(normalizeId(raw), registry, { today });
+    assert.equal(c.status, "at-risk", raw);
+    assert.equal(c.entry.aliasOf, "claude-sonnet-4-5-20250929", raw);
+  }
+  assert.equal(classify(normalizeId("claude-sonnet-4-0"), registry, { today }).status, "retired");
+  assert.equal(classify(normalizeId("claude-3.5-sonnet"), registry, { today }).status, "retired");
+  assert.equal(registry.models.some((m) => m.aliasOf), false); // aliases never count as listed models
+  assert.equal(registry.byId.get("claude-sonnet-4-5-20250929").aliasOf, undefined);
+});
+
+test("report: Google model past its earliest date says it may already be off", () => {
+  const today = new Date("2026-10-21T00:00:00Z");
+  const c = classify("gemini-2.0-flash-001", registry, { today });
+  const md = renderReport({ findings: [{ ...c, file: "a.py", line: 1 }], drift: [], registry });
+  assert.match(md, /May already be off/);
+  assert.doesNotMatch(md, /Retires soon/);
+  const alias = classify("claude-sonnet-4-5", registry, { today });
+  assert.match(renderReport({ findings: [{ ...alias, file: "a.py", line: 1 }], drift: [], registry }), /alias of `claude-sonnet-4-5-20250929`/);
+});
+
+test("only whole-version Claude names get the -0 alias", () => {
+  assert.ok(registry.byId.has("claude-opus-4-0"));
+  assert.equal(registry.byId.has("claude-sonnet-4-5-0"), false);
+  assert.equal(registry.byId.has("claude-opus-4-1-0"), false);
+});
