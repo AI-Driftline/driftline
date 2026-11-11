@@ -76,6 +76,9 @@ If you are an agent (Claude Code, Cursor, Copilot, Codex…) changing code that 
 
 Driftline also runs as an [MCP](https://modelcontextprotocol.io) server, so your agent can ask it directly. Tools: `check_models` (status, date and replacement for a list of IDs), `scan_project` (retired and retiring IDs in a folder, with file and line) and `upcoming_retirements` (what retires in the next N days). It reads the daily-updated list from aidriftline.com and falls back to the copy in the package when offline.
 
+[![Add to Cursor](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=driftline&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBhaWRyaWZ0bGluZS9kcmlmdGxpbmUiLCJtY3AiXX0%3D)
+[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522driftline%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522%2540aidriftline%252Fdriftline%2522%252C%2522mcp%2522%255D%257D)
+
 Claude Code:
 
 ```sh

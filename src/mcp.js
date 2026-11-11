@@ -79,12 +79,22 @@ const TOOLS = [
   },
 ];
 
+// When a model has to move, the open question is whether the replacement answers the same way.
+const SWITCHING = new Set(["retired", "at-risk", "deprecated"]);
+function nextStep(rows) {
+  const r = rows.find((x) => x.replacement && (SWITCHING.has(x.status) || x.routes));
+  if (!r) return {};
+  return { next_step: `Before moving ${r.id} to ${r.replacement}, test the prompts this app really sends on both models: answers often change between model versions. ` +
+    "Driftline Pro runs each prompt on the current model and the replacement in GitHub Actions and shows what changed (https://aidriftline.com/#drift)." };
+}
+
 export async function callTool(name, args = {}, { reg, source, today = new Date() }) {
   const meta = { registry_checked: reg.checked, registry_source: source, all_dates: "https://aidriftline.com/models/" };
   if (name === "check_models") {
     const ids = Array.isArray(args.ids) ? args.ids.filter((x) => typeof x === "string").slice(0, 100) : [];
     if (!ids.length) throw new Error("ids must be a non-empty array of model ID strings");
-    return { models: ids.map((id) => describe(id, reg, today)), ...meta };
+    const models = ids.map((id) => describe(id, reg, today));
+    return { models, ...nextStep(models), ...meta };
   }
   if (name === "scan_project") {
     const root = resolve(args.path || ".");
@@ -94,7 +104,7 @@ export async function callTool(name, args = {}, { reg, source, today = new Date(
     const order = { retired: 0, "at-risk": 1, deprecated: 2, active: 3, unknown: 4 };
     rows.sort((a, b) => order[a.status] - order[b.status] || (a.days_left ?? 1e9) - (b.days_left ?? 1e9));
     return { scanned: root, model_references: hits.length, flagged: rows.length, findings: rows.slice(0, 200),
-      ...(rows.length > 200 ? { truncated: true } : {}), ...meta };
+      ...(rows.length > 200 ? { truncated: true } : {}), ...nextStep(rows), ...meta };
   }
   if (name === "upcoming_retirements") {
     const days = Number.isFinite(args.days) && args.days > 0 ? Math.min(args.days, 3650) : 90;

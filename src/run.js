@@ -57,7 +57,7 @@ export async function run({
       notices.push(`Drift tests stopped: ${e.message}. The scan results above are complete.`);
     }
   } else if (findings.some((f) => FLAGGED.has(f.status))) {
-    notices.push(`Add ${promptsFile} to test your real prompts on the replacement model before you switch.`);
+    notices.push(`Before you switch, test the prompts your app really sends on the replacement model: list them in ${promptsFile} and Driftline Pro runs each one on both models and shows what changed. https://aidriftline.com/#drift`);
   }
 
   const atRisk = findings.filter((f) => !f.doc && (f.status === "retired" || f.status === "at-risk")).length;

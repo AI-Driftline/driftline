@@ -584,7 +584,11 @@ test("MCP tools: check, scan, upcoming", async () => {
   assert.ok(c.models[0].retires && c.models[0].advice);
   assert.equal(c.models[1].alias_of, "claude-sonnet-4-5-20250929");
   assert.equal(c.models[2].status, "unknown");
+  assert.match(c.next_step, /aidriftline\.com\/#drift/);
+  const fine = await callTool("check_models", { ids: ["not-a-model"] }, ctx);
+  assert.equal(fine.next_step, undefined);
   const s = await callTool("scan_project", { path: SAMPLE }, ctx);
+  assert.match(s.next_step, /Driftline Pro/);
   assert.ok(s.flagged > 0 && s.findings.every((f) => f.file && f.line && !["active", "unknown"].includes(f.status)));
   const u = await callTool("upcoming_retirements", { days: 60, provider: "openai" }, ctx);
   assert.ok(u.models.every((m) => m.provider === "openai" && m.days_left > 0 && m.days_left <= 60));

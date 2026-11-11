@@ -28,10 +28,10 @@ function accountFromGit() {
 const HELP = `Driftline: finds AI model IDs in your code and warns before they are retired.
 
 Usage:
-  npx github:AI-Driftline/driftline [directory]            scan and print the report
-  npx github:AI-Driftline/driftline activate <license-key>  register this GitHub account for Pro
-  npx github:AI-Driftline/driftline deactivate <code>       free that account's slot
-  npx github:AI-Driftline/driftline mcp                     MCP server for coding agents (stdio)
+  npx @aidriftline/driftline [directory]            scan and print the report
+  npx @aidriftline/driftline activate <license-key>  register this GitHub account for Pro
+  npx @aidriftline/driftline deactivate <code>       free that account's slot
+  npx @aidriftline/driftline mcp                     MCP server for coding agents (stdio)
 
 Options:
   --json             print the scan as JSON (for scripts and coding agents)
