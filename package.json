@@ -1,11 +1,18 @@
 {
-  "name": "driftline",
+  "name": "@aidriftline/driftline",
   "version": "0.1.10",
-  "description": "GitHub Action that finds AI model IDs in your code, warns before they are retired, and tests your prompts on the replacement model.",
+  "description": "Finds OpenAI, Anthropic and Google model IDs in your code and warns before they are retired. CLI, GitHub Action and MCP server.",
+  "mcpName": "io.github.AI-Driftline/driftline",
   "type": "module",
   "bin": {
     "driftline": "src/cli.js"
   },
+  "files": [
+    "src",
+    "registry",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "node --test test/*.test.js"
   },
@@ -13,5 +20,19 @@
     "node": ">=20"
   },
   "license": "Elastic-2.0",
-  "private": true
+  "homepage": "https://aidriftline.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AI-Driftline/driftline.git"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "openai",
+    "anthropic",
+    "gemini",
+    "model-deprecation",
+    "llm",
+    "github-action"
+  ]
 }

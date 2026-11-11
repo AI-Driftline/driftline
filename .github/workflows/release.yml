@@ -12,6 +12,7 @@ concurrency: release
 
 permissions:
   contents: write
+  id-token: write # npm trusted publishing + MCP Registry login, no stored tokens
 
 jobs:
   release:
@@ -25,6 +26,7 @@ jobs:
           node-version: 24
       - run: npm test
       - name: Bump, tag, move v0
+        id: bump
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
@@ -38,11 +40,28 @@ jobs:
             exit 0
           fi
           next="v0.1.$(( ${last##*.} + 1 ))"
-          node -e "const f='package.json',p=JSON.parse(require('fs').readFileSync(f));p.version='${next#v}';require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
-          git add package.json
+          node -e "const fs=require('fs'),v='${next#v}';for(const f of ['package.json','server.json']){const p=JSON.parse(fs.readFileSync(f));p.version=v;if(p.packages)p.packages[0].version=v;fs.writeFileSync(f,JSON.stringify(p,null,2)+'\n')}"
+          git add package.json server.json
           git commit -m "Release $next"
           git tag -a "$next" -m "$next"
           git tag -fa v0 -m "v0 -> $next"
           git push origin HEAD:main "$next"
           git push -f origin v0
           echo "Released $next" >> "$GITHUB_STEP_SUMMARY"
+          echo "released=$next" >> "$GITHUB_OUTPUT"
+      # npm: trusted publishing (set up once on npmjs.com for this repo + release.yml). Needs npm 11.5+.
+      - name: Publish to npm
+        if: steps.bump.outputs.released
+        continue-on-error: true
+        run: |
+          npm install -g npm@11
+          npm publish --access public --provenance
+      # Official MCP Registry (feeds VS Code, PulseMCP and other directories). Logs in as this repo via OIDC.
+      # Also runs when started by hand from the Actions tab (re-publishes the current server.json).
+      - name: Publish to the MCP Registry
+        if: steps.bump.outputs.released || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        run: |
+          curl -sL "https://github.com/modelcontextprotocol/registry/releases/download/v1.8.9/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish
