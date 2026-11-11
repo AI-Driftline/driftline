@@ -123,7 +123,23 @@
       "announced": "2026-10-01"
     },
     {
+      "id": "gpt-5.1-2025-11-13",
+      "provider": "openai",
+      "retires": "2027-04-01",
+      "qualifier": "exact",
+      "replacement": "gpt-6-sol",
+      "announced": "2026-10-01"
+    },
+    {
       "id": "gpt-5.4-nano",
+      "provider": "openai",
+      "retires": "2027-04-01",
+      "qualifier": "exact",
+      "replacement": "gpt-6-luna",
+      "announced": "2026-10-01"
+    },
+    {
+      "id": "gpt-5.4-nano-2026-03-17",
       "provider": "openai",
       "retires": "2027-04-01",
       "qualifier": "exact",
@@ -139,7 +155,23 @@
       "announced": "2026-06-11"
     },
     {
+      "id": "gpt-5",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-06-11"
+    },
+    {
       "id": "gpt-5-pro-2025-10-06",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-06-11"
+    },
+    {
+      "id": "gpt-5-pro",
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
@@ -155,7 +187,23 @@
       "announced": "2026-06-11"
     },
     {
+      "id": "o3",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-06-11"
+    },
+    {
       "id": "o3-pro-2025-06-10",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-06-11"
+    },
+    {
+      "id": "o3-pro",
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
@@ -171,7 +219,23 @@
       "announced": "2026-06-11"
     },
     {
+      "id": "gpt-5-mini",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2026-06-11"
+    },
+    {
       "id": "gpt-5-nano-2025-08-07",
+      "provider": "openai",
+      "retires": "2026-12-11",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-luna",
+      "announced": "2026-06-11"
+    },
+    {
+      "id": "gpt-5-nano",
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
@@ -949,6 +1013,14 @@
       "kind": "audio"
     },
     {
+      "id": "gpt-4o-mini-tts",
+      "provider": "openai",
+      "retires": "2027-01-06",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1-mini",
+      "kind": "audio"
+    },
+    {
       "id": "gpt-4o-mini-tts-2025-12-15",
       "provider": "openai",
       "retires": "2027-01-06",
@@ -981,6 +1053,14 @@
       "kind": "audio"
     },
     {
+      "id": "gpt-4o-mini-transcribe-2025-12-15",
+      "provider": "openai",
+      "retires": "2027-02-26",
+      "qualifier": "exact",
+      "replacement": "gpt-transcribe",
+      "kind": "audio"
+    },
+    {
       "id": "gpt-4o-transcribe-diarize",
       "provider": "openai",
       "retires": "2027-02-26",
@@ -990,6 +1070,14 @@
     },
     {
       "id": "gpt-realtime",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-realtime-2025-08-28",
       "provider": "openai",
       "retires": "2027-01-20",
       "qualifier": "exact",
@@ -1013,6 +1101,14 @@
       "kind": "audio"
     },
     {
+      "id": "gpt-audio-2025-08-28",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-audio-1.5",
+      "kind": "audio"
+    },
+    {
       "id": "gpt-4o-audio",
       "provider": "openai",
       "retires": "2027-01-20",
@@ -1029,6 +1125,14 @@
       "kind": "audio"
     },
     {
+      "id": "gpt-audio-mini-2025-12-15",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-audio-1.5",
+      "kind": "audio"
+    },
+    {
       "id": "gpt-4o-mini-audio",
       "provider": "openai",
       "retires": "2027-01-20",
@@ -1038,6 +1142,14 @@
     },
     {
       "id": "gpt-realtime-mini",
+      "provider": "openai",
+      "retires": "2027-01-20",
+      "qualifier": "exact",
+      "replacement": "gpt-realtime-2.1-mini",
+      "kind": "audio"
+    },
+    {
+      "id": "gpt-realtime-mini-2025-12-15",
       "provider": "openai",
       "retires": "2027-01-20",
       "qualifier": "exact",
@@ -1169,7 +1281,7 @@
       "provider": "openai",
       "retires": "2026-12-01",
       "qualifier": "exact",
-      "replacement": "gpt-image-2.5-sunburst",
+      "replacement": "gpt-image-2.6-sunburst",
       "kind": "image"
     },
     {
@@ -1177,7 +1289,15 @@
       "provider": "openai",
       "retires": "2026-12-01",
       "qualifier": "exact",
-      "replacement": "gpt-image-2.5-sunburst",
+      "replacement": "gpt-image-2.6-sunburst",
+      "kind": "image"
+    },
+    {
+      "id": "gpt-image-1.5-2025-12-16",
+      "provider": "openai",
+      "retires": "2026-12-01",
+      "qualifier": "exact",
+      "replacement": "gpt-image-2.6-sunburst",
       "kind": "image"
     },
     {
@@ -1185,7 +1305,7 @@
       "provider": "openai",
       "retires": "2026-12-01",
       "qualifier": "exact",
-      "replacement": "gpt-image-2.5-sunburst",
+      "replacement": "gpt-image-2.6-sunburst",
       "kind": "image"
     },
     {
@@ -1465,6 +1585,18 @@
       "retires": "2024-11-06",
       "qualifier": "exact",
       "replacement": "claude-haiku-4-5-20251001"
+    },
+    {
+      "id": "claude-mythos-5-2",
+      "provider": "anthropic",
+      "retires": "2027-11-09",
+      "qualifier": "not-before"
+    },
+    {
+      "id": "claude-fable-5-2",
+      "provider": "anthropic",
+      "retires": "2027-11-09",
+      "qualifier": "not-before"
     },
     {
       "id": "claude-fable-5-1",
