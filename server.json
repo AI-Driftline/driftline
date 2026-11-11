@@ -3,17 +3,27 @@
   "name": "io.github.AI-Driftline/driftline",
   "title": "Driftline",
   "description": "Retirement dates and replacements for OpenAI, Anthropic and Google model IDs, checked daily.",
-  "repository": { "url": "https://github.com/AI-Driftline/driftline", "source": "github" },
+  "repository": {
+    "url": "https://github.com/AI-Driftline/driftline",
+    "source": "github"
+  },
   "websiteUrl": "https://aidriftline.com/agents/",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@aidriftline/driftline",
-      "version": "0.1.10",
-      "transport": { "type": "stdio" },
-      "packageArguments": [{ "type": "positional", "value": "mcp" }]
+      "version": "0.1.11",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ]
     }
   ]
 }
