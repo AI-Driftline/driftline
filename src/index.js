@@ -48,8 +48,12 @@ async function main() {
   }
   for (const f of toAnnotate.slice(0, MAX_ANNOTATIONS)) {
     const level = f.status === "deprecated" || f.doc ? "notice" : "warning";
-    const repl = f.entry?.replacement ? ` Replacement: ${f.entry.replacement}.` : "";
-    const text = f.entry.qualifier === "earliest" && f.days <= 0
+    const repl = f.entry?.replacement && !f.entry.routes ? ` Replacement: ${f.entry.replacement}.` : "";
+    const text = f.entry.routes && f.entry.replacement
+      ? (f.days <= 0
+        ? `Since ${f.entry.retires}, requests to ${f.id} are answered by ${f.entry.replacement}. The call still works, but the model behind it changed.`
+        : `From ${f.entry.retires}, requests to ${f.id} will be answered by ${f.entry.replacement}. The call keeps working, but the model behind it changes.`)
+      : f.entry.qualifier === "earliest" && f.days <= 0
       ? `${f.id} is past its earliest shutdown date (${f.entry.retires}) and may stop working at any time.`
       : `${f.id} ${STATUS_TEXT[f.status]} (${f.entry.retires}).`;
     annotate(level, text + repl, f.file, f.line);

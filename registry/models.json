@@ -1,12 +1,71 @@
 {
-  "checked": "2026-10-21",
-  "note": "Hand-maintained from the official deprecation pages. Re-check before each release. Entries with a 'kind' other than text are scanned and reported but never drift-tested. gpt-4-1106-preview is listed on OpenAI's page under both 2026-03-26 and 2026-10-23; the later date is used so builds are not failed on a conflicting record.",
+  "checked": "2026-11-11",
+  "note": "Hand-maintained from the official deprecation pages. Re-check before each release. Entries with a 'kind' other than text are scanned and reported but never drift-tested. gpt-4-1106-preview is listed on OpenAI's page under both 2026-03-26 and 2026-10-23; the later date is used so builds are not failed on a conflicting record. Entries with routes: true keep answering after the date, but the provider sends the requests to the replacement model (Google calls this automatic routing); the 'retires' date is the day routing starts. gemini-3.5-flash and gemini-3.7-flash already route to newer models with no date given, so they are left out.",
   "sources": {
     "openai": "https://developers.openai.com/api/docs/deprecations",
     "anthropic": "https://platform.claude.com/docs/en/about-claude/model-deprecations",
     "google": "https://ai.google.dev/gemini-api/docs/deprecations"
   },
   "models": [
+    {
+      "id": "gpt-image-2",
+      "provider": "openai",
+      "retires": "2027-02-10",
+      "qualifier": "exact",
+      "replacement": "gpt-image-2.6-sunburst",
+      "kind": "image",
+      "announced": "2026-11-10"
+    },
+    {
+      "id": "gpt-image-2-2026-04-21",
+      "provider": "openai",
+      "retires": "2027-02-10",
+      "qualifier": "exact",
+      "replacement": "gpt-image-2.6-sunburst",
+      "kind": "image",
+      "announced": "2026-11-10"
+    },
+    {
+      "id": "gpt-5.5-cyber-preview",
+      "provider": "openai",
+      "retires": "2027-02-01",
+      "qualifier": "exact",
+      "announced": "2026-11-05"
+    },
+    {
+      "id": "gemini-2.5-pro",
+      "provider": "google",
+      "retires": "2026-12-01",
+      "qualifier": "exact",
+      "replacement": "gemini-3.8-flash",
+      "routes": true
+    },
+    {
+      "id": "gemini-2.5-flash",
+      "provider": "google",
+      "retires": "2026-12-01",
+      "qualifier": "exact",
+      "replacement": "gemini-3.5-flash-lite",
+      "routes": true
+    },
+    {
+      "id": "gemini-omni-1.1-flash",
+      "provider": "google",
+      "retires": "2026-12-03",
+      "qualifier": "exact",
+      "replacement": "gemini-omni-1.2-flash",
+      "kind": "video",
+      "routes": true
+    },
+    {
+      "id": "gemini-embedding-2-preview",
+      "provider": "google",
+      "retires": "2026-11-06",
+      "qualifier": "exact",
+      "replacement": "gemini-embedding-2",
+      "kind": "embedding",
+      "routes": true
+    },
     {
       "id": "gpt-4o-2024-08-06",
       "provider": "openai",
@@ -597,21 +656,21 @@
       "provider": "google",
       "retires": "2025-12-02",
       "qualifier": "earliest",
-      "replacement": "gemini-3.1-pro-preview"
+      "replacement": "gemini-3.8-flash"
     },
     {
       "id": "gemini-2.5-pro-preview-05-06",
       "provider": "google",
       "retires": "2025-12-02",
       "qualifier": "earliest",
-      "replacement": "gemini-3.1-pro-preview"
+      "replacement": "gemini-3.8-flash"
     },
     {
       "id": "gemini-2.5-pro-preview-06-05",
       "provider": "google",
       "retires": "2025-12-02",
       "qualifier": "earliest",
-      "replacement": "gemini-3.1-pro-preview"
+      "replacement": "gemini-3.8-flash"
     },
     {
       "id": "gemini-2.5-flash-preview-05-20",
@@ -621,7 +680,7 @@
       "replacement": "gemini-3.6-flash"
     },
     {
-      "id": "gemini-2.5-flash-preview-09-25",
+      "id": "gemini-2.5-flash-preview-09-2025",
       "provider": "google",
       "retires": "2026-02-17",
       "qualifier": "earliest",
@@ -1649,7 +1708,7 @@
       "provider": "google",
       "retires": "2026-06-30",
       "qualifier": "earliest",
-      "replacement": "gemini-omni-1.1-flash",
+      "replacement": "gemini-omni-1.2-flash",
       "kind": "video"
     },
     {
@@ -1657,7 +1716,7 @@
       "provider": "google",
       "retires": "2026-06-30",
       "qualifier": "earliest",
-      "replacement": "gemini-omni-1.1-flash",
+      "replacement": "gemini-omni-1.2-flash",
       "kind": "video"
     },
     {
@@ -1665,7 +1724,7 @@
       "provider": "google",
       "retires": "2026-06-30",
       "qualifier": "earliest",
-      "replacement": "gemini-omni-1.1-flash",
+      "replacement": "gemini-omni-1.2-flash",
       "kind": "video"
     },
     {
@@ -1673,7 +1732,7 @@
       "provider": "google",
       "retires": "2026-10-22",
       "qualifier": "earliest",
-      "replacement": "gemini-omni-1.1-flash",
+      "replacement": "gemini-omni-1.2-flash",
       "kind": "video"
     },
     {
@@ -1681,7 +1740,7 @@
       "provider": "google",
       "retires": "2026-10-22",
       "qualifier": "earliest",
-      "replacement": "gemini-omni-1.1-flash",
+      "replacement": "gemini-omni-1.2-flash",
       "kind": "video"
     },
     {
@@ -1689,7 +1748,7 @@
       "provider": "google",
       "retires": "2026-10-22",
       "qualifier": "earliest",
-      "replacement": "gemini-omni-1.1-flash",
+      "replacement": "gemini-omni-1.2-flash",
       "kind": "video"
     },
     {
@@ -1697,7 +1756,7 @@
       "provider": "google",
       "retires": "2026-10-22",
       "qualifier": "earliest",
-      "replacement": "gemini-omni-1.1-flash",
+      "replacement": "gemini-omni-1.2-flash",
       "kind": "video"
     },
     {
@@ -1705,7 +1764,7 @@
       "provider": "google",
       "retires": "2025-11-12",
       "qualifier": "earliest",
-      "replacement": "gemini-omni-1.1-flash",
+      "replacement": "gemini-omni-1.2-flash",
       "kind": "video"
     },
     {
@@ -1713,7 +1772,7 @@
       "provider": "google",
       "retires": "2025-11-12",
       "qualifier": "earliest",
-      "replacement": "gemini-omni-1.1-flash",
+      "replacement": "gemini-omni-1.2-flash",
       "kind": "video"
     },
     {

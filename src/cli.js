@@ -4,6 +4,7 @@
 //                                      .driftline/prompts.yml, DRIFTLINE_LICENSE_KEY and provider keys exist)
 //   driftline activate <license-key>   register this GitHub account; prints the code to save as DRIFTLINE_LICENSE_KEY
 //   driftline deactivate <code>        free that account's slot (a key works on up to 3 accounts)
+//   driftline [directory] --json       same scan, machine-readable (for scripts and coding agents)
 //   driftline --help | --version
 import { resolve } from "node:path";
 import { readFileSync } from "node:fs";
@@ -11,7 +12,8 @@ import { execFileSync } from "node:child_process";
 import { run } from "./run.js";
 import { activate, deactivate } from "./license.js";
 
-const [cmd, arg] = process.argv.slice(2);
+const JSON_OUT = process.argv.includes("--json");
+const [cmd, arg] = process.argv.slice(2).filter((a) => a !== "--json");
 const flag = (name) => { const i = process.argv.indexOf(`--${name}`); return i > 0 ? process.argv[i + 1] : ""; };
 
 // "git@github.com:acme/app.git" or "https://github.com/acme/app" -> "acme"
@@ -30,10 +32,13 @@ Usage:
   npx github:AI-Driftline/driftline deactivate <code>       free that account's slot
 
 Options:
+  --json             print the scan as JSON (for scripts and coding agents)
   --account <name>   GitHub account to activate for (default: origin remote owner)
   -h, --help         show this help
   -v, --version      show the version
 
+Exit code: 1 if a retired model is used in code, 0 otherwise.
+Retirement dates for every model: https://aidriftline.com/models/
 Docs: https://github.com/AI-Driftline/driftline`;
 
 if (cmd === "-h" || cmd === "--help" || cmd === "help") {
@@ -63,6 +68,13 @@ if (cmd === "-h" || cmd === "--help" || cmd === "help") {
     account: process.env.GITHUB_REPOSITORY_OWNER || accountFromGit(),
     log: (m) => console.error(m),
   });
-  console.log(result.markdown);
+  if (JSON_OUT) {
+    const pick = (f) => ({
+      id: f.id, file: f.file, line: f.line, status: f.status, docOnly: !!f.doc,
+      provider: f.entry?.provider, retires: f.entry?.retires, qualifier: f.entry?.qualifier,
+      replacement: f.entry?.replacement, routes: !!f.entry?.routes, aliasOf: f.entry?.aliasOf,
+    });
+    console.log(JSON.stringify({ findings: result.findings.map(pick), drift: result.drift || [] }, null, 2));
+  } else console.log(result.markdown);
   process.exitCode = result.findings.some((f) => f.status === "retired" && !f.doc) ? 1 : 0;
 }

@@ -548,8 +548,30 @@ test("report: Google model past its earliest date says it may already be off", (
   assert.match(renderReport({ findings: [{ ...alias, file: "a.py", line: 1 }], drift: [], registry }), /alias of `claude-sonnet-4-5-20250929`/);
 });
 
+test("routed Google models: switch date, not shutdown", () => {
+  const before = classify("gemini-2.5-pro", registry, { today: new Date("2026-11-11T00:00:00Z") });
+  assert.equal(before.status, "at-risk");
+  assert.match(renderReport({ findings: [{ ...before, file: "a.py", line: 1 }], drift: [], registry }), /Switches model soon.*routing starts/);
+  const after = classify("gemini-2.5-flash", registry, { today: new Date("2026-12-02T00:00:00Z") });
+  assert.equal(after.status, "retired");
+  const md = renderReport({ findings: [{ ...after, file: "a.py", line: 1 }], drift: [], registry });
+  assert.match(md, /Now answered by the replacement/);
+  assert.match(md, /gemini-3\.5-flash-lite/);
+  assert.ok(registry.byId.has("gemini-2.5-flash-preview-09-2025"));
+});
+
 test("only whole-version Claude names get the -0 alias", () => {
   assert.ok(registry.byId.has("claude-opus-4-0"));
   assert.equal(registry.byId.has("claude-sonnet-4-5-0"), false);
   assert.equal(registry.byId.has("claude-opus-4-1-0"), false);
+});
+
+test("CLI --json prints machine-readable findings", async () => {
+  const { execFileSync } = await import("node:child_process");
+  let out;
+  try { out = execFileSync(process.execPath, [join(here, "..", "src", "cli.js"), SAMPLE, "--json"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], env: { ...process.env, DRIFTLINE_LICENSE_KEY: "" } }); }
+  catch (e) { out = e.stdout; } // exit 1 when the sample uses a retired model
+  const data = JSON.parse(out);
+  assert.ok(Array.isArray(data.findings) && data.findings.length > 0);
+  assert.ok(data.findings.every((f) => f.id && f.file && f.status));
 });

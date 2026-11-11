@@ -8,12 +8,16 @@ const STATUS_LABEL = {
 const RESULT_LABEL = { same: "✅ Same", changed: "🟡 Changed", broken: "🔴 Broken", error: "⚠️ Error", skipped: "⏭️ Skipped" };
 
 // Google gives only earliest dates; once one has passed the model may be gone already, so "retires soon" would be wrong.
+// Routed models keep answering after the date, but from the replacement model ("retired" would be wrong too).
 const label = (c) => c.status === "at-risk" && c.entry?.qualifier === "earliest" && c.days <= 0
-  ? "🟠 May already be off" : STATUS_LABEL[c.status];
+  ? "🟠 May already be off"
+  : c.status === "retired" && c.entry?.routes ? "🔴 Now answered by the replacement"
+  : c.status === "at-risk" && c.entry?.routes ? "🟠 Switches model soon"
+  : STATUS_LABEL[c.status];
 
 function when(c) {
   if (!c.entry) return "";
-  const q = c.entry.qualifier === "earliest" ? " (earliest)" : c.entry.qualifier === "not-before" ? " (not before)" : "";
+  const q = c.entry.routes ? " (routing starts)" : c.entry.qualifier === "earliest" ? " (earliest)" : c.entry.qualifier === "not-before" ? " (not before)" : "";
   const rel = c.days <= 0
     ? (c.entry.qualifier === "earliest" ? `earliest shutdown passed ${-c.days} days ago` : `${-c.days} days ago`)
     : `in ${c.days} days`;
