@@ -1,0 +1,48 @@
+# Ships every change to the registry or the code: tests → bump version → tag v0.1.x → move v0.
+# Runs on its own when main changes (the daily registry robot pushes there), or by hand from the Actions tab.
+# Pushes made here use GITHUB_TOKEN, which does not start other workflows, so this never loops.
+name: release
+on:
+  push:
+    branches: [main]
+    paths: ["registry/**", "src/**", "action.yml"]
+  workflow_dispatch:
+
+concurrency: release
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm test
+      - name: Bump, tag, move v0
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          last=$(git tag --list 'v0.1.*' | sort -V | tail -1)
+          # A daily re-check that only moves the "checked" date is not worth a release.
+          models() { node -e "const r=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(JSON.stringify(r.models))"; }
+          if git diff --quiet "$last" HEAD -- src action.yml && \
+             [ "$(git show "${last}:registry/models.json" | models)" = "$(git show HEAD:registry/models.json | models)" ]; then
+            echo "Nothing to release since $last (only the checked date or docs changed)." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          next="v0.1.$(( ${last##*.} + 1 ))"
+          node -e "const f='package.json',p=JSON.parse(require('fs').readFileSync(f));p.version='${next#v}';require('fs').writeFileSync(f,JSON.stringify(p,null,2)+'\n')"
+          git add package.json
+          git commit -m "Release $next"
+          git tag -a "$next" -m "$next"
+          git tag -fa v0 -m "v0 -> $next"
+          git push origin HEAD:main "$next"
+          git push -f origin v0
+          echo "Released $next" >> "$GITHUB_STEP_SUMMARY"
