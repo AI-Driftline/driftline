@@ -5,6 +5,7 @@
 //   driftline activate <license-key>   register this GitHub account; prints the code to save as DRIFTLINE_LICENSE_KEY
 //   driftline deactivate <code>        free that account's slot (a key works on up to 3 accounts)
 //   driftline [directory] --json       same scan, machine-readable (for scripts and coding agents)
+//   driftline mcp                      MCP server on stdio for coding agents (Claude Code, Cursor, ...)
 //   driftline --help | --version
 import { resolve } from "node:path";
 import { readFileSync } from "node:fs";
@@ -30,6 +31,7 @@ Usage:
   npx github:AI-Driftline/driftline [directory]            scan and print the report
   npx github:AI-Driftline/driftline activate <license-key>  register this GitHub account for Pro
   npx github:AI-Driftline/driftline deactivate <code>       free that account's slot
+  npx github:AI-Driftline/driftline mcp                     MCP server for coding agents (stdio)
 
 Options:
   --json             print the scan as JSON (for scripts and coding agents)
@@ -48,6 +50,9 @@ if (cmd === "-h" || cmd === "--help" || cmd === "help") {
 } else if (cmd?.startsWith("-")) {
   console.error(`Unknown option ${cmd}\n\n${HELP}`);
   process.exitCode = 2;
+} else if (cmd === "mcp") {
+  const { startServer } = await import("./mcp.js");
+  startServer();
 } else if (cmd === "activate") {
   const account = flag("account") || accountFromGit();
   const r = await activate(arg, account);

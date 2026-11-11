@@ -72,6 +72,28 @@ Exit code 1 means a retired model is used in code.
 
 If you are an agent (Claude Code, Cursor, Copilot, Codex…) changing code that calls OpenAI, Anthropic or Google: run `npx -y github:AI-Driftline/driftline . --json` before you pick or keep a model ID, and do not introduce an ID whose `status` is `retired` or `at-risk`. Without a shell, look the ID up in [`registry/models.json`](registry/models.json) or at `https://aidriftline.com/models/<model-id>/`. More, including a snippet for `AGENTS.md` / `CLAUDE.md`: [aidriftline.com/agents](https://aidriftline.com/agents/).
 
+### MCP server
+
+Driftline also runs as an [MCP](https://modelcontextprotocol.io) server, so your agent can ask it directly. Tools: `check_models` (status, date and replacement for a list of IDs), `scan_project` (retired and retiring IDs in a folder, with file and line) and `upcoming_retirements` (what retires in the next N days). It reads the daily-updated list from aidriftline.com and falls back to the copy in the package when offline.
+
+Claude Code:
+
+```sh
+claude mcp add driftline -- npx -y github:AI-Driftline/driftline mcp
+```
+
+Cursor, Windsurf, Claude Desktop and other clients (`mcp.json` / `claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "driftline": { "command": "npx", "args": ["-y", "github:AI-Driftline/driftline", "mcp"] }
+  }
+}
+```
+
+Needs Node 20+. Free, no key.
+
 ## Retirement data
 
 [`registry/models.json`](registry/models.json) is maintained by hand from the official pages ([OpenAI](https://developers.openai.com/api/docs/deprecations), [Anthropic](https://platform.claude.com/docs/en/about-claude/model-deprecations), [Google](https://ai.google.dev/gemini-api/docs/deprecations)) and records the date it was last checked. Google publishes only the *earliest* possible shutdown date, so Driftline reports those models as "may stop working" rather than "retired". Anthropic's "not sooner than" dates are informational and never trigger a warning. Audio, image, video and embedding models are scanned and reported too, but only text models are drift-tested. Some Google models are not shut down but *routed*: after the date, requests to the old ID are answered by the replacement model (`routes: true` in the registry). Driftline flags those too, because the call keeps working while the answers change.

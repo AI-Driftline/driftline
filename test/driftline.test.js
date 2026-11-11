@@ -575,3 +575,43 @@ test("CLI --json prints machine-readable findings", async () => {
   assert.ok(Array.isArray(data.findings) && data.findings.length > 0);
   assert.ok(data.findings.every((f) => f.id && f.file && f.status));
 });
+
+test("MCP tools: check, scan, upcoming", async () => {
+  const { callTool } = await import("../src/mcp.js");
+  const ctx = { reg: registry, source: "bundled", today: TODAY };
+  const c = await callTool("check_models", { ids: ["models/gemini-2.0-flash", "claude-sonnet-4-5", "not-a-model"] }, ctx);
+  assert.equal(c.models[0].normalized, "gemini-2.0-flash");
+  assert.ok(c.models[0].retires && c.models[0].advice);
+  assert.equal(c.models[1].alias_of, "claude-sonnet-4-5-20250929");
+  assert.equal(c.models[2].status, "unknown");
+  const s = await callTool("scan_project", { path: SAMPLE }, ctx);
+  assert.ok(s.flagged > 0 && s.findings.every((f) => f.file && f.line && !["active", "unknown"].includes(f.status)));
+  const u = await callTool("upcoming_retirements", { days: 60, provider: "openai" }, ctx);
+  assert.ok(u.models.every((m) => m.provider === "openai" && m.days_left > 0 && m.days_left <= 60));
+  await assert.rejects(callTool("check_models", { ids: [] }, ctx));
+});
+
+test("MCP server answers JSON-RPC over stdio", async () => {
+  const { spawn } = await import("node:child_process");
+  const p = spawn(process.execPath, [join(here, "..", "src", "cli.js"), "mcp"], { env: { ...process.env, DRIFTLINE_OFFLINE: "1" } });
+  const lines = [];
+  let buf = "";
+  const done = new Promise((ok) => p.stdout.on("data", (d) => {
+    buf += d; const parts = buf.split("\n"); buf = parts.pop(); lines.push(...parts);
+    if (lines.length >= 3) ok();
+  }));
+  const msgs = [
+    { jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "t", version: "1" } } },
+    { jsonrpc: "2.0", method: "notifications/initialized" },
+    { jsonrpc: "2.0", id: 2, method: "tools/list" },
+    { jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "check_models", arguments: { ids: ["gpt-5"] } } },
+  ];
+  p.stdin.write(msgs.map((m) => JSON.stringify(m)).join("\n") + "\n");
+  await done;
+  p.kill();
+  const [init, list, call] = lines.map((l) => JSON.parse(l)).sort((a, b) => a.id - b.id);
+  assert.equal(init.result.serverInfo.name, "driftline");
+  assert.deepEqual(list.result.tools.map((t) => t.name), ["check_models", "scan_project", "upcoming_retirements"]);
+  assert.equal(call.result.structuredContent.registry_source, "bundled");
+  assert.equal(call.result.structuredContent.models[0].replacement, "gpt-5.6-sol");
+});

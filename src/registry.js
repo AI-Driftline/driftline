@@ -5,8 +5,14 @@ import { dirname, join } from "node:path";
 const here = dirname(fileURLToPath(import.meta.url));
 const DAY = 24 * 60 * 60 * 1000;
 
-export function loadRegistry(path = join(here, "..", "registry", "models.json")) {
-  const data = JSON.parse(readFileSync(path, "utf8"));
+export const REGISTRY_PATH = join(here, "..", "registry", "models.json");
+
+export function loadRegistry(path = REGISTRY_PATH) {
+  return buildRegistry(JSON.parse(readFileSync(path, "utf8")));
+}
+
+// Same as loadRegistry, from already-parsed JSON (e.g. the live copy at aidriftline.com/models.json).
+export function buildRegistry(data) {
   const byId = new Map(data.models.map((m) => [m.id, { ...m }]));
   // Providers sometimes name a replacement that is itself being retired (o1-mini -> o4-mini -> ...).
   // Follow the chain so customers are pointed at a model that stays.
