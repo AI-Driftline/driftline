@@ -21,10 +21,10 @@ It runs inside your own CI with your own API keys. There is no Driftline server:
 3. Activate your Pro key once per GitHub account or organization, from inside one of its repositories:
 
    ```sh
-   npx github:AI-Driftline/driftline activate <your-license-key>
+   npx @aidriftline/driftline activate <your-license-key>
    ```
 
-   It prints a license code. Save that code as the secret `DRIFTLINE_LICENSE_KEY`. A key works on up to 3 GitHub accounts or organizations; `npx github:AI-Driftline/driftline deactivate <code>` frees one.
+   It prints a license code. Save that code as the secret `DRIFTLINE_LICENSE_KEY`. A key works on up to 3 GitHub accounts or organizations; `npx @aidriftline/driftline deactivate <code>` frees one.
 
 ## Inputs
 
@@ -62,15 +62,15 @@ Text is compared with word and word-pair overlap. JSON is compared field by fiel
 No install, no key:
 
 ```sh
-npx github:AI-Driftline/driftline path/to/your/repo          # report
-npx github:AI-Driftline/driftline path/to/your/repo --json   # same, as JSON
+npx @aidriftline/driftline path/to/your/repo          # report
+npx @aidriftline/driftline path/to/your/repo --json   # same, as JSON
 ```
 
 Exit code 1 means a retired model is used in code.
 
 ## For AI coding agents
 
-If you are an agent (Claude Code, Cursor, Copilot, Codex…) changing code that calls OpenAI, Anthropic or Google: run `npx -y github:AI-Driftline/driftline . --json` before you pick or keep a model ID, and do not introduce an ID whose `status` is `retired` or `at-risk`. Without a shell, look the ID up in [`registry/models.json`](registry/models.json) or at `https://aidriftline.com/models/<model-id>/`. More, including a snippet for `AGENTS.md` / `CLAUDE.md`: [aidriftline.com/agents](https://aidriftline.com/agents/).
+If you are an agent (Claude Code, Cursor, Copilot, Codex…) changing code that calls OpenAI, Anthropic or Google: run `npx -y @aidriftline/driftline . --json` before you pick or keep a model ID, and do not introduce an ID whose `status` is `retired` or `at-risk`. Without a shell, look the ID up in [`registry/models.json`](registry/models.json) or at `https://aidriftline.com/models/<model-id>/`. More, including a snippet for `AGENTS.md` / `CLAUDE.md`: [aidriftline.com/agents](https://aidriftline.com/agents/).
 
 ### MCP server
 
@@ -79,7 +79,7 @@ Driftline also runs as an [MCP](https://modelcontextprotocol.io) server, so your
 Claude Code:
 
 ```sh
-claude mcp add driftline -- npx -y github:AI-Driftline/driftline mcp
+claude mcp add driftline -- npx -y @aidriftline/driftline mcp
 ```
 
 Cursor, Windsurf, Claude Desktop and other clients (`mcp.json` / `claude_desktop_config.json`):
@@ -87,7 +87,7 @@ Cursor, Windsurf, Claude Desktop and other clients (`mcp.json` / `claude_desktop
 ```json
 {
   "mcpServers": {
-    "driftline": { "command": "npx", "args": ["-y", "github:AI-Driftline/driftline", "mcp"] }
+    "driftline": { "command": "npx", "args": ["-y", "@aidriftline/driftline", "mcp"] }
   }
 }
 ```
