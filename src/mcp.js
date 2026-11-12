@@ -3,7 +3,7 @@
 // Speaks JSON-RPC 2.0, one message per line on stdin/stdout (the MCP stdio transport). No dependencies.
 // Data: the live registry at aidriftline.com/models.json (updated daily), or the copy bundled with this
 // version when the site can't be reached or is older. Set DRIFTLINE_OFFLINE=1 to never fetch.
-import { readFileSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline";
 import { REGISTRY_PATH, buildRegistry, classify, normalizeId } from "./registry.js";
@@ -55,27 +55,78 @@ function describe(rawId, reg, today) {
   };
 }
 
+const STATUS_ENUM = ["retired", "at-risk", "deprecated", "active", "unknown"];
+const MODEL_RESULT = {
+  type: "object",
+  properties: {
+    id: { type: "string", description: "The ID as given" },
+    normalized: { type: "string", description: "The ID after removing provider prefixes such as models/ or openai/" },
+    status: { type: "string", enum: STATUS_ENUM, description: "retired = calls fail (or are re-routed) now; at-risk = retires within 90 days; deprecated = retirement announced, further out; active = announced as active; unknown = no retirement published" },
+    provider: { type: "string" }, retires: { type: "string", description: "YYYY-MM-DD" },
+    qualifier: { type: "string", enum: ["exact", "earliest", "not-before"], description: "exact date, earliest possible shutdown (Google), or not before this date (Anthropic)" },
+    days_left: { type: "number", description: "Days until the date; 0 or negative when it has passed" },
+    replacement: { type: ["string", "null"] },
+    routes: { type: "boolean", description: "true: after the date the provider answers with the replacement model instead of failing" },
+    alias_of: { type: "string" }, page: { type: "string", description: "aidriftline.com page with the source for this date" },
+    advice: { type: "string", description: "One plain sentence to pass on to the user" },
+  },
+  required: ["id", "status", "advice"],
+};
+const META = {
+  registry_checked: { type: "string", description: "Date the registry was last checked against the provider pages" },
+  registry_source: { type: "string", enum: ["live", "bundled"], description: "live = aidriftline.com/models.json; bundled = the copy shipped in the package (used offline)" },
+  all_dates: { type: "string" },
+  next_step: { type: "string", description: "Present when a model has to move: how to test prompts on the replacement first" },
+};
+const READ_ONLY = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true };
+
 const TOOLS = [
   {
     name: "check_models",
-    description: "Check AI model IDs (OpenAI, Anthropic, Google) for retirement: status, retirement date, replacement. Use before writing or keeping a model ID in code. Accepts provider spellings such as models/gemini-2.5-pro, openai/gpt-4o or Bedrock IDs.",
-    inputSchema: { type: "object", properties: { ids: { type: "array", items: { type: "string" }, minItems: 1, description: "Model IDs, e.g. [\"gpt-4o\", \"claude-sonnet-4-5\"]" } }, required: ["ids"] },
+    title: "Check model IDs for retirement",
+    description: "Look up OpenAI, Anthropic and Google model IDs and return, for each one, its retirement status, retirement date, days left and replacement. " +
+      "Use it before writing, changing or keeping a model ID in code, or when the user asks whether a model still works. " +
+      "To find the IDs inside a codebase use scan_project instead; to list everything retiring soon use upcoming_retirements. " +
+      "Read-only. Data comes from the providers' official deprecation pages, re-checked daily at aidriftline.com (fetched with a 4 s timeout, falling back to the copy in the package when offline). " +
+      "IDs not in the registry return status \"unknown\": no retirement is published for them, which does not prove the ID exists. Up to 100 IDs per call; extra IDs are ignored.",
+    inputSchema: { type: "object", properties: {
+      ids: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 100,
+        description: "Model IDs exactly as written in code, e.g. [\"gpt-4o\", \"claude-sonnet-4-5\", \"models/gemini-2.5-pro\"]. Provider prefixes (openai/, models/), Bedrock, Vertex and OpenRouter spellings and Claude short names are accepted and normalized." },
+    }, required: ["ids"] },
+    outputSchema: { type: "object", properties: { models: { type: "array", items: MODEL_RESULT }, ...META }, required: ["models", "registry_checked", "registry_source"] },
+    annotations: { title: "Check model IDs for retirement", ...READ_ONLY },
   },
   {
     name: "scan_project",
-    description: "Scan a project folder for AI model IDs in code and config and report the ones that are retired, retiring or being re-routed, with file and line. Pass the absolute path of the project if unsure what the current directory is.",
+    title: "Scan a project for retiring model IDs",
+    description: "Scan a project folder for OpenAI, Anthropic and Google model IDs in code and config files and report the ones that are retired, retiring soon, deprecated or being re-routed, with file and line, most urgent first. " +
+      "Use it to audit a repository or before a release. For IDs you already know use check_models; for a time-based list use upcoming_retirements. " +
+      "Read-only: reads files on this machine and never changes them. Scans subfolders recursively, skips .git, node_modules, vendor, dist, build and similar folders, and files over 1 MB. " +
+      "Mentions in .md and .txt files are marked in_docs. Returns at most 200 findings (truncated: true when cut). Fails with an error if the path does not exist.",
     inputSchema: { type: "object", properties: {
-      path: { type: "string", description: "Folder to scan (default: the server's current directory)" },
-      include_ok: { type: "boolean", description: "Also list models with no retirement announced (default false)" },
+      path: { type: "string", description: "Absolute path of the folder to scan. Defaults to the server's working directory, which may not be the user's project, so pass it explicitly." },
+      include_ok: { type: "boolean", default: false, description: "Also list models with no retirement announced (status active or unknown). Default false." },
     } },
+    outputSchema: { type: "object", properties: {
+      scanned: { type: "string" }, model_references: { type: "number", description: "All model ID mentions found, before filtering" },
+      flagged: { type: "number" }, truncated: { type: "boolean" },
+      findings: { type: "array", items: { ...MODEL_RESULT, properties: { file: { type: "string" }, line: { type: "number" }, in_docs: { type: "boolean" }, ...MODEL_RESULT.properties } } },
+      ...META,
+    }, required: ["scanned", "flagged", "findings"] },
+    annotations: { title: "Scan a project for retiring model IDs", ...READ_ONLY },
   },
   {
     name: "upcoming_retirements",
-    description: "List AI models retiring or being re-routed in the next N days, soonest first. Optionally filter by provider.",
+    title: "List upcoming model retirements",
+    description: "List OpenAI, Anthropic and Google models whose retirement or re-routing date falls in the next N days, soonest first, with replacement for each. " +
+      "Use it to answer \"what is being retired soon?\" or to plan migrations. It does not look at code: use scan_project for that, or check_models for specific IDs. " +
+      "Read-only. Models already past their date are not included (check_models reports those as retired). Anthropic \"not before\" dates are left out because those models are still active.",
     inputSchema: { type: "object", properties: {
-      days: { type: "number", description: "Look-ahead window in days (default 90)" },
-      provider: { type: "string", enum: ["openai", "anthropic", "google"] },
+      days: { type: "number", minimum: 1, maximum: 3650, default: 90, description: "Look-ahead window in days, 1 to 3650. Default 90." },
+      provider: { type: "string", enum: ["openai", "anthropic", "google"], description: "Only this provider. Omit for all three." },
     } },
+    outputSchema: { type: "object", properties: { days: { type: "number" }, count: { type: "number" }, models: { type: "array", items: MODEL_RESULT }, ...META }, required: ["days", "count", "models"] },
+    annotations: { title: "List upcoming model retirements", ...READ_ONLY },
   },
 ];
 
@@ -98,6 +149,9 @@ export async function callTool(name, args = {}, { reg, source, today = new Date(
   }
   if (name === "scan_project") {
     const root = resolve(args.path || ".");
+    let isDir = false;
+    try { isDir = statSync(root).isDirectory(); } catch { /* missing */ }
+    if (!isDir) throw new Error(`Not a folder: ${root}. Pass the absolute path of the project to scan.`);
     const hits = scanDirectory(root, { known: reg.byId });
     const rows = hits.map((h) => ({ file: h.file.split("\\").join("/"), line: h.line, in_docs: h.doc, ...describe(h.id, reg, today) }))
       .filter((r) => args.include_ok || !["active", "unknown"].includes(r.status));

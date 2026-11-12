@@ -593,6 +593,7 @@ test("MCP tools: check, scan, upcoming", async () => {
   const u = await callTool("upcoming_retirements", { days: 60, provider: "openai" }, ctx);
   assert.ok(u.models.every((m) => m.provider === "openai" && m.days_left > 0 && m.days_left <= 60));
   await assert.rejects(callTool("check_models", { ids: [] }, ctx));
+  await assert.rejects(callTool("scan_project", { path: "/no/such/folder" }, ctx), /Not a folder/);
 });
 
 test("MCP server answers JSON-RPC over stdio", async () => {
