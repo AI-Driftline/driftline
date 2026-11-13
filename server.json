@@ -8,13 +8,13 @@
     "source": "github"
   },
   "websiteUrl": "https://aidriftline.com/agents/",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@aidriftline/driftline",
-      "version": "0.1.16",
+      "version": "0.1.17",
       "transport": {
         "type": "stdio"
       },
