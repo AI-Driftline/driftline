@@ -103,6 +103,10 @@ Needs Node 20+. Free, no key.
 
 Every model also has its own page with the date, replacement and source: [aidriftline.com/models](https://aidriftline.com/models/).
 
+## Versions
+
+Releases are numbered `0.x.y`. A new `x` means new features; a new `y` means fixes or updated retirement data, which can ship several times a week. `uses: AI-Driftline/driftline@v0` always runs the newest release, and the Action reads the live retirement list at aidriftline.com either way, so a provider's change reaches you without a new version.
+
 ## Development
 
 ```sh

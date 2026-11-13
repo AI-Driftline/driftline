@@ -1,5 +1,7 @@
-# Ships every change to the registry or the code: tests → bump version → tag v0.1.x → move v0.
+# Ships every change to the registry or the code: tests → bump version → tag v0.x.y → move v0.
 # Runs on its own when main changes (the daily registry robot pushes there), or by hand from the Actions tab.
+# Version: a new feature bumps the middle number (0.1.17 → 0.2.0): put [minor] in a commit message, or pick
+# "minor" when running by hand. Everything else (fixes, registry updates) bumps the last number (0.2.0 → 0.2.1).
 # Pushes made here use GITHUB_TOKEN, which does not start other workflows, so this never loops.
 name: release
 on:
@@ -7,6 +9,12 @@ on:
     branches: [main]
     paths: ["registry/**", "src/**", "action.yml"]
   workflow_dispatch:
+    inputs:
+      bump:
+        description: "patch = fixes and registry updates, minor = new features"
+        type: choice
+        options: [patch, minor]
+        default: patch
 
 concurrency: release
 
@@ -31,7 +39,7 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          last=$(git tag --list 'v0.1.*' | sort -V | tail -1)
+          last=$(git tag --list 'v0.*.*' | sort -V | tail -1)
           # A daily re-check that only moves the "checked" date is not worth a release.
           models() { node -e "const r=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(JSON.stringify(r.models))"; }
           if git diff --quiet "$last" HEAD -- src action.yml && \
@@ -39,7 +47,10 @@ jobs:
             echo "Nothing to release since $last (only the checked date or docs changed)." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          next="v0.1.$(( ${last##*.} + 1 ))"
+          kind=patch
+          if [ "${{ inputs.bump }}" = "minor" ] || git log "$last"..HEAD --format=%B | grep -qi '\[minor\]'; then kind=minor; fi
+          ver=${last#v}; maj=${ver%%.*}; rest=${ver#*.}; min=${rest%%.*}; pat=${rest#*.}
+          if [ "$kind" = minor ]; then next="v$maj.$((min + 1)).0"; else next="v$maj.$min.$((pat + 1))"; fi
           node -e "const fs=require('fs'),v='${next#v}';for(const f of ['package.json','server.json']){const p=JSON.parse(fs.readFileSync(f));p.version=v;if(p.packages)p.packages[0].version=v;fs.writeFileSync(f,JSON.stringify(p,null,2)+'\n')}"
           git add package.json server.json
           git commit -m "Release $next"
@@ -47,7 +58,7 @@ jobs:
           git tag -fa v0 -m "v0 -> $next"
           git push origin HEAD:main "$next"
           git push -f origin v0
-          echo "Released $next" >> "$GITHUB_STEP_SUMMARY"
+          echo "Released $next ($kind)" >> "$GITHUB_STEP_SUMMARY"
           echo "released=$next" >> "$GITHUB_OUTPUT"
       # npm: trusted publishing (set up once on npmjs.com for this repo + release.yml). Needs npm 11.5+.
       - name: Publish to npm

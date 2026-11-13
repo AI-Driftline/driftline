@@ -38,4 +38,4 @@ Only these three pages count. No blog posts, forum threads or emails.
 
 `node tools/check-pages.mjs` must report that the registry matches the provider pages. It compares every recent and upcoming entry's date and replacement with the page text by script, so it catches rows that were missed while reading. If it lists a difference you decided to keep (e.g. an ambiguous page), explain it in `note`.
 
-`npm test` must pass. Commit message: `Registry re-checked YYYY-MM-DD: <what changed>` or `Registry re-checked YYYY-MM-DD: no changes`. No co-author lines. Pushing to `main` starts the release workflow (new v0.1.x tag, v0 moved), and the website rebuilds from it.
+`npm test` must pass. Commit message: `Registry re-checked YYYY-MM-DD: <what changed>` or `Registry re-checked YYYY-MM-DD: no changes`. No co-author lines, and never `[minor]` (that marks new features; registry updates are patch releases). Pushing to `main` starts the release workflow (new v0.x.y tag with the last number raised, v0 moved), and the website rebuilds from it.
