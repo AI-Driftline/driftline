@@ -731,3 +731,14 @@ test("migrationFor: rename, settings, params, api, re-embed, choose", async () =
   assert.match(at("gpt-image-1.5").note, /flare/);
   assert.equal(migrationFor(registry.byId.get("sora-2")), null, "no replacement, no migration");
 });
+
+test("two replacements ('X or Y') are both shown, also through a chain", async () => {
+  const { replacementText } = await import("../src/registry.js");
+  assert.equal(replacementText(registry.byId.get("whisper-1")), "gpt-live-transcribe or gpt-transcribe");
+  assert.equal(replacementText(registry.byId.get("gpt-4o-mini-transcribe-2025-03-20")), "gpt-live-transcribe or gpt-transcribe", "carried along the chain");
+  assert.equal(replacementText(registry.byId.get("gpt-image-1.5")), "gpt-image-2.6-sunburst or gpt-image-2.6-flare");
+  assert.equal(registry.byId.get("gpt-4").replacement_alt, undefined);
+  const dir = tempRepo({ "a.py": 'm = "whisper-1"\n' });
+  const r = await run({ root: dir, today: TODAY, registry });
+  assert.match(r.markdown, /`gpt-live-transcribe` or `gpt-transcribe`/);
+});

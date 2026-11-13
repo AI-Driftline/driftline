@@ -81,7 +81,7 @@ if (cmd === "-h" || cmd === "--help" || cmd === "help") {
     const pick = (f) => ({
       id: f.id, file: f.file, line: f.line, status: f.status, docOnly: !!f.doc,
       provider: f.entry?.provider, retires: f.entry?.retires, qualifier: f.entry?.qualifier,
-      replacement: f.entry?.replacement, migration: migrationFor(f.entry) || undefined, routes: !!f.entry?.routes, aliasOf: f.entry?.aliasOf,
+      replacement: f.entry?.replacement, replacement_alt: f.entry?.replacement_alt, migration: migrationFor(f.entry) || undefined, routes: !!f.entry?.routes, aliasOf: f.entry?.aliasOf,
     });
     console.log(JSON.stringify({ findings: result.findings.map(pick), drift: result.drift || [] }, null, 2));
   } else console.log(result.markdown);

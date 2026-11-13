@@ -40,12 +40,18 @@ export function buildRegistry(data) {
     if (!m.replacement) continue;
     const seen = new Set([m.id]);
     let next = m.replacement;
+    let hop = m; // the entry whose replacement is `next`: its second option and note belong to that target
     seen.add(next);
     while (byId.get(next)?.replacement && byId.get(next).qualifier !== "not-before" && !seen.has(byId.get(next).replacement)) {
-      next = byId.get(next).replacement;
+      hop = byId.get(next);
+      next = hop.replacement;
       seen.add(next);
     }
-    if (next !== m.replacement && next !== m.id) { m.via = m.replacement; m.replacement = next; }
+    if (next !== m.replacement && next !== m.id) {
+      m.via = m.replacement; m.replacement = next;
+      if (hop.replacement_alt) m.replacement_alt = hop.replacement_alt; else delete m.replacement_alt;
+      if (hop.replacement_note) m.replacement_note = hop.replacement_note; else delete m.replacement_note;
+    }
   }
   // Anthropic short names point at a dated snapshot: "claude-sonnet-4-5" and "-latest" -> claude-sonnet-4-5-20250929,
   // "claude-sonnet-4-0" -> claude-sonnet-4-20250514. The deprecation page lists only snapshots, so a short name
@@ -95,7 +101,7 @@ export const isTextModel = (entry) => !entry?.kind || entry.kind === "text";
 // The replacement as people should read it: the model, plus the provider's extra instruction when there is one,
 // e.g. "gpt-6.1-sol (reasoning.mode: pro, in the Responses API)". Without the note, a rename alone is not the move.
 export const replacementText = (entry) => entry?.replacement
-  ? entry.replacement + (entry.replacement_note ? ` (${entry.replacement_note})` : "") : "";
+  ? entry.replacement + (entry.replacement_alt ? ` or ${entry.replacement_alt}` : "") + (entry.replacement_note ? ` (${entry.replacement_note})` : "") : "";
 
 // Providers sometimes change the recommended replacement after announcing a retirement. The registry keeps
 // the old one and the date we saw the change, so reports can say so instead of silently switching targets.

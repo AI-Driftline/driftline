@@ -6,7 +6,7 @@
 import { readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline";
-import { loadBestRegistry, classify, normalizeId, replacementChange } from "./registry.js";
+import { loadBestRegistry, classify, normalizeId, replacementChange, replacementText } from "./registry.js";
 import { migrationFor } from "./migration.js";
 import { scanDirectory } from "./scan.js";
 
@@ -24,7 +24,7 @@ function advice(c, today = new Date()) {
   const chg = replacementChange(m, today);
   const mig = migrationFor(m);
   const migText = mig && !mig.drop_in && mig.change !== "settings" ? ` More than a rename: ${mig.note}` : mig?.change === "choose" ? ` ${mig.note}` : "";
-  const repl = m.replacement ? ` Replacement: ${m.replacement}${m.replacement_note ? ` (${m.replacement_note})` : ""}.${chg ? ` ${who} changed this recommendation on ${chg.on}; before it was ${chg.was}.` : ""}` : "";
+  const repl = m.replacement ? ` Replacement: ${replacementText(m)}.${chg ? ` ${who} changed this recommendation on ${chg.on}; before it was ${chg.was}.` : ""}` : "";
   if (m.qualifier === "not-before") return `Active. ${who} says it will not be retired before ${m.retires}.`;
   if (m.routes) return c.days <= 0
     ? `Since ${m.retires}, ${who} answers requests for it with ${m.replacement}. No error, but answers come from a different model.${migText}`
@@ -43,7 +43,7 @@ function describe(rawId, reg, today) {
     id: rawId, ...(id !== rawId ? { normalized: id } : {}),
     status: c.status, ...(m ? {
       provider: m.provider, retires: m.retires, qualifier: m.qualifier, days_left: c.days,
-      replacement: m.replacement || null, ...(m.replacement_note ? { replacement_note: m.replacement_note } : {}),
+      replacement: m.replacement || null, ...(m.replacement_alt ? { replacement_alt: m.replacement_alt } : {}), ...(m.replacement_note ? { replacement_note: m.replacement_note } : {}),
       ...(m.previous_replacement ? { previous_replacement: m.previous_replacement, replacement_changed: m.replacement_changed } : {}), routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: page(m.aliasOf || m.id),
     } : {}),
     ...(m && migrationFor(m) ? { migration: migrationFor(m) } : {}),
@@ -62,6 +62,7 @@ const MODEL_RESULT = {
     qualifier: { type: "string", enum: ["exact", "earliest", "not-before"], description: "exact date, earliest possible shutdown (Google), or not before this date (Anthropic)" },
     days_left: { type: "number", description: "Days until the date; 0 or negative when it has passed" },
     replacement: { type: ["string", "null"] },
+    replacement_alt: { type: "string", description: "A second replacement the provider names (\"X or Y\"); which one fits depends on how the model is used" },
     previous_replacement: { type: "string", description: "The replacement the provider recommended before it changed its advice" },
     replacement_changed: { type: "string", description: "YYYY-MM-DD: when the change was seen on the provider's page" },
     migration: { type: "object", description: "Whether moving to the replacement is just a new model name (drop_in true) or needs more: change = rename | settings | params | api | re-embed | choose, with a note and the provider's guide", properties: { change: { type: "string" }, drop_in: { type: "boolean" }, note: { type: "string" }, guide: { type: ["string", "null"] } } },

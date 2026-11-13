@@ -78,7 +78,7 @@ for (const m of reg.models) {
   }
   const windows = at.map((i) => page.text.slice(Math.max(0, i - 260), i + 420));
   const dateOk = windows.some((w) => dateForms(m.retires).some((d) => w.includes(d)));
-  const replOk = !m.replacement || windows.some((w) => w.includes(m.replacement));
+  const replOk = !m.replacement || windows.some((w) => w.includes(m.replacement) && (!m.replacement_alt || w.includes(m.replacement_alt)));
   if (!dateOk || !replOk) {
     const ctx = page.text.slice(Math.max(0, at[0] - 80), at[0] + 220).trim();
     problems.push({ kind: "differs", provider: m.provider, id: m.id,
