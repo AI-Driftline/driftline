@@ -26,6 +26,9 @@ inputs:
   show-answers:
     description: Include model answers in the job summary ("true" or "false"). They are never put in the issue.
     default: "true"
+  registry:
+    description: Where the model list comes from. "live" (default) reads aidriftline.com/models.json, updated as soon as a provider changes a date or replacement, and falls back to the copy bundled with this version. "bundled" never fetches.
+    default: "live"
   github-token:
     description: Token used to open the issue. Needs issues:write.
     default: ${{ github.token }}

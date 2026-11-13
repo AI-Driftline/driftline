@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { loadRegistry, classify, isTextModel } from "./registry.js";
+import { loadRegistry, classify, isTextModel, replacementChange } from "./registry.js";
 import { scanDirectory } from "./scan.js";
 import { loadPrompts } from "./prompts.js";
 import { complete, providerOf, keyFor, missingKeyMessage } from "./providers.js";
@@ -61,9 +61,9 @@ export async function run({
   }
 
   const atRisk = findings.filter((f) => !f.doc && (f.status === "retired" || f.status === "at-risk")).length;
-  const markdown = renderReport({ findings, drift, registry, notices, answers });
+  const markdown = renderReport({ findings, drift, registry, notices, answers, today });
   // The issue never carries model answers: in a public repository anyone can read it.
-  const issueMarkdown = renderReport({ findings, drift, registry, notices, answers: false });
+  const issueMarkdown = renderReport({ findings, drift, registry, notices, answers: false, today });
   return { findings, drift, notices, atRisk, markdown, issueMarkdown };
 }
 
@@ -94,8 +94,12 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
       const to = p.compare_to || status.entry?.replacement;
       // The provider's replacement comes with an extra instruction (e.g. "reasoning.mode: pro") that this test
       // doesn't apply: say so on every row, so nobody reads a plain-mode answer as the replacement's best.
-      const caveat = !p.compare_to && status.entry?.replacement_note
-        ? `Tested without "${status.entry.replacement_note}", which the provider says the replacement needs; answers after a correct switch may differ.` : "";
+      const chg = !p.compare_to && replacementChange(status.entry, today);
+      const caveat = [
+        !p.compare_to && status.entry?.replacement_note
+          ? `Tested without "${status.entry.replacement_note}", which the provider says the replacement needs; answers after a correct switch may differ.` : "",
+        chg ? `The provider changed this replacement on ${chg.on} (before: ${chg.was}); drift results from earlier runs compared against ${chg.was}.` : "",
+      ].filter(Boolean).join(" ");
       const push = (row) => out.push(caveat ? { ...row, note: [row.note, caveat].filter(Boolean).join(" ") } : row);
       if (!to) {
         push({ id: p.id, from, to: "—", result: "skipped", note: "No known replacement; set compare_to" });

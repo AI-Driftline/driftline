@@ -646,3 +646,37 @@ test("run: drift test on a pro model says the replacement's mode was not applied
   const r2 = await run({ root: dir2, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl: licensed("hi"), env: { OPENAI_API_KEY: "x" } });
   assert.doesNotMatch(r2.drift.find((x) => x.id === "p").note || "", /Tested without/);
 });
+
+test("replacement changes are remembered and shown for 120 days", async () => {
+  const { replacementChange } = await import("../src/registry.js");
+  const e = registry.byId.get("gpt-5-mini");
+  assert.deepEqual(replacementChange(e, new Date("2026-11-20T00:00:00Z")), { on: "2026-11-13", was: "gpt-5.6-terra", days: 7 });
+  assert.equal(replacementChange(e, new Date("2026-11-01T00:00:00Z")), null, "not before the change");
+  assert.equal(replacementChange(e, new Date("2027-04-01T00:00:00Z")), null, "not after 120 days");
+  assert.equal(replacementChange(registry.byId.get("gpt-4"), new Date("2026-11-20T00:00:00Z")), null);
+
+  const dir = tempRepo({ "a.py": 'm = "gpt-5-mini"\n', ".driftline/prompts.yml": "prompts:\n  - id: p\n    prompt: hi\n" });
+  const r = await run({ root: dir, today: new Date("2026-11-20T00:00:00Z"), registry, licenseKey: "k:i", account: "acme", fetchImpl: licensed("hi"), env: { OPENAI_API_KEY: "x" } });
+  assert.match(r.drift.find((x) => x.id === "p").note, /changed this replacement on 2026-11-13 \(before: gpt-5\.6-terra\)/);
+  assert.match(r.markdown, /changed 2026-11-13, was `gpt-5\.6-terra`/);
+});
+
+test("live registry is used when valid and at least as new; otherwise the bundled copy", async () => {
+  const { loadBestRegistry, validRegistry } = await import("../src/registry.js");
+  const bundled = JSON.parse((await import("node:fs")).readFileSync(new URL("../registry/models.json", import.meta.url), "utf8"));
+  const serve = (data) => async () => ({ ok: true, json: async () => data });
+  const newer = { ...bundled, checked: "2099-01-01", models: bundled.models.map((m) => m.id === "gpt-4" ? { ...m, replacement: "live-only-model" } : m) };
+  let r = await loadBestRegistry({ fetchImpl: serve(newer), offline: false });
+  assert.equal(r.source, "live");
+  assert.equal(r.reg.byId.get("gpt-4").replacement, "live-only-model");
+  assert.equal(r.reg.source, "live");
+  r = await loadBestRegistry({ fetchImpl: serve({ ...newer, checked: "2000-01-01" }), offline: false });
+  assert.equal(r.source, "bundled", "older live copy is ignored");
+  r = await loadBestRegistry({ fetchImpl: serve({ checked: "2099-01-01", models: [{ id: 1 }] }), offline: false });
+  assert.equal(r.source, "bundled", "malformed live copy is ignored");
+  r = await loadBestRegistry({ fetchImpl: async () => { throw new TypeError("fetch failed"); }, offline: false });
+  assert.equal(r.source, "bundled", "network error falls back");
+  r = await loadBestRegistry({ fetchImpl: serve(newer), offline: true });
+  assert.equal(r.source, "bundled", "registry: bundled never fetches");
+  assert.equal(validRegistry(bundled), true);
+});

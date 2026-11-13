@@ -1,3 +1,5 @@
+import { replacementChange } from "./registry.js";
+
 const STATUS_LABEL = {
   retired: "🔴 Retired",
   "at-risk": "🟠 Retires soon",
@@ -6,6 +8,9 @@ const STATUS_LABEL = {
   unknown: "⚪ No retirement listed",
 };
 const RESULT_LABEL = { same: "✅ Same", changed: "🟡 Changed", broken: "🔴 Broken", error: "⚠️ Error", skipped: "⏭️ Skipped" };
+
+// "<br>changed 2026-11-13, was `gpt-5.6-sol`" when the provider changed its advice recently.
+const changed = (entry, today) => { const c = replacementChange(entry, today); return c ? `<br>_changed ${c.on}, was ${code(c.was)}_` : ""; };
 
 // Google gives only earliest dates; once one has passed the model may be gone already, so "retires soon" would be wrong.
 // Routed models keep answering after the date, but from the replacement model ("retired" would be wrong too).
@@ -43,7 +48,7 @@ const MAX_ANSWER = 1500;
 const MAX_ROWS = 150;
 const clip = (s) => { s = String(s || ""); return s.length > MAX_ANSWER ? s.slice(0, MAX_ANSWER) + "\n[…cut]" : s; };
 
-export function renderReport({ findings, drift, registry, notices = [], answers = true }) {
+export function renderReport({ findings, drift, registry, notices = [], answers = true, today = new Date() }) {
   const lines = ["## Driftline report", ""];
   const flagged = findings.filter((f) => ["retired", "at-risk", "deprecated"].includes(f.status));
   const byModel = new Map();
@@ -67,7 +72,7 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
     for (const r of rows) {
       const places = r.places.slice(0, 3).join(", ") + (r.places.length > 3 ? ` +${r.places.length - 3} more` : "");
       const docsOnly = r.places.length && byModel.get(r.id).docs === r.places.length ? " · docs only" : "";
-      lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) + (r.entry.replacement_note ? " (" + esc(r.entry.replacement_note) + ")" : "") : ""} | ${places} |`);
+      lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) + (r.entry.replacement_note ? " (" + esc(r.entry.replacement_note) + ")" : "") + changed(r.entry, today) : ""} | ${places} |`);
     }
     if (all.length > rows.length) lines.push("", `_${all.length - rows.length} more model ID(s) with no retirement listed are not shown._`);
   }
@@ -96,7 +101,7 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
   }
 
   if (notices.length) lines.push("", ...notices.map((n) => `> ${n}`));
-  lines.push("", `<sub>Retirement dates checked against official provider pages on ${registry.checked}. ` +
+  lines.push("", `<sub>Retirement dates checked against official provider pages on ${registry.checked}${registry.source === "live" ? " (live list at aidriftline.com)" : ({ newer: " (list bundled with this version, newer than the live list)", unreachable: " (list bundled with this version; the live list could not be read)", offline: " (list bundled with this version)" })[registry.sourceWhy] || ""}. ` +
     `Sources: [OpenAI](${registry.sources.openai}) · [Anthropic](${registry.sources.anthropic}) · [Google](${registry.sources.google}).</sub>`);
   return lines.join("\n");
 }

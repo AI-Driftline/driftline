@@ -11,6 +11,26 @@ export function loadRegistry(path = REGISTRY_PATH) {
   return buildRegistry(JSON.parse(readFileSync(path, "utf8")));
 }
 
+// The live registry is updated as soon as a provider changes a date or replacement; the copy bundled with a
+// release can be days or weeks old. Everything (Action, CLI, MCP) uses the live copy when it can be read, looks
+// like ours and is at least as new as the bundled one; otherwise the bundled copy. reg.source says which.
+export const LIVE_URL = "https://aidriftline.com/models.json";
+export function validRegistry(data) {
+  return Array.isArray(data?.models) && data.models.length >= 50 && /^\d{4}-\d{2}-\d{2}$/.test(data.checked || "") &&
+    data.models.every((m) => typeof m?.id === "string" && ["openai", "anthropic", "google"].includes(m.provider) && /^\d{4}-\d{2}-\d{2}$/.test(m.retires || ""));
+}
+export async function loadBestRegistry({ fetchImpl = fetch, offline = process.env.DRIFTLINE_OFFLINE === "1", timeoutMs = 4000 } = {}) {
+  const bundled = JSON.parse(readFileSync(REGISTRY_PATH, "utf8"));
+  const use = (data, source, why = "") => { const reg = buildRegistry(data); reg.source = source; reg.sourceWhy = why; return { reg, source, why }; };
+  if (offline) return use(bundled, "bundled", "offline");
+  try {
+    const res = await fetchImpl(LIVE_URL, { signal: AbortSignal.timeout(timeoutMs) });
+    const live = res.ok ? await res.json() : null;
+    if (validRegistry(live)) return live.checked >= bundled.checked ? use(live, "live") : use(bundled, "bundled", "newer");
+  } catch { /* offline, slow or malformed: use the bundled copy */ }
+  return use(bundled, "bundled", "unreachable");
+}
+
 // Same as loadRegistry, from already-parsed JSON (e.g. the live copy at aidriftline.com/models.json).
 export function buildRegistry(data) {
   const byId = new Map(data.models.map((m) => [m.id, { ...m }]));
@@ -76,6 +96,15 @@ export const isTextModel = (entry) => !entry?.kind || entry.kind === "text";
 // e.g. "gpt-6.1-sol (reasoning.mode: pro, in the Responses API)". Without the note, a rename alone is not the move.
 export const replacementText = (entry) => entry?.replacement
   ? entry.replacement + (entry.replacement_note ? ` (${entry.replacement_note})` : "") : "";
+
+// Providers sometimes change the recommended replacement after announcing a retirement. The registry keeps
+// the old one and the date we saw the change, so reports can say so instead of silently switching targets.
+export const RECENT_CHANGE_DAYS = 120;
+export function replacementChange(entry, today = new Date()) {
+  if (!entry?.replacement_changed || !entry.previous_replacement) return null;
+  const days = Math.floor((today - new Date(entry.replacement_changed + "T00:00:00Z")) / DAY);
+  return days >= 0 && days <= RECENT_CHANGE_DAYS ? { on: entry.replacement_changed, was: entry.previous_replacement, days } : null;
+}
 
 /**
  * Classify one model ID against the registry on a given date.

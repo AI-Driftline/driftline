@@ -152,6 +152,8 @@
       "retires": "2026-12-11",
       "qualifier": "exact",
       "replacement": "gpt-6.1-sol",
+      "previous_replacement": "gpt-5.6-sol",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {
@@ -160,6 +162,8 @@
       "retires": "2026-12-11",
       "qualifier": "exact",
       "replacement": "gpt-6.1-sol",
+      "previous_replacement": "gpt-5.6-sol",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {
@@ -169,6 +173,8 @@
       "qualifier": "exact",
       "replacement": "gpt-6.1-sol",
       "replacement_note": "reasoning.mode: pro, in the Responses API",
+      "previous_replacement": "gpt-5.6-sol",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {
@@ -178,6 +184,8 @@
       "qualifier": "exact",
       "replacement": "gpt-6.1-sol",
       "replacement_note": "reasoning.mode: pro, in the Responses API",
+      "previous_replacement": "gpt-5.6-sol",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {
@@ -186,6 +194,8 @@
       "retires": "2026-12-11",
       "qualifier": "exact",
       "replacement": "gpt-6.1-sol",
+      "previous_replacement": "gpt-5.6-sol",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {
@@ -194,6 +204,8 @@
       "retires": "2026-12-11",
       "qualifier": "exact",
       "replacement": "gpt-6.1-sol",
+      "previous_replacement": "gpt-5.6-sol",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {
@@ -203,6 +215,8 @@
       "qualifier": "exact",
       "replacement": "gpt-6.1-sol",
       "replacement_note": "reasoning.mode: pro, in the Responses API",
+      "previous_replacement": "gpt-5.6-sol",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {
@@ -212,6 +226,8 @@
       "qualifier": "exact",
       "replacement": "gpt-6.1-sol",
       "replacement_note": "reasoning.mode: pro, in the Responses API",
+      "previous_replacement": "gpt-5.6-sol",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {
@@ -220,6 +236,8 @@
       "retires": "2026-12-11",
       "qualifier": "exact",
       "replacement": "gpt-6.1-terra",
+      "previous_replacement": "gpt-5.6-terra",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {
@@ -228,6 +246,8 @@
       "retires": "2026-12-11",
       "qualifier": "exact",
       "replacement": "gpt-6.1-terra",
+      "previous_replacement": "gpt-5.6-terra",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {
@@ -236,6 +256,8 @@
       "retires": "2026-12-11",
       "qualifier": "exact",
       "replacement": "gpt-6-luna",
+      "previous_replacement": "gpt-5.6-luna",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {
@@ -244,6 +266,8 @@
       "retires": "2026-12-11",
       "qualifier": "exact",
       "replacement": "gpt-6-luna",
+      "previous_replacement": "gpt-5.6-luna",
+      "replacement_changed": "2026-11-13",
       "announced": "2026-06-11"
     },
     {

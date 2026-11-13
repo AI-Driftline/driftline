@@ -6,31 +6,22 @@
 import { readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline";
-import { REGISTRY_PATH, buildRegistry, classify, normalizeId } from "./registry.js";
+import { loadBestRegistry, classify, normalizeId, replacementChange } from "./registry.js";
 import { scanDirectory } from "./scan.js";
 
 const VERSION = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
-const LIVE_URL = "https://aidriftline.com/models.json";
 const page = (id) => `https://aidriftline.com/models/${id}/`;
 const WHO = { openai: "OpenAI", anthropic: "Anthropic", google: "Google" };
 
-export async function loadBestRegistry({ fetchImpl = fetch, offline = process.env.DRIFTLINE_OFFLINE === "1" } = {}) {
-  const bundled = JSON.parse(readFileSync(REGISTRY_PATH, "utf8"));
-  if (offline) return { reg: buildRegistry(bundled), source: "bundled" };
-  try {
-    const res = await fetchImpl(LIVE_URL, { signal: AbortSignal.timeout(4000) });
-    const live = res.ok ? await res.json() : null;
-    if (live?.models?.length && live.checked >= bundled.checked) return { reg: buildRegistry(live), source: "live" };
-  } catch { /* offline or slow: use the bundled copy */ }
-  return { reg: buildRegistry(bundled), source: "bundled" };
-}
+export { loadBestRegistry }; // shared with the Action and CLI (src/registry.js)
 
 // One plain sentence an agent can pass on to the user.
-function advice(c) {
+function advice(c, today = new Date()) {
   const m = c.entry;
   if (!m) return "Not in Driftline's registry: no retirement is announced for it on the OpenAI, Anthropic or Google deprecation pages (or it is not a model ID).";
   const who = WHO[m.provider] || m.provider;
-  const repl = m.replacement ? ` Replacement: ${m.replacement}${m.replacement_note ? ` (${m.replacement_note})` : ""}.` : "";
+  const chg = replacementChange(m, today);
+  const repl = m.replacement ? ` Replacement: ${m.replacement}${m.replacement_note ? ` (${m.replacement_note})` : ""}.${chg ? ` ${who} changed this recommendation on ${chg.on}; before it was ${chg.was}.` : ""}` : "";
   if (m.qualifier === "not-before") return `Active. ${who} says it will not be retired before ${m.retires}.`;
   if (m.routes) return c.days <= 0
     ? `Since ${m.retires}, ${who} answers requests for it with ${m.replacement}. No error, but answers come from a different model.`
@@ -49,9 +40,10 @@ function describe(rawId, reg, today) {
     id: rawId, ...(id !== rawId ? { normalized: id } : {}),
     status: c.status, ...(m ? {
       provider: m.provider, retires: m.retires, qualifier: m.qualifier, days_left: c.days,
-      replacement: m.replacement || null, ...(m.replacement_note ? { replacement_note: m.replacement_note } : {}), routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: page(m.aliasOf || m.id),
+      replacement: m.replacement || null, ...(m.replacement_note ? { replacement_note: m.replacement_note } : {}),
+      ...(m.previous_replacement ? { previous_replacement: m.previous_replacement, replacement_changed: m.replacement_changed } : {}), routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: page(m.aliasOf || m.id),
     } : {}),
-    advice: advice(c),
+    advice: advice(c, today),
   };
 }
 
@@ -66,6 +58,8 @@ const MODEL_RESULT = {
     qualifier: { type: "string", enum: ["exact", "earliest", "not-before"], description: "exact date, earliest possible shutdown (Google), or not before this date (Anthropic)" },
     days_left: { type: "number", description: "Days until the date; 0 or negative when it has passed" },
     replacement: { type: ["string", "null"] },
+    previous_replacement: { type: "string", description: "The replacement the provider recommended before it changed its advice" },
+    replacement_changed: { type: "string", description: "YYYY-MM-DD: when the change was seen on the provider's page" },
     replacement_note: { type: "string", description: "Extra instruction the provider gives with the replacement (e.g. a setting or API to use). Without it, switching the model name alone is not enough" },
     routes: { type: "boolean", description: "true: after the date the provider answers with the replacement model instead of failing" },
     alias_of: { type: "string" }, page: { type: "string", description: "aidriftline.com page with the source for this date" },

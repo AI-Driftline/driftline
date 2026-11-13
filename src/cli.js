@@ -7,6 +7,7 @@
 //   driftline [directory] --json       same scan, machine-readable (for scripts and coding agents)
 //   driftline mcp                      MCP server on stdio for coding agents (Claude Code, Cursor, ...)
 //   driftline --help | --version
+import { loadBestRegistry } from "./registry.js";
 import { resolve } from "node:path";
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
@@ -67,8 +68,10 @@ if (cmd === "-h" || cmd === "--help" || cmd === "help") {
   if (!r.ok) { console.error(r.reason); process.exitCode = 1; }
   else console.log("Deactivated. That slot is free for another GitHub account.");
 } else {
+  const { reg } = await loadBestRegistry();
   const result = await run({
     root: resolve(cmd || "."),
+    registry: reg,
     licenseKey: process.env.DRIFTLINE_LICENSE_KEY || "",
     account: process.env.GITHUB_REPOSITORY_OWNER || accountFromGit(),
     log: (m) => console.error(m),

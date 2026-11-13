@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // GitHub Action entry point.
-import { replacementText } from "./registry.js";
+import { replacementText, replacementChange, loadBestRegistry } from "./registry.js";
 import { resolve } from "node:path";
 import { statSync } from "node:fs";
 import { randomUUID } from "node:crypto";
@@ -27,9 +27,12 @@ async function main() {
     failOn = "retired";
   }
 
+  const { reg, source } = await loadBestRegistry({ offline: input("registry", "live").toLowerCase() === "bundled" });
+  console.log(`Registry: ${source === "live" ? "live copy from aidriftline.com" : "copy bundled with this version"}, checked ${reg.checked}.`);
   const result = await run({
     root,
     repoRoot: workspace,
+    registry: reg,
     warnDays,
     promptsFile: input("prompts-file", ".driftline/prompts.yml"),
     licenseKey: input("license-key"),
@@ -49,7 +52,8 @@ async function main() {
   }
   for (const f of toAnnotate.slice(0, MAX_ANNOTATIONS)) {
     const level = f.status === "deprecated" || f.doc ? "notice" : "warning";
-    const repl = f.entry?.replacement && !f.entry.routes ? ` Replacement: ${replacementText(f.entry)}.` : "";
+    const chg = replacementChange(f.entry);
+    const repl = f.entry?.replacement && !f.entry.routes ? ` Replacement: ${replacementText(f.entry)}.${chg ? ` (Changed by the provider on ${chg.on}; before it was ${chg.was}.)` : ""}` : "";
     const text = f.entry.routes && f.entry.replacement
       ? (f.days <= 0
         ? `Since ${f.entry.retires}, requests to ${f.id} are answered by ${f.entry.replacement}. The call still works, but the model behind it changed.`
