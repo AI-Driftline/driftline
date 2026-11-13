@@ -67,7 +67,7 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
     for (const r of rows) {
       const places = r.places.slice(0, 3).join(", ") + (r.places.length > 3 ? ` +${r.places.length - 3} more` : "");
       const docsOnly = r.places.length && byModel.get(r.id).docs === r.places.length ? " · docs only" : "";
-      lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) : ""} | ${places} |`);
+      lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) + (r.entry.replacement_note ? " (" + esc(r.entry.replacement_note) + ")" : "") : ""} | ${places} |`);
     }
     if (all.length > rows.length) lines.push("", `_${all.length - rows.length} more model ID(s) with no retirement listed are not shown._`);
   }

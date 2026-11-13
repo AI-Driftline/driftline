@@ -72,6 +72,11 @@ export function looksLikeModelId(id, known) {
 // Only text models can be drift-tested; audio, image, video, embedding and the rest are scan-only.
 export const isTextModel = (entry) => !entry?.kind || entry.kind === "text";
 
+// The replacement as people should read it: the model, plus the provider's extra instruction when there is one,
+// e.g. "gpt-6.1-sol (reasoning.mode: pro, in the Responses API)". Without the note, a rename alone is not the move.
+export const replacementText = (entry) => entry?.replacement
+  ? entry.replacement + (entry.replacement_note ? ` (${entry.replacement_note})` : "") : "";
+
 /**
  * Classify one model ID against the registry on a given date.
  * status: retired | at-risk | deprecated | active | unknown

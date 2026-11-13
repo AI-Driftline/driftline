@@ -12,7 +12,7 @@ Only these three pages count. No blog posts, forum threads or emails.
 
 ## Entry fields
 
-`id`, `provider` (openai | anthropic | google), `retires` (YYYY-MM-DD), `qualifier`, optional `replacement`, `kind` (omit for text; else audio | image | video | embedding | moderation | agent), `announced` (date of the notice, when the page gives one), `routes: true` (see below).
+`id`, `provider` (openai | anthropic | google), `retires` (YYYY-MM-DD), `qualifier`, optional `replacement`, optional `replacement_note`, `kind` (omit for text; else audio | image | video | embedding | moderation | agent), `announced` (date of the notice, when the page gives one), `routes: true` (see below).
 
 ## Qualifiers
 
@@ -26,6 +26,7 @@ Only these three pages count. No blog posts, forum threads or emails.
 - New model ID with a date on a page → add it. Use the exact ID spelling from the page. One entry per ID; a row listing an alias and a snapshot ("gpt-image-2 | gpt-image-2-2026-04-21") gives two entries.
 - Changed date or replacement → update the entry.
 - Replacement written as "X or Y" → use X.
+- Replacement with an extra instruction, e.g. "gpt-6.1-sol (reasoning.mode: pro) in the Responses API" → `replacement` = the model ID only (`gpt-6.1-sol`), `replacement_note` = the rest in plain words (`reasoning.mode: pro, in the Responses API`). Keep the note when the replacement changes, if the page still gives it.
 - No date given ("no shutdown date announced", "N/A") → leave the model out.
 - A model that disappears from a page → leave it in (pages drop old rows).
 - Never add aliases the page does not name (e.g. `gpt-4o` when only snapshots are listed).

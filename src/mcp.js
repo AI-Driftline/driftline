@@ -30,7 +30,7 @@ function advice(c) {
   const m = c.entry;
   if (!m) return "Not in Driftline's registry: no retirement is announced for it on the OpenAI, Anthropic or Google deprecation pages (or it is not a model ID).";
   const who = WHO[m.provider] || m.provider;
-  const repl = m.replacement ? ` Replacement: ${m.replacement}.` : "";
+  const repl = m.replacement ? ` Replacement: ${m.replacement}${m.replacement_note ? ` (${m.replacement_note})` : ""}.` : "";
   if (m.qualifier === "not-before") return `Active. ${who} says it will not be retired before ${m.retires}.`;
   if (m.routes) return c.days <= 0
     ? `Since ${m.retires}, ${who} answers requests for it with ${m.replacement}. No error, but answers come from a different model.`
@@ -49,7 +49,7 @@ function describe(rawId, reg, today) {
     id: rawId, ...(id !== rawId ? { normalized: id } : {}),
     status: c.status, ...(m ? {
       provider: m.provider, retires: m.retires, qualifier: m.qualifier, days_left: c.days,
-      replacement: m.replacement || null, routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: page(m.aliasOf || m.id),
+      replacement: m.replacement || null, ...(m.replacement_note ? { replacement_note: m.replacement_note } : {}), routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: page(m.aliasOf || m.id),
     } : {}),
     advice: advice(c),
   };
@@ -66,6 +66,7 @@ const MODEL_RESULT = {
     qualifier: { type: "string", enum: ["exact", "earliest", "not-before"], description: "exact date, earliest possible shutdown (Google), or not before this date (Anthropic)" },
     days_left: { type: "number", description: "Days until the date; 0 or negative when it has passed" },
     replacement: { type: ["string", "null"] },
+    replacement_note: { type: "string", description: "Extra instruction the provider gives with the replacement (e.g. a setting or API to use). Without it, switching the model name alone is not enough" },
     routes: { type: "boolean", description: "true: after the date the provider answers with the replacement model instead of failing" },
     alias_of: { type: "string" }, page: { type: "string", description: "aidriftline.com page with the source for this date" },
     advice: { type: "string", description: "One plain sentence to pass on to the user" },

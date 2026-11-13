@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // GitHub Action entry point.
+import { replacementText } from "./registry.js";
 import { resolve } from "node:path";
 import { statSync } from "node:fs";
 import { randomUUID } from "node:crypto";
@@ -48,7 +49,7 @@ async function main() {
   }
   for (const f of toAnnotate.slice(0, MAX_ANNOTATIONS)) {
     const level = f.status === "deprecated" || f.doc ? "notice" : "warning";
-    const repl = f.entry?.replacement && !f.entry.routes ? ` Replacement: ${f.entry.replacement}.` : "";
+    const repl = f.entry?.replacement && !f.entry.routes ? ` Replacement: ${replacementText(f.entry)}.` : "";
     const text = f.entry.routes && f.entry.replacement
       ? (f.days <= 0
         ? `Since ${f.entry.retires}, requests to ${f.id} are answered by ${f.entry.replacement}. The call still works, but the model behind it changed.`

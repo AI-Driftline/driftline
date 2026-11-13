@@ -1,5 +1,5 @@
 {
-  "checked": "2026-11-12",
+  "checked": "2026-11-13",
   "note": "Hand-maintained from the official deprecation pages. Re-check before each release. Entries with a 'kind' other than text are scanned and reported but never drift-tested. gpt-4-1106-preview is listed on OpenAI's page under both 2026-03-26 and 2026-10-23; the later date is used so builds are not failed on a conflicting record. Entries with routes: true keep answering after the date, but the provider sends the requests to the replacement model (Google calls this automatic routing); the 'retires' date is the day routing starts. gemini-3.5-flash and gemini-3.7-flash already route to newer models with no date given, so they are left out.",
   "sources": {
     "openai": "https://developers.openai.com/api/docs/deprecations",
@@ -151,7 +151,7 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-sol",
+      "replacement": "gpt-6.1-sol",
       "announced": "2026-06-11"
     },
     {
@@ -159,7 +159,7 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-sol",
+      "replacement": "gpt-6.1-sol",
       "announced": "2026-06-11"
     },
     {
@@ -167,7 +167,8 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-sol",
+      "replacement": "gpt-6.1-sol",
+      "replacement_note": "reasoning.mode: pro, in the Responses API",
       "announced": "2026-06-11"
     },
     {
@@ -175,7 +176,8 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-sol",
+      "replacement": "gpt-6.1-sol",
+      "replacement_note": "reasoning.mode: pro, in the Responses API",
       "announced": "2026-06-11"
     },
     {
@@ -183,7 +185,7 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-sol",
+      "replacement": "gpt-6.1-sol",
       "announced": "2026-06-11"
     },
     {
@@ -191,7 +193,7 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-sol",
+      "replacement": "gpt-6.1-sol",
       "announced": "2026-06-11"
     },
     {
@@ -199,7 +201,8 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-sol",
+      "replacement": "gpt-6.1-sol",
+      "replacement_note": "reasoning.mode: pro, in the Responses API",
       "announced": "2026-06-11"
     },
     {
@@ -207,7 +210,8 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-sol",
+      "replacement": "gpt-6.1-sol",
+      "replacement_note": "reasoning.mode: pro, in the Responses API",
       "announced": "2026-06-11"
     },
     {
@@ -215,7 +219,7 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-terra",
+      "replacement": "gpt-6.1-terra",
       "announced": "2026-06-11"
     },
     {
@@ -223,7 +227,7 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-terra",
+      "replacement": "gpt-6.1-terra",
       "announced": "2026-06-11"
     },
     {
@@ -231,7 +235,7 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-luna",
+      "replacement": "gpt-6-luna",
       "announced": "2026-06-11"
     },
     {
@@ -239,7 +243,7 @@
       "provider": "openai",
       "retires": "2026-12-11",
       "qualifier": "exact",
-      "replacement": "gpt-5.6-luna",
+      "replacement": "gpt-6-luna",
       "announced": "2026-06-11"
     },
     {
@@ -344,6 +348,7 @@
       "retires": "2026-10-23",
       "qualifier": "exact",
       "replacement": "gpt-5.6-sol",
+      "replacement_note": "reasoning.mode: pro",
       "announced": "2026-04-22"
     },
     {
@@ -352,6 +357,7 @@
       "retires": "2026-10-23",
       "qualifier": "exact",
       "replacement": "gpt-5.6-sol",
+      "replacement_note": "reasoning.mode: pro",
       "announced": "2026-04-22"
     },
     {
@@ -1944,6 +1950,46 @@
       "qualifier": "earliest",
       "replacement": "antigravity-preview-09-2026",
       "kind": "agent"
+    },
+    {
+      "id": "gpt-3.5-turbo-completions",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-terra",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4-completions",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4-0613-completions",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4-turbo-completions",
+      "provider": "openai",
+      "retires": "2026-10-23",
+      "qualifier": "exact",
+      "replacement": "gpt-5.6-sol",
+      "announced": "2026-04-22"
+    },
+    {
+      "id": "gpt-4-turbo-preview-completions",
+      "provider": "openai",
+      "retires": "2026-03-26",
+      "qualifier": "exact",
+      "replacement": "gpt-5",
+      "announced": "2025-09-26"
     }
   ]
 }

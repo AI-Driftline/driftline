@@ -92,13 +92,18 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
     for (const from of froms) {
       const status = classify(from, registry, { today, warnDays });
       const to = p.compare_to || status.entry?.replacement;
+      // The provider's replacement comes with an extra instruction (e.g. "reasoning.mode: pro") that this test
+      // doesn't apply: say so on every row, so nobody reads a plain-mode answer as the replacement's best.
+      const caveat = !p.compare_to && status.entry?.replacement_note
+        ? `Tested without "${status.entry.replacement_note}", which the provider says the replacement needs; answers after a correct switch may differ.` : "";
+      const push = (row) => out.push(caveat ? { ...row, note: [row.note, caveat].filter(Boolean).join(" ") } : row);
       if (!to) {
-        out.push({ id: p.id, from, to: "—", result: "skipped", note: "No known replacement; set compare_to" });
+        push({ id: p.id, from, to: "—", result: "skipped", note: "No known replacement; set compare_to" });
         continue;
       }
       const missing = [from, to].map(providerOf).find((pr) => !keyFor(pr, env));
       if (missing) {
-        out.push({ id: p.id, from, to, result: "error", note: missingKeyMessage(missing) });
+        push({ id: p.id, from, to, result: "error", note: missingKeyMessage(missing) });
         continue;
       }
       log(oneLine(`Drift test ${p.id}: ${from} → ${to}`));
@@ -106,11 +111,11 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
         const after = await complete({ model: to, prompt: p.prompt, system: p.system, env, fetchImpl });
         if (status.status === "retired") {
           if (!after.trim()) {
-            out.push({ id: p.id, from, to, after, before: "(current model already retired)", result: "broken", note: "Replacement returned an empty answer" });
+            push({ id: p.id, from, to, after, before: "(current model already retired)", result: "broken", note: "Replacement returned an empty answer" });
             continue;
           }
           const jsonOk = p.expect !== "json" || extractJson(after).ok;
-          out.push({ id: p.id, from, to, after, before: "(current model already retired)", result: jsonOk ? "changed" : "broken",
+          push({ id: p.id, from, to, after, before: "(current model already retired)", result: jsonOk ? "changed" : "broken",
             note: jsonOk ? "Current model is retired; review the replacement's answer" : "Replacement did not return valid JSON" });
           continue;
         }
@@ -120,12 +125,12 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
         } catch (e) {
           if (!/^(Empty answer|Answer cut off)/.test(e.message)) throw e;
           // The current model gave nothing usable; the replacement's answer is still worth showing.
-          out.push({ id: p.id, from, to, after, before: `(${e.message})`, result: "changed", note: `Current model: ${e.message}. Review the replacement's answer` });
+          push({ id: p.id, from, to, after, before: `(${e.message})`, result: "changed", note: `Current model: ${e.message}. Review the replacement's answer` });
           continue;
         }
-        out.push({ id: p.id, from, to, before, after, ...compare(before, after, p.expect) });
+        push({ id: p.id, from, to, before, after, ...compare(before, after, p.expect) });
       } catch (e) {
-        out.push({ id: p.id, from, to, result: "error", note: e.message.slice(0, 200) });
+        push({ id: p.id, from, to, result: "error", note: e.message.slice(0, 200) });
       }
     }
   }

@@ -618,5 +618,31 @@ test("MCP server answers JSON-RPC over stdio", async () => {
   assert.equal(init.result.serverInfo.name, "driftline");
   assert.deepEqual(list.result.tools.map((t) => t.name), ["check_models", "scan_project", "upcoming_retirements"]);
   assert.equal(call.result.structuredContent.registry_source, "bundled");
-  assert.equal(call.result.structuredContent.models[0].replacement, "gpt-5.6-sol");
+  assert.equal(call.result.structuredContent.models[0].replacement, "gpt-6.1-sol");
+});
+
+// ---------- replacement notes (provider instructions that go with the replacement) ----------
+test("registry: gpt-5/o3 replacements follow OpenAI's 13 Nov 2026 page; pro models carry the mode note", async () => {
+  const { replacementText } = await import("../src/registry.js");
+  const at = (id) => registry.byId.get(id);
+  assert.equal(at("gpt-5").replacement, "gpt-6.1-sol");
+  assert.equal(at("gpt-5-mini").replacement, "gpt-6.1-terra");
+  assert.equal(at("gpt-5-nano-2025-08-07").replacement, "gpt-6-luna");
+  assert.equal(at("o3-pro").replacement, "gpt-6.1-sol");
+  assert.equal(replacementText(at("o3-pro")), "gpt-6.1-sol (reasoning.mode: pro, in the Responses API)");
+  assert.equal(replacementText(at("o3")), "gpt-6.1-sol");
+  assert.equal(at("gpt-4-completions").retires, "2026-10-23");
+});
+
+test("run: drift test on a pro model says the replacement's mode was not applied", async () => {
+  const dir = tempRepo({ "a.py": 'm = "o3-pro"\n', ".driftline/prompts.yml": "prompts:\n  - id: p\n    prompt: hi\n" });
+  const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl: licensed("hi"), env: { OPENAI_API_KEY: "x" } });
+  const d = r.drift.find((x) => x.id === "p");
+  assert.equal(d.to, "gpt-6.1-sol");
+  assert.match(d.note, /Tested without "reasoning\.mode: pro, in the Responses API"/);
+  assert.match(r.markdown, /gpt-6\.1-sol` \(reasoning\.mode: pro, in the Responses API\)/);
+  // With an explicit compare_to the customer chose the target, so no caveat.
+  const dir2 = tempRepo({ "a.py": 'm = "o3-pro"\n', ".driftline/prompts.yml": "prompts:\n  - id: p\n    prompt: hi\n    compare_to: gpt-6.1-sol\n" });
+  const r2 = await run({ root: dir2, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl: licensed("hi"), env: { OPENAI_API_KEY: "x" } });
+  assert.doesNotMatch(r2.drift.find((x) => x.id === "p").note || "", /Tested without/);
 });
