@@ -1,6 +1,6 @@
 # Ships every change to the registry or the code: tests → bump version → tag v0.x.y → move v0.
 # Runs on its own when main changes (the daily registry robot pushes there), or by hand from the Actions tab.
-# Version: a new feature bumps the middle number (0.1.17 → 0.2.0): put [minor] in a commit message, or pick
+# Version: a new feature bumps the middle number (0.1.17 → 0.2.0): put [minor] on a line of its own in a commit message, or pick
 # "minor" when running by hand. Everything else (fixes, registry updates) bumps the last number (0.2.0 → 0.2.1).
 # Pushes made here use GITHUB_TOKEN, which does not start other workflows, so this never loops.
 name: release
@@ -48,7 +48,7 @@ jobs:
             exit 0
           fi
           kind=patch
-          if [ "${{ inputs.bump }}" = "minor" ] || git log "$last"..HEAD --format=%B | grep -qi '\[minor\]'; then kind=minor; fi
+          if [ "${{ inputs.bump }}" = "minor" ] || git log "$last"..HEAD --format=%B | grep -qiE '^[[:space:]]*\[minor\][[:space:]]*$'; then kind=minor; fi
           ver=${last#v}; maj=${ver%%.*}; rest=${ver#*.}; min=${rest%%.*}; pat=${rest#*.}
           if [ "$kind" = minor ]; then next="v$maj.$((min + 1)).0"; else next="v$maj.$min.$((pat + 1))"; fi
           node -e "const fs=require('fs'),v='${next#v}';for(const f of ['package.json','server.json']){const p=JSON.parse(fs.readFileSync(f));p.version=v;if(p.packages)p.packages[0].version=v;fs.writeFileSync(f,JSON.stringify(p,null,2)+'\n')}"
