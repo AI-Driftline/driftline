@@ -7,6 +7,7 @@ import { complete, providerOf, keyFor, missingKeyMessage } from "./providers.js"
 import { compare, extractJson } from "./compare.js";
 import { checkLicense } from "./license.js";
 import { renderReport } from "./report.js";
+import { migrationFor } from "./migration.js";
 
 const MAX_PROMPTS = 20;
 const oneLine = (s) => String(s).replace(/[\r\n]+/g, " ");
@@ -95,9 +96,14 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
       // The provider's replacement comes with an extra instruction (e.g. "reasoning.mode: pro") that this test
       // doesn't apply: say so on every row, so nobody reads a plain-mode answer as the replacement's best.
       const chg = !p.compare_to && replacementChange(status.entry, today);
+      // The provider says the replacement runs in a mode (e.g. reasoning.mode: pro): test it that way, as the customer would run it.
+      const proMode = !p.compare_to && /reasoning\.mode: pro/.test(status.entry?.replacement_note || "") && providerOf(to) === "openai" ? "pro" : null;
+      const mig = !p.compare_to ? migrationFor(status.entry) : null;
       const caveat = [
-        !p.compare_to && status.entry?.replacement_note
+        proMode ? "Replacement tested with reasoning.mode: pro, as the provider recommends." : "",
+        !p.compare_to && !proMode && status.entry?.replacement_note
           ? `Tested without "${status.entry.replacement_note}", which the provider says the replacement needs; answers after a correct switch may differ.` : "",
+        mig && !mig.drop_in && mig.change !== "settings" ? `Beyond the model name: ${mig.note}` : "",
         chg ? `The provider changed this replacement on ${chg.on} (before: ${chg.was}); drift results from earlier runs compared against ${chg.was}.` : "",
       ].filter(Boolean).join(" ");
       const push = (row) => out.push(caveat ? { ...row, note: [row.note, caveat].filter(Boolean).join(" ") } : row);
@@ -112,7 +118,7 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
       }
       log(oneLine(`Drift test ${p.id}: ${from} → ${to}`));
       try {
-        const after = await complete({ model: to, prompt: p.prompt, system: p.system, env, fetchImpl });
+        const after = await complete({ model: to, prompt: p.prompt, system: p.system, reasoningMode: proMode, env, fetchImpl });
         if (status.status === "retired") {
           if (!after.trim()) {
             push({ id: p.id, from, to, after, before: "(current model already retired)", result: "broken", note: "Replacement returned an empty answer" });

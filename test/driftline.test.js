@@ -634,18 +634,41 @@ test("registry: gpt-5/o3 replacements follow OpenAI's 13 Nov 2026 page; pro mode
   assert.equal(at("gpt-4-completions").retires, "2026-10-23");
 });
 
-test("run: drift test on a pro model says the replacement's mode was not applied", async () => {
+test("run: drift test on a pro model runs the replacement in pro mode, as the provider says", async () => {
   const dir = tempRepo({ "a.py": 'm = "o3-pro"\n', ".driftline/prompts.yml": "prompts:\n  - id: p\n    prompt: hi\n" });
-  const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl: licensed("hi"), env: { OPENAI_API_KEY: "x" } });
+  const bodies = [];
+  const fetchImpl = async (url, opts) => { if (!url.includes("lemonsqueezy")) bodies.push(JSON.parse(opts.body)); return licensed("hi")(url, opts); };
+  const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl, env: { OPENAI_API_KEY: "x" } });
   const d = r.drift.find((x) => x.id === "p");
   assert.equal(d.to, "gpt-6.1-sol");
-  assert.match(d.note, /Tested without "reasoning\.mode: pro, in the Responses API"/);
+  assert.deepEqual(bodies.find((b) => b.model === "gpt-6.1-sol").reasoning, { mode: "pro" });
+  assert.equal(bodies.find((b) => b.model === "o3-pro").reasoning, undefined, "the current model is called as before");
+  assert.match(d.note, /tested with reasoning\.mode: pro/);
+  assert.doesNotMatch(d.note, /Tested without/);
   assert.match(r.markdown, /gpt-6\.1-sol` \(reasoning\.mode: pro, in the Responses API\)/);
-  // With an explicit compare_to the customer chose the target, so no caveat.
+  // With an explicit compare_to the customer chose the target: no mode, no caveat.
   const dir2 = tempRepo({ "a.py": 'm = "o3-pro"\n', ".driftline/prompts.yml": "prompts:\n  - id: p\n    prompt: hi\n    compare_to: gpt-6.1-sol\n" });
-  const r2 = await run({ root: dir2, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl: licensed("hi"), env: { OPENAI_API_KEY: "x" } });
-  assert.doesNotMatch(r2.drift.find((x) => x.id === "p").note || "", /Tested without/);
+  bodies.length = 0;
+  const r2 = await run({ root: dir2, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl, env: { OPENAI_API_KEY: "x" } });
+  assert.equal(bodies.find((b) => b.model === "gpt-6.1-sol").reasoning, undefined);
+  assert.doesNotMatch(r2.drift.find((x) => x.id === "p").note || "", /reasoning/);
 });
+
+test("report and drift notes say when a replacement is more than a rename", async () => {
+  const dir = tempRepo({ "a.py": 'm = "gemini-2.0-flash"\nt = "tts-1"\ng = "gpt-4"\n', ".driftline/prompts.yml": "prompts:\n  - id: p\n    model: gemini-2.0-flash\n    prompt: hi\n" });
+  const fetchImpl = async (url, opts) => url.includes("lemonsqueezy") ? licensed("hi")(url, opts)
+    : { ok: true, status: 200, text: async () => JSON.stringify({ candidates: [{ content: { parts: [{ text: "hi" }] } }] }) };
+  const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl, env: { GEMINI_API_KEY: "x", GOOGLE_API_KEY: "x" } });
+  assert.match(r.markdown, /\| Change needed \|/);
+  assert.match(r.markdown, /⚠️ Parameter changes \[\d\]/);
+  assert.match(r.markdown, /⚠️ API change \[\d\]/);
+  assert.match(r.markdown, /✅ Rename/);
+  assert.match(r.markdown, /\*\*More than a rename:\*\*/);
+  assert.match(r.markdown, /thinking_budget with thinking_level/);
+  const d = r.drift.find((x) => x.id === "p");
+  assert.match(d.note || "", /Beyond the model name: Gemini 3 changes the request/);
+});
+
 
 test("replacement changes are remembered and shown for 120 days", async () => {
   const { replacementChange } = await import("../src/registry.js");
@@ -679,4 +702,32 @@ test("live registry is used when valid and at least as new; otherwise the bundle
   r = await loadBestRegistry({ fetchImpl: serve(newer), offline: true });
   assert.equal(r.source, "bundled", "registry: bundled never fetches");
   assert.equal(validRegistry(bundled), true);
+});
+
+// ---------- migration notes: is the replacement a drop-in? ----------
+test("migrationFor: rename, settings, params, api, re-embed, choose", async () => {
+  const { migrationFor } = await import("../src/migration.js");
+  const at = (id) => migrationFor(registry.byId.get(id));
+  assert.equal(at("gpt-4").change, "rename");
+  assert.equal(at("gpt-4").drop_in, true);
+  assert.equal(at("o3-pro").change, "settings");
+  assert.match(at("o3-pro").note, /reasoning\.mode: pro/);
+  assert.equal(at("davinci-002").change, "api");
+  assert.equal(at("gpt-4-completions").change, "api");
+  assert.equal(at("tts-1").change, "api");
+  assert.equal(at("gpt-4o-realtime-preview").change, "api");
+  assert.equal(at("whisper-1").change, "choose");
+  assert.match(at("whisper-1").note, /gpt-transcribe for recorded files/);
+  assert.equal(at("gemini-2.5-pro").change, "params", "routed Gemini 2.x still needs the Gemini 3 request changes");
+  assert.match(at("gemini-2.5-pro").guide, /whats-new-gemini-3\.8/);
+  assert.equal(at("gemini-2.0-flash").change, "params");
+  assert.equal(at("gemini-3-pro-preview").change, "rename");
+  assert.equal(at("imagen-4.0-generate-001").change, "api");
+  assert.equal(at("veo-3.1-generate-preview").change, "api");
+  assert.equal(at("text-embedding-004").change, "re-embed");
+  assert.equal(at("claude-sonnet-4-5-20250929").change, "params");
+  assert.equal(at("claude-3-haiku-20240307").change, "rename", "Haiku 4.5 still takes sampling settings");
+  assert.equal(at("gpt-image-1.5").change, "rename");
+  assert.match(at("gpt-image-1.5").note, /flare/);
+  assert.equal(migrationFor(registry.byId.get("sora-2")), null, "no replacement, no migration");
 });

@@ -7,6 +7,7 @@ import { readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline";
 import { loadBestRegistry, classify, normalizeId, replacementChange } from "./registry.js";
+import { migrationFor } from "./migration.js";
 import { scanDirectory } from "./scan.js";
 
 const VERSION = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
@@ -21,15 +22,17 @@ function advice(c, today = new Date()) {
   if (!m) return "Not in Driftline's registry: no retirement is announced for it on the OpenAI, Anthropic or Google deprecation pages (or it is not a model ID).";
   const who = WHO[m.provider] || m.provider;
   const chg = replacementChange(m, today);
+  const mig = migrationFor(m);
+  const migText = mig && !mig.drop_in && mig.change !== "settings" ? ` More than a rename: ${mig.note}` : mig?.change === "choose" ? ` ${mig.note}` : "";
   const repl = m.replacement ? ` Replacement: ${m.replacement}${m.replacement_note ? ` (${m.replacement_note})` : ""}.${chg ? ` ${who} changed this recommendation on ${chg.on}; before it was ${chg.was}.` : ""}` : "";
   if (m.qualifier === "not-before") return `Active. ${who} says it will not be retired before ${m.retires}.`;
   if (m.routes) return c.days <= 0
-    ? `Since ${m.retires}, ${who} answers requests for it with ${m.replacement}. No error, but answers come from a different model.`
-    : `From ${m.retires} (in ${c.days} days), ${who} will answer requests for it with ${m.replacement}.`;
+    ? `Since ${m.retires}, ${who} answers requests for it with ${m.replacement}. No error, but answers come from a different model.${migText}`
+    : `From ${m.retires} (in ${c.days} days), ${who} will answer requests for it with ${m.replacement}.${migText}`;
   if (m.qualifier === "earliest") return c.days <= 0
-    ? `${who} listed ${m.retires} as the earliest shutdown date; it can stop working at any time now.${repl}`
-    : `${who} may shut it down from ${m.retires} (in ${c.days} days).${repl}`;
-  return c.days <= 0 ? `Retired on ${m.retires}. Calls to it fail.${repl}` : `Retires on ${m.retires} (in ${c.days} days). Calls fail after that.${repl}`;
+    ? `${who} listed ${m.retires} as the earliest shutdown date; it can stop working at any time now.${repl}${migText}`
+    : `${who} may shut it down from ${m.retires} (in ${c.days} days).${repl}${migText}`;
+  return c.days <= 0 ? `Retired on ${m.retires}. Calls to it fail.${repl}${migText}` : `Retires on ${m.retires} (in ${c.days} days). Calls fail after that.${repl}${migText}`;
 }
 
 function describe(rawId, reg, today) {
@@ -43,6 +46,7 @@ function describe(rawId, reg, today) {
       replacement: m.replacement || null, ...(m.replacement_note ? { replacement_note: m.replacement_note } : {}),
       ...(m.previous_replacement ? { previous_replacement: m.previous_replacement, replacement_changed: m.replacement_changed } : {}), routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: page(m.aliasOf || m.id),
     } : {}),
+    ...(m && migrationFor(m) ? { migration: migrationFor(m) } : {}),
     advice: advice(c, today),
   };
 }
@@ -60,6 +64,7 @@ const MODEL_RESULT = {
     replacement: { type: ["string", "null"] },
     previous_replacement: { type: "string", description: "The replacement the provider recommended before it changed its advice" },
     replacement_changed: { type: "string", description: "YYYY-MM-DD: when the change was seen on the provider's page" },
+    migration: { type: "object", description: "Whether moving to the replacement is just a new model name (drop_in true) or needs more: change = rename | settings | params | api | re-embed | choose, with a note and the provider's guide", properties: { change: { type: "string" }, drop_in: { type: "boolean" }, note: { type: "string" }, guide: { type: ["string", "null"] } } },
     replacement_note: { type: "string", description: "Extra instruction the provider gives with the replacement (e.g. a setting or API to use). Without it, switching the model name alone is not enough" },
     routes: { type: "boolean", description: "true: after the date the provider answers with the replacement model instead of failing" },
     alias_of: { type: "string" }, page: { type: "string", description: "aidriftline.com page with the source for this date" },

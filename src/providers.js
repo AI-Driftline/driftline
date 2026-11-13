@@ -63,7 +63,7 @@ async function postOnce(fetchImpl, url, headers, body) {
   return json;
 }
 
-export async function complete({ model, prompt, system, env = process.env, fetchImpl = fetch }) {
+export async function complete({ model, prompt, system, reasoningMode = null, env = process.env, fetchImpl = fetch }) {
   const provider = providerOf(model);
   const key = keyFor(provider, env);
   if (!key) throw new Error(missingKeyMessage(provider));
@@ -71,7 +71,7 @@ export async function complete({ model, prompt, system, env = process.env, fetch
   if (provider === "openai") {
     const data = await postJson(fetchImpl, "https://api.openai.com/v1/responses",
       { authorization: `Bearer ${key}` },
-      { model, input: prompt, ...(system ? { instructions: system } : {}) });
+      { model, input: prompt, ...(system ? { instructions: system } : {}), ...(reasoningMode ? { reasoning: { mode: reasoningMode } } : {}) });
     const text = typeof data.output_text === "string" ? data.output_text : (data.output || [])
       .flatMap((o) => o.content || [])
       .filter((c) => c.type === "output_text" || typeof c.text === "string")

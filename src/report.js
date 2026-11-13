@@ -1,4 +1,5 @@
 import { replacementChange } from "./registry.js";
+import { migrationFor, MIGRATION_LABEL } from "./migration.js";
 
 const STATUS_LABEL = {
   retired: "🔴 Retired",
@@ -65,16 +66,30 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
     lines.push(n
       ? `**${n} reference${n === 1 ? "" : "s"} to retired or retiring models** across ${byModel.size} model ID${byModel.size === 1 ? "" : "s"} found.`
       : `Found ${byModel.size} model ID${byModel.size === 1 ? "" : "s"}. None are scheduled for retirement.`);
-    lines.push("", "| Model | Status | Retirement | Replacement | Where |", "|---|---|---|---|---|");
+    lines.push("", "| Model | Status | Retirement | Replacement | Change needed | Where |", "|---|---|---|---|---|---|");
+    const migNotes = new Map(); // note → { n, ids, guide } for the list under the table
     const order = ["retired", "at-risk", "deprecated", "active", "unknown"];
     const all = [...byModel.values()].sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status));
     const rows = all.slice(0, MAX_ROWS); // flagged models sort first, so only unknown/active rows get cut
     for (const r of rows) {
+      const mig = migrationFor(r.entry);
+      let changeCell = "";
+      if (mig) {
+        if (mig.note && !(mig.change === "settings" && r.entry.replacement_note && mig.note === `Also set ${r.entry.replacement_note}.`)) {
+          if (!migNotes.has(mig.note)) migNotes.set(mig.note, { n: migNotes.size + 1, ids: [], guide: mig.guide });
+          migNotes.get(mig.note).ids.push(r.id);
+          changeCell = `${mig.drop_in ? "✅" : "⚠️"} ${MIGRATION_LABEL[mig.change]} [${migNotes.get(mig.note).n}]`;
+        } else changeCell = `${mig.drop_in ? "✅" : "⚠️"} ${MIGRATION_LABEL[mig.change]}`;
+      }
       const places = r.places.slice(0, 3).join(", ") + (r.places.length > 3 ? ` +${r.places.length - 3} more` : "");
       const docsOnly = r.places.length && byModel.get(r.id).docs === r.places.length ? " · docs only" : "";
-      lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) + (r.entry.replacement_note ? " (" + esc(r.entry.replacement_note) + ")" : "") + changed(r.entry, today) : ""} | ${places} |`);
+      lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) + (r.entry.replacement_note ? " (" + esc(r.entry.replacement_note) + ")" : "") + changed(r.entry, today) : ""} | ${changeCell} | ${places} |`);
     }
     if (all.length > rows.length) lines.push("", `_${all.length - rows.length} more model ID(s) with no retirement listed are not shown._`);
+    if (migNotes.size) {
+      lines.push("", "**More than a rename:**", "");
+      for (const [note, m] of migNotes) lines.push(`${m.n}. ${m.ids.map(code).join(", ")}: ${esc(note)}${m.guide ? ` ([provider guide](${m.guide}))` : ""}`);
+    }
   }
 
   if (drift?.length) {

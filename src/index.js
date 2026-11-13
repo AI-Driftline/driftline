@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // GitHub Action entry point.
 import { replacementText, replacementChange, loadBestRegistry } from "./registry.js";
+import { migrationFor } from "./migration.js";
 import { resolve } from "node:path";
 import { statSync } from "node:fs";
 import { randomUUID } from "node:crypto";
@@ -53,6 +54,8 @@ async function main() {
   for (const f of toAnnotate.slice(0, MAX_ANNOTATIONS)) {
     const level = f.status === "deprecated" || f.doc ? "notice" : "warning";
     const chg = replacementChange(f.entry);
+    const mig = f.entry.routes ? null : migrationFor(f.entry);
+    const more = mig && !mig.drop_in && mig.change !== "settings" ? ` Not just a rename: ${mig.note}` : mig?.change === "choose" ? ` ${mig.note}` : "";
     const repl = f.entry?.replacement && !f.entry.routes ? ` Replacement: ${replacementText(f.entry)}.${chg ? ` (Changed by the provider on ${chg.on}; before it was ${chg.was}.)` : ""}` : "";
     const text = f.entry.routes && f.entry.replacement
       ? (f.days <= 0
@@ -61,7 +64,8 @@ async function main() {
       : f.entry.qualifier === "earliest" && f.days <= 0
       ? `${f.id} is past its earliest shutdown date (${f.entry.retires}) and may stop working at any time.`
       : `${f.id} ${STATUS_TEXT[f.status]} (${f.entry.retires}).`;
-    annotate(level, text + repl, f.file, f.line);
+    const routedMore = f.entry.routes && migrationFor(f.entry)?.change === "params" ? ` Before then, apply the request changes the provider lists: ${migrationFor(f.entry).note}` : "";
+    annotate(level, text + repl + more + routedMore, f.file, f.line);
   }
 
   // The report contains model answers; stop GitHub from reading any "::command::" lines inside it.

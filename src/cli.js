@@ -8,6 +8,7 @@
 //   driftline mcp                      MCP server on stdio for coding agents (Claude Code, Cursor, ...)
 //   driftline --help | --version
 import { loadBestRegistry } from "./registry.js";
+import { migrationFor } from "./migration.js";
 import { resolve } from "node:path";
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
@@ -80,7 +81,7 @@ if (cmd === "-h" || cmd === "--help" || cmd === "help") {
     const pick = (f) => ({
       id: f.id, file: f.file, line: f.line, status: f.status, docOnly: !!f.doc,
       provider: f.entry?.provider, retires: f.entry?.retires, qualifier: f.entry?.qualifier,
-      replacement: f.entry?.replacement, routes: !!f.entry?.routes, aliasOf: f.entry?.aliasOf,
+      replacement: f.entry?.replacement, migration: migrationFor(f.entry) || undefined, routes: !!f.entry?.routes, aliasOf: f.entry?.aliasOf,
     });
     console.log(JSON.stringify({ findings: result.findings.map(pick), drift: result.drift || [] }, null, 2));
   } else console.log(result.markdown);
