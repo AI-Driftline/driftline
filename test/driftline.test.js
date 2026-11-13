@@ -742,3 +742,16 @@ test("two replacements ('X or Y') are both shown, also through a chain", async (
   const r = await run({ root: dir, today: TODAY, registry });
   assert.match(r.markdown, /`gpt-live-transcribe` or `gpt-transcribe`/);
 });
+
+test("an entry under review says so in the report instead of stating its date as fact", async () => {
+  const { buildRegistry, reviewText } = await import("../src/registry.js");
+  const data = JSON.parse((await import("node:fs")).readFileSync(new URL("../registry/models.json", import.meta.url), "utf8"));
+  const flagged = { ...data, models: data.models.map((m) => m.id === "gpt-4" ? { ...m, under_review: { since: "2026-11-14", what: "date", page: "https://developers.openai.com/api/docs/deprecations" } } : m) };
+  const reg = buildRegistry(flagged);
+  assert.match(reviewText(reg.byId.get("gpt-4")), /^Under review: OpenAI's page no longer matches the date shown here \(since 2026-11-14\)/);
+  assert.equal(reviewText(reg.byId.get("gpt-4o-2024-05-13")), "");
+  const dir = tempRepo({ "a.py": 'm = "gpt-4"\n' });
+  const r = await run({ root: dir, today: TODAY, registry: reg });
+  assert.match(r.markdown, /· 🔍 under review \|/);
+  assert.match(r.markdown, /\*\*🔍 Under review:\*\*/);
+});

@@ -30,6 +30,7 @@ Only these three pages count. No blog posts, forum threads or emails.
 - Replacement with an extra instruction, e.g. "gpt-6.1-sol (reasoning.mode: pro) in the Responses API" → `replacement` = the model ID only (`gpt-6.1-sol`), `replacement_note` = the rest in plain words (`reasoning.mode: pro, in the Responses API`). Keep the note when the replacement changes, if the page still gives it.
 - No date given ("no shutdown date announced", "N/A") → leave the model out.
 - A model that disappears from a page → leave it in (pages drop old rows).
+- A model still on the page but whose date was replaced by "no shutdown date announced" / "to be announced" → remove it (it's no longer scheduled), and say so in `note` with the date.
 - Never add aliases the page does not name (e.g. `gpt-4o` when only snapshots are listed).
 - Set `checked` to today's date whenever the three pages were compared, even if nothing else changed.
 - If the page is ambiguous or contradicts itself, keep the later date and say so in `note`.

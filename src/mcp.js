@@ -6,7 +6,7 @@
 import { readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline";
-import { loadBestRegistry, classify, normalizeId, replacementChange, replacementText } from "./registry.js";
+import { loadBestRegistry, classify, normalizeId, replacementChange, replacementText, reviewText } from "./registry.js";
 import { migrationFor } from "./migration.js";
 import { scanDirectory } from "./scan.js";
 
@@ -47,7 +47,8 @@ function describe(rawId, reg, today) {
       ...(m.previous_replacement ? { previous_replacement: m.previous_replacement, replacement_changed: m.replacement_changed } : {}), routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: page(m.aliasOf || m.id),
     } : {}),
     ...(m && migrationFor(m) ? { migration: migrationFor(m) } : {}),
-    advice: advice(c, today),
+    ...(m?.under_review ? { under_review: m.under_review } : {}),
+    advice: (m?.under_review ? reviewText(m) + " " : "") + advice(c, today),
   };
 }
 
@@ -62,6 +63,7 @@ const MODEL_RESULT = {
     qualifier: { type: "string", enum: ["exact", "earliest", "not-before"], description: "exact date, earliest possible shutdown (Google), or not before this date (Anthropic)" },
     days_left: { type: "number", description: "Days until the date; 0 or negative when it has passed" },
     replacement: { type: ["string", "null"] },
+    under_review: { type: "object", description: "Present when the provider's page no longer matches this entry and Driftline is updating it: since (date), what (date, replacement or listing), page (source to check)", properties: { since: { type: "string" }, what: { type: "string" }, page: { type: "string" } } },
     replacement_alt: { type: "string", description: "A second replacement the provider names (\"X or Y\"); which one fits depends on how the model is used" },
     previous_replacement: { type: "string", description: "The replacement the provider recommended before it changed its advice" },
     replacement_changed: { type: "string", description: "YYYY-MM-DD: when the change was seen on the provider's page" },

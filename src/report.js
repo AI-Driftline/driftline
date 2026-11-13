@@ -1,4 +1,4 @@
-import { replacementChange } from "./registry.js";
+import { replacementChange, reviewText } from "./registry.js";
 import { migrationFor, MIGRATION_LABEL } from "./migration.js";
 
 const STATUS_LABEL = {
@@ -68,6 +68,7 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
       : `Found ${byModel.size} model ID${byModel.size === 1 ? "" : "s"}. None are scheduled for retirement.`);
     lines.push("", "| Model | Status | Retirement | Replacement | Change needed | Where |", "|---|---|---|---|---|---|");
     const migNotes = new Map(); // note → { n, ids, guide } for the list under the table
+    const underReview = []; // rows whose provider page changed and the registry isn't fixed yet
     const order = ["retired", "at-risk", "deprecated", "active", "unknown"];
     const all = [...byModel.values()].sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status));
     const rows = all.slice(0, MAX_ROWS); // flagged models sort first, so only unknown/active rows get cut
@@ -83,9 +84,14 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
       }
       const places = r.places.slice(0, 3).join(", ") + (r.places.length > 3 ? ` +${r.places.length - 3} more` : "");
       const docsOnly = r.places.length && byModel.get(r.id).docs === r.places.length ? " · docs only" : "";
-      lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) + (r.entry.replacement_alt ? " or " + code(r.entry.replacement_alt) : "") + (r.entry.replacement_note ? " (" + esc(r.entry.replacement_note) + ")" : "") + changed(r.entry, today) : ""} | ${changeCell} | ${places} |`);
+      if (r.entry?.under_review) underReview.push(r);
+      lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly}${r.entry?.under_review ? " · 🔍 under review" : ""} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) + (r.entry.replacement_alt ? " or " + code(r.entry.replacement_alt) : "") + (r.entry.replacement_note ? " (" + esc(r.entry.replacement_note) + ")" : "") + changed(r.entry, today) : ""} | ${changeCell} | ${places} |`);
     }
     if (all.length > rows.length) lines.push("", `_${all.length - rows.length} more model ID(s) with no retirement listed are not shown._`);
+    if (underReview.length) {
+      lines.push("", "**🔍 Under review:**", "");
+      for (const r of underReview) lines.push(`- ${code(r.id)}: ${esc(reviewText(r.entry))}`);
+    }
     if (migNotes.size) {
       lines.push("", "**More than a rename:**", "");
       for (const [note, m] of migNotes) lines.push(`${m.n}. ${m.ids.map(code).join(", ")}: ${esc(note)}${m.guide ? ` ([provider guide](${m.guide}))` : ""}`);

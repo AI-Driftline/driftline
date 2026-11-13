@@ -4,7 +4,11 @@
 //   2. any model ID on a page that wasn't there last time (a new row to look at)?
 //   3. could each page be read at all?
 //
-//   node tools/check-pages.mjs [registry/models.json] [--state page-ids.json] [--out report.md]
+//   node tools/check-pages.mjs [registry/models.json] [--state page-ids.json] [--out report.md] [--disputed disputed.json]
+//
+// --disputed writes the entries whose date or replacement no longer matches the page, with the day each dispute
+// started. The website build marks them "under review" in the live list, so the Action, MCP, emails and posts stop
+// presenting them as fact until the registry is fixed. Not rewritten when a page couldn't be read.
 //
 // Prints a report and, inside GitHub Actions, sets the step output problems=<count>. Exit code is 0 unless the
 // script itself fails, so the workflow decides what to do (open or update an issue).
@@ -16,6 +20,7 @@ const args = process.argv.slice(2);
 const opt = (name) => { const i = args.indexOf(name); return i >= 0 ? args.splice(i, 2)[1] : null; };
 const statePath = opt("--state");
 const outPath = opt("--out");
+const disputedPath = opt("--disputed");
 const regPath = resolve(args[0] || new URL("../registry/models.json", import.meta.url).pathname);
 const reg = JSON.parse(readFileSync(regPath, "utf8"));
 const today = new Date().toISOString().slice(0, 10);
@@ -73,7 +78,7 @@ for (const m of reg.models) {
   if (!page || m.retires < back) continue;
   const at = [...page.text.matchAll(new RegExp(`(?<![\\w.-])${esc(m.id)}(?![\\w.-])`, "g"))].map((x) => x.index);
   if (!at.length) {
-    if (m.retires > today) problems.push({ kind: "missing", provider: m.provider, id: m.id, msg: `\`${m.id}\` (retires ${m.retires}) is no longer on the ${m.provider} page` });
+    if (m.retires > today) problems.push({ kind: "missing", what: "listing", provider: m.provider, id: m.id, msg: `\`${m.id}\` (retires ${m.retires}) is no longer on the ${m.provider} page` });
     continue;
   }
   const windows = at.map((i) => page.text.slice(Math.max(0, i - 260), i + 420));
@@ -81,7 +86,7 @@ for (const m of reg.models) {
   const replOk = !m.replacement || windows.some((w) => w.includes(m.replacement) && (!m.replacement_alt || w.includes(m.replacement_alt)));
   if (!dateOk || !replOk) {
     const ctx = page.text.slice(Math.max(0, at[0] - 80), at[0] + 220).trim();
-    problems.push({ kind: "differs", provider: m.provider, id: m.id,
+    problems.push({ kind: "differs", what: !dateOk && !replOk ? "date and replacement" : !dateOk ? "date" : "replacement", provider: m.provider, id: m.id,
       msg: `\`${m.id}\`: registry says ${!dateOk ? `retires **${m.retires}**` : ""}${!dateOk && !replOk ? ", " : ""}${!replOk ? `replacement **${m.replacement}**` : ""}, ` +
         `not found next to it on the page. Page text: "…${ctx}…"` });
   }
@@ -102,6 +107,14 @@ for (const [provider, page] of Object.entries(pages)) {
   nextState[provider] = seen;
 }
 if (statePath) writeFileSync(statePath, JSON.stringify(nextState, null, 1) + "\n");
+
+if (disputedPath && !problems.some((p) => p.kind === "page")) {
+  const before = existsSync(disputedPath) ? JSON.parse(readFileSync(disputedPath, "utf8")) : {};
+  const now = {};
+  for (const p of problems.filter((x) => x.kind === "differs" || x.kind === "missing"))
+    now[p.id] = { since: before[p.id]?.since || today, provider: p.provider, what: p.what, page: reg.sources[p.provider] };
+  writeFileSync(disputedPath, JSON.stringify(now, null, 1) + "\n");
+}
 
 const report = problems.length
   ? [`Registry (checked ${reg.checked}) vs the provider pages, ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC: **${problems.length} difference${problems.length > 1 ? "s" : ""}**.`, "",

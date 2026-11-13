@@ -103,6 +103,15 @@ export const isTextModel = (entry) => !entry?.kind || entry.kind === "text";
 export const replacementText = (entry) => entry?.replacement
   ? entry.replacement + (entry.replacement_alt ? ` or ${entry.replacement_alt}` : "") + (entry.replacement_note ? ` (${entry.replacement_note})` : "") : "";
 
+// The live list marks an entry under_review when the provider's page no longer matches it (found by the page check
+// every 6 hours) and the registry hasn't been fixed yet. Say so instead of presenting the stored date as fact.
+const WHO_NAME = { openai: "OpenAI", anthropic: "Anthropic", google: "Google" };
+export function reviewText(entry) {
+  const r = entry?.under_review;
+  if (!r) return "";
+  return `Under review: ${WHO_NAME[entry.provider] || entry.provider}'s page no longer matches the ${r.what || "entry"} shown here (since ${r.since}); Driftline is updating it. Check ${r.page || "the provider's deprecation page"} before acting on this ${r.what === "replacement" ? "replacement" : "date"}.`;
+}
+
 // Providers sometimes change the recommended replacement after announcing a retirement. The registry keeps
 // the old one and the date we saw the change, so reports can say so instead of silently switching targets.
 export const RECENT_CHANGE_DAYS = 120;
