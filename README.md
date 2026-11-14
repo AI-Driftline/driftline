@@ -14,6 +14,8 @@ It runs inside your own CI with your own API keys. There is no Driftline server:
 - **A report** in the job summary, and optionally a GitHub issue that updates itself on each run and closes itself once nothing is left to fix.
 - **Drift tests (Pro):** each prompt in `.driftline/prompts.yml` runs on both models. You get a similarity score per prompt, and a hard failure if a JSON answer stops parsing.
 
+Outside CI: `npx -y @aidriftline/driftline .` scans any repository once, an [MCP server](#mcp-server) lets AI coding agents look up model IDs, and every model page at [aidriftline.com/models](https://aidriftline.com/models/) has free email alerts (30 days, 7 days and the day itself, plus date changes).
+
 ## Quick start
 
 1. Copy [`examples/driftline.yml`](examples/driftline.yml) to `.github/workflows/driftline.yml`.
@@ -99,7 +101,13 @@ Needs Node 20+. Free, no key.
 
 ## Retirement data
 
-[`registry/models.json`](registry/models.json) is maintained by hand from the official pages ([OpenAI](https://developers.openai.com/api/docs/deprecations), [Anthropic](https://platform.claude.com/docs/en/about-claude/model-deprecations), [Google](https://ai.google.dev/gemini-api/docs/deprecations)) and records the date it was last checked. Google publishes only the *earliest* possible shutdown date, so Driftline reports those models as "may stop working" rather than "retired". Anthropic's "not sooner than" dates are informational and never trigger a warning. Audio, image, video and embedding models are scanned and reported too, but only text models are drift-tested. Some Google models are not shut down but *routed*: after the date, requests to the old ID are answered by the replacement model (`routes: true` in the registry). Driftline flags those too, because the call keeps working while the answers change.
+[`registry/models.json`](registry/models.json) comes from the official pages ([OpenAI](https://developers.openai.com/api/docs/deprecations), [Anthropic](https://platform.claude.com/docs/en/about-claude/model-deprecations), [Google](https://ai.google.dev/gemini-api/docs/deprecations)) and is kept in line with them automatically:
+
+- A script compares every entry with those pages every 6 hours (date, replacement, new models on a page).
+- An AI check runs daily, and right away when the script finds a difference. It follows written rules ([`docs/registry-rules.md`](docs/registry-rules.md)), and its changes ship only after they pass the same script and the test suite.
+- Until a difference is fixed, the affected models are marked "under review" in reports, MCP answers and model pages, and email alerts for them wait, so nobody gets a wrong date.
+
+Each entry records the date it was last checked. Google publishes only the *earliest* possible shutdown date, so Driftline reports those models as "may stop working" rather than "retired". Anthropic's "not sooner than" dates are informational and never trigger a warning. Audio, image, video and embedding models are scanned and reported too, but only text models are drift-tested. Some Google models are not shut down but *routed*: after the date, requests to the old ID are answered by the replacement model (`routes: true` in the registry). Driftline flags those too, because the call keeps working while the answers change.
 
 Every model also has its own page with the date, replacement and source: [aidriftline.com/models](https://aidriftline.com/models/).
 
