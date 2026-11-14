@@ -956,3 +956,29 @@ test("provider page parsers: Groq tables, Mistral markdown, xAI guides, Cohere n
   const c = parseCohere("### 2025-09-15: Old models\n\nEffective September 15, 2025, the following deprecations will roll out.\n\nDeprecated Models:\n\n* `command-r-03-2024`  (and the alias `command-r`)\n* `summarize` (endpoint)\n\nFor command model replacements, we recommend you use `command-r-08-2024` or `command-a-03-2025`.\n");
   assert.deepEqual(c.map((m) => [m.id, m.retires, m.replacement_note]), [["command-r", "2025-09-15", "Cohere suggests command-r-08-2024 or command-a-03-2025"], ["command-r-03-2024", "2025-09-15", "Cohere suggests command-r-08-2024 or command-a-03-2025"]]);
 });
+
+// `driftline fix`: renames only where a rename is the whole change; everything else is listed, nothing else touched.
+test("fix replaces plain renames, keeps prefixes, skips the rest with a reason", async () => {
+  const { buildRegistry } = await import("../src/registry.js");
+  const { planFixes, applyFixes } = await import("../src/fix.js");
+  const reg = buildRegistry({ checked: "2026-11-14", sources: {}, models: [
+    { id: "gpt-4-0613", provider: "openai", retires: "2026-06-06", qualifier: "exact", replacement: "gpt-4.1" },
+    { id: "gemini-2.0-flash", provider: "google", retires: "2026-06-01", qualifier: "exact", replacement: "gemini-3.5-flash" },
+    { id: "gpt-4o-mini-2024-07-18", provider: "openai", retires: "2026-12-11", qualifier: "exact", replacement: "gpt-5-mini", replacement_alt: "gpt-5-nano" },
+  ] });
+  const dir = tempRepo({
+    "app.py": 'a = "gpt-4-0613"\nb = "openai/gpt-4-0613"\nc = "gpt-4-0613-custom"\nd = "gemini-2.0-flash"\ne = "gpt-4o-mini-2024-07-18"\n',
+    "notes.md": "We moved off `gpt-4-0613`.\n",
+  });
+  const today = new Date("2026-11-14T00:00:00Z");
+  const plan = planFixes(dir, reg, { today });
+  assert.deepEqual(plan.changes.map((c) => [c.line, c.from, c.to]), [[1, "gpt-4-0613", "gpt-4.1"], [2, "openai/gpt-4-0613", "openai/gpt-4.1"]]);
+  const why = Object.fromEntries(plan.skipped.map((s) => [`${s.file}:${s.line}`, s.reason]));
+  assert.match(why["app.py:4"], /more than a rename/); // Gemini 3 needs request changes
+  assert.match(why["app.py:5"], /two replacements \(gpt-5-mini or gpt-5-nano\)/); // the person picks one
+  assert.match(why["notes.md:1"], /documentation/);
+  assert.equal(applyFixes(dir, plan.changes), 2);
+  const after = (await import("node:fs")).readFileSync(join(dir, "app.py"), "utf8");
+  assert.equal(after, 'a = "gpt-4.1"\nb = "openai/gpt-4.1"\nc = "gpt-4-0613-custom"\nd = "gemini-2.0-flash"\ne = "gpt-4o-mini-2024-07-18"\n');
+  assert.equal((await import("node:fs")).readFileSync(join(dir, "notes.md"), "utf8"), "We moved off `gpt-4-0613`.\n");
+});

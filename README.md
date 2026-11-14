@@ -70,6 +70,15 @@ npx @aidriftline/driftline path/to/your/repo --json   # same, as JSON
 
 Exit code 1 means a retired model is used in code.
 
+### Fix the easy ones
+
+```sh
+npx @aidriftline/driftline fix --dry-run   # show what would change
+npx @aidriftline/driftline fix             # change it
+```
+
+`fix` replaces a retired or retiring model ID with its replacement only where Driftline's migration rules say a new name is the whole change, and keeps what's around it (`openai/gpt-4-0613` → `openai/gpt-4.1`). It leaves everything else alone and lists it with the reason: request or API changes, a provider that names two replacements, Bedrock and Azure IDs, models under review, and documentation files. A rename keeps the call working, but answers can still change, so test your prompts on the new model before you ship.
+
 ## For AI coding agents
 
 If you are an agent (Claude Code, Cursor, Copilot, Codex…) changing code that calls OpenAI, Anthropic or Google: run `npx -y @aidriftline/driftline . --json` before you pick or keep a model ID, and do not introduce an ID whose `status` is `retired` or `at-risk`. Without a shell, look the ID up in [`registry/models.json`](registry/models.json) or at `https://aidriftline.com/models/<model-id>/`. More, including a snippet for `AGENTS.md` / `CLAUDE.md`: [aidriftline.com/agents](https://aidriftline.com/agents/).

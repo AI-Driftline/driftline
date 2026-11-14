@@ -5,6 +5,7 @@
 //   driftline activate <license-key>   register this GitHub account; prints the code to save as DRIFTLINE_LICENSE_KEY
 //   driftline deactivate <code>        free that account's slot (a key works on up to 3 accounts)
 //   driftline [directory] --json       same scan, machine-readable (for scripts and coding agents)
+//   driftline fix [directory]          replace retiring IDs where a rename is the whole change (--dry-run to preview)
 //   driftline mcp                      MCP server on stdio for coding agents (Claude Code, Cursor, ...)
 //   driftline --help | --version
 import { loadBestRegistry } from "./registry.js";
@@ -16,7 +17,8 @@ import { run } from "./run.js";
 import { activate, deactivate } from "./license.js";
 
 const JSON_OUT = process.argv.includes("--json");
-const [cmd, arg] = process.argv.slice(2).filter((a) => a !== "--json");
+const DRY_RUN = process.argv.includes("--dry-run");
+const [cmd, arg] = process.argv.slice(2).filter((a) => a !== "--json" && a !== "--dry-run");
 const flag = (name) => { const i = process.argv.indexOf(`--${name}`); return i > 0 ? process.argv[i + 1] : ""; };
 
 // "git@github.com:acme/app.git" or "https://github.com/acme/app" -> "acme"
@@ -31,12 +33,14 @@ const HELP = `Driftline: finds AI model IDs in your code and warns before they a
 
 Usage:
   npx @aidriftline/driftline [directory]            scan and print the report
+  npx @aidriftline/driftline fix [directory]        replace retiring model IDs where a rename is the whole change
   npx @aidriftline/driftline activate <license-key>  register this GitHub account for Pro
   npx @aidriftline/driftline deactivate <code>       free that account's slot
   npx @aidriftline/driftline mcp                     MCP server for coding agents (stdio)
 
 Options:
-  --json             print the scan as JSON (for scripts and coding agents)
+  --json             print the scan (or the fix plan) as JSON
+  --dry-run          with fix: show what would change, write nothing
   --account <name>   GitHub account to activate for (default: origin remote owner)
   -h, --help         show this help
   -v, --version      show the version
@@ -52,6 +56,13 @@ if (cmd === "-h" || cmd === "--help" || cmd === "help") {
 } else if (cmd?.startsWith("-")) {
   console.error(`Unknown option ${cmd}\n\n${HELP}`);
   process.exitCode = 2;
+} else if (cmd === "fix") {
+  const { planFixes, applyFixes, fixReport } = await import("./fix.js");
+  const { reg } = await loadBestRegistry();
+  const root = resolve(arg || ".");
+  const plan = planFixes(root, reg);
+  if (!DRY_RUN && plan.changes.length) applyFixes(root, plan.changes);
+  console.log(JSON_OUT ? JSON.stringify({ dry_run: DRY_RUN, ...plan }, null, 2) : fixReport(plan, { dryRun: DRY_RUN }));
 } else if (cmd === "mcp") {
   const { startServer } = await import("./mcp.js");
   startServer();

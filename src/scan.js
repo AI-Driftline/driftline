@@ -72,11 +72,12 @@ export function scanText(text, file, known) {
       const a = line.match(ASSIGNED);
       if (a) seen.add(a[1]);
     }
-    const ids = [...seen].map((raw) => resolveId(raw, { byId: known }, { onVertex, onAzure, version: onAzure ? versionNear(i) : undefined, providers })).filter((id) => looksLikeModelId(id, known));
-    const context = MODEL_CONTEXT.test(line) || ids.some((id) => !BARE_SHORT.test(id)); // e.g. ["o1", "gpt-4o"]
-    for (const id of ids) {
+    // [spelling in the code, registry key]; the spelling is kept so `driftline fix` can rewrite exactly what is there.
+    const pairs = [...seen].map((raw) => [raw, resolveId(raw, { byId: known }, { onVertex, onAzure, version: onAzure ? versionNear(i) : undefined, providers })]).filter(([, id]) => looksLikeModelId(id, known));
+    const context = MODEL_CONTEXT.test(line) || pairs.some(([, id]) => !BARE_SHORT.test(id)); // e.g. ["o1", "gpt-4o"]
+    for (const [raw, id] of pairs) {
       if (BARE_SHORT.test(id) && !context) continue;
-      hits.push({ id, file, line: i + 1, doc, text: line.trim().slice(0, 160) });
+      hits.push({ id, raw, file, line: i + 1, doc, text: line.trim().slice(0, 160) });
     }
   });
   return hits;
