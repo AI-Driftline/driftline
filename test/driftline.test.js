@@ -869,3 +869,47 @@ test("Vertex page parsers read tables, partner paragraphs and MaaS tables", asyn
   const o = parseOpen(`<table><tr><td>llama-3.3-70b-instruct-maas</td><td>July 21, 2026</td><td>October 21, 2026</td><td>Self-deploy</td></tr></table>`);
   assert.deepEqual(o.map((m) => [m.id, m.maker, m.retires]), [["llama-3.3-70b-instruct-maas", "meta", "2026-10-21"]]);
 });
+
+// Microsoft Azure: its own date per model version; files with Azure signs use them.
+const AZURE = { models: [
+    { id: "o3", provider: "openai", retires: "2026-12-11", qualifier: "exact", replacement: "gpt-6.1-sol" },
+    { id: "gpt-4o-2024-05-13", provider: "openai", retires: "2026-10-23", qualifier: "exact", replacement: "gpt-5.1" },
+  ], checked: "2026-11-14", sources: {}, platforms: { azure: { name: "Azure", source: "https://x/azure", models: [
+    { id: "o3", name: "o3", maker: "openai", kind: "text", retires: "2026-11-19", replacement: "gpt-5.6-sol", versions: [{ version: "2025-04-16", lifecycle: "Deprecated", retires: "2026-11-19", replacement: "gpt-5.6-sol" }] },
+    { id: "gpt-4o", name: "gpt-4o", maker: "openai", kind: "text", retires: "2027-01-14", replacement: "gpt-5.1", versions: [
+      { version: "2024-05-13", lifecycle: "Deprecated", retires: "2027-01-14", replacement: "gpt-5.1" },
+      { version: "2024-08-06", lifecycle: "Deprecated", retires: "2027-04-14", replacement: "gpt-5.1" }] },
+    { id: "gpt-5.1", name: "gpt-5.1", maker: "openai", kind: "text", retires: "2027-07-13", versions: [{ version: "2025-11-13", lifecycle: "GA", retires: "2027-07-13" }] },
+  ] } } };
+
+test("Azure dates apply in Azure files, per model version; api_version is never a model version", async () => {
+  const { buildRegistry, vertexNote, platformText } = await import("../src/registry.js");
+  const reg = buildRegistry(AZURE);
+  const today = new Date("2026-11-14T00:00:00Z");
+  const app = 'client = AzureOpenAI(azure_endpoint=e, api_version="2024-08-06")\nr = client.chat.completions.create(model="gpt-4o")\no = "o3"\nn = "gpt-5.1"';
+  const ids = scanText(app, "app.py", reg.byId).map((h) => h.id);
+  assert.deepEqual(ids, ["azure:gpt-4o", "azure:o3", "azure:gpt-5.1"]); // api_version next to it is not the model version
+  const bicep = "resource d 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {\n  model: {\n    name: 'gpt-4o'\n    version: '2024-08-06'\n  }\n}";
+  assert.deepEqual(scanText(bicep, "main.bicep", reg.byId).map((h) => h.id), ["azure:gpt-4o@2024-08-06"]);
+  assert.equal(classify("azure:o3", reg, { today }).status, "at-risk"); // 19 Nov on Azure, 11 Dec on OpenAI's API
+  assert.equal(classify("azure:gpt-4o@2024-08-06", reg, { today }).entry.retires, "2027-04-14");
+  assert.equal(classify("azure:gpt-5.1", reg, { today }).status, "active"); // GA: Azure plans every model's end, not a deprecation
+  assert.match(platformText(reg.byId.get("azure:gpt-4o"), today), /2024-05-13 → 2027-01-14, 2024-08-06 → 2027-04-14/);
+  // OpenAI's own entries mention Azure's date; plain OpenAI files keep OpenAI's date.
+  assert.deepEqual(scanText('r = client.responses.create(model="o3")', "plain.py", reg.byId).map((h) => h.id), ["o3"]);
+  assert.match(vertexNote(reg.byId.get("o3"), today), /On Azure the date differs: retires 2026-11-19/);
+  assert.match(vertexNote(reg.byId.get("gpt-4o-2024-05-13"), today), /retires 2027-01-14 \(version 2024-05-13\)/);
+  assert.equal(scanText('m = "azure/o3"', "x.py", reg.byId)[0].id, "azure:o3");
+});
+
+test("Azure page parser reads the per-maker tables and skips fine-tuned ones", async () => {
+  const { parseAzure } = await import("../tools/azure.mjs");
+  const out = parseAzure(`<h3>Azure OpenAI</h3><table><thead><tr><th>Model</th><th>Version</th><th>Lifecycle</th><th>Retirement date</th><th>Replacement</th></tr></thead>
+    <tr><td>gpt-4o</td><td>2024-08-06</td><td>Deprecated</td><td>2027-04-14<sup>3</sup></td><td>gpt-5.1</td></tr>
+    <tr><td>gpt-4o</td><td>2024-05-13</td><td>Deprecated</td><td>2027-01-14</td><td>gpt-5.1 (2025-11-13)</td></tr>
+    <tr><td>gpt-4.1</td><td>2025-04-14</td><td>Deprecated</td><td>No earlier than 2027-04-14</td><td>—</td></tr></table>
+    <h4>Fine-tuned models</h4><table><tr><th>Model</th><th>Version</th><th>Training retirement date</th><th>Deployment retirement date</th></tr><tr><td>gpt-4o</td><td>2024-08-06</td><td>2027-04-01</td><td>2027-10-01</td></tr></table>
+    <h3>Anthropic</h3><table><tr><th>Model</th><th>Version</th><th>Lifecycle</th><th>Retirement date</th><th>Replacement</th></tr><tr><td>claude-mythos-preview (gated research preview)</td><td>—</td><td>Preview</td><td>2027-04-02</td><td>—</td></tr></table>`);
+  assert.deepEqual(out.map((m) => [m.id, m.maker, m.retires, m.replacement || null, m.versions.length]), [
+    ["claude-mythos-preview", "anthropic", "2027-04-02", null, 1], ["gpt-4o", "openai", "2027-01-14", "gpt-5.1", 2]]);
+});

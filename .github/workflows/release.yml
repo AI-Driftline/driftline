@@ -109,6 +109,10 @@ jobs:
           git fetch -q origin "+refs/tags/*:refs/tags/*"
           npmv=$(npm view @aidriftline/driftline version)
           v0ok=$([ "$(git rev-parse "v0^{commit}")" = "$(git rev-parse "${v}^{commit}")" ] && echo yes || echo no)
-          mcpok=$(curl -fsS "https://registry.modelcontextprotocol.io/v0/servers?search=io.github.AI-Driftline/driftline&limit=100" | grep -cE "\"version\": *\"${v#v}\"" || true)
+          # The registry's search can take a little while to show a version it just accepted.
+          for i in 1 2 3 4 5 6; do
+            mcpok=$(curl -fsS "https://registry.modelcontextprotocol.io/v0/servers?search=io.github.AI-Driftline/driftline&limit=100" | grep -cE "\"version\": *\"${v#v}\"" || true)
+            [ "${mcpok:-0}" != 0 ] && break; sleep 20
+          done
           echo "npm latest: $npmv · @v0 at $v: $v0ok · MCP Registry has ${v#v}: $([ "${mcpok:-0}" != 0 ] && echo yes || echo no)" | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$npmv" = "${v#v}" ] && [ "$v0ok" = yes ] && [ "${mcpok:-0}" != 0 ]

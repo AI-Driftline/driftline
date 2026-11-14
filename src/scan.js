@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, extname, sep } from "node:path";
-import { looksLikeModelId, resolveId, VERTEX_SIGNS } from "./registry.js";
+import { looksLikeModelId, resolveId, VERTEX_SIGNS, AZURE_SIGNS, AZURE_VERSION, API_VERSION } from "./registry.js";
 
 const SKIP_DIRS = new Set([
   ".git", "node_modules", "vendor", "dist", "build", "out", ".next", ".nuxt",
@@ -10,7 +10,7 @@ const EXTENSIONS = new Set([
   ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".py", ".rb", ".go", ".rs", ".java",
   ".kt", ".php", ".cs", ".swift", ".json", ".yaml", ".yml", ".toml", ".env", ".ini",
   ".cfg", ".md", ".txt", ".sh", ".tf", ".vue", ".svelte", ".astro", ".mts", ".cts", ".html",
-  ".jsonc", ".ipynb",
+  ".jsonc", ".ipynb", ".bicep", ".bicepparam",
 ]);
 const MAX_BYTES = 1024 * 1024;
 // Mentions in docs are reported but never fail the build (changelogs name old models on purpose).
@@ -51,6 +51,17 @@ export function scanText(text, file, known) {
   const doc = isDocFile(file);
   const lines = text.split(/\r?\n/);
   const onVertex = VERTEX_SIGNS.test(text); // this file calls Gemini/Claude through Vertex AI: use Vertex's dates
+  const onAzure = AZURE_SIGNS.test(text); // …or OpenAI (and other) models through Azure: Azure's dates, per version
+  // Azure deployment templates put the model version next to the name (version: '2024-08-06'); never api_version.
+  const versionNear = (i) => {
+    for (const d of [0, 1, -1, 2, -2, 3, -3]) {
+      const l = lines[i + d];
+      if (l === undefined || API_VERSION.test(l)) continue;
+      const m = l.match(AZURE_VERSION);
+      if (m) return m[1];
+    }
+    return undefined;
+  };
   lines.forEach((raw, i) => {
     // Escaped quotes (\"gpt-4\") appear in notebooks and JSON-in-JSON; read them as plain quotes.
     const line = raw.replace(/\\(["'`])/g, "$1");
@@ -60,7 +71,7 @@ export function scanText(text, file, known) {
       const a = line.match(ASSIGNED);
       if (a) seen.add(a[1]);
     }
-    const ids = [...seen].map((raw) => resolveId(raw, { byId: known }, { onVertex })).filter((id) => looksLikeModelId(id, known));
+    const ids = [...seen].map((raw) => resolveId(raw, { byId: known }, { onVertex, onAzure, version: onAzure ? versionNear(i) : undefined })).filter((id) => looksLikeModelId(id, known));
     const context = MODEL_CONTEXT.test(line) || ids.some((id) => !BARE_SHORT.test(id)); // e.g. ["o1", "gpt-4o"]
     for (const id of ids) {
       if (BARE_SHORT.test(id) && !context) continue;

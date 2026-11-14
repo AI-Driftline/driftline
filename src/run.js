@@ -34,7 +34,7 @@ export async function run({
     ...h,
     file: prefix && !prefix.startsWith("..") ? `${prefix}/${h.file.split(sep).join("/")}` : h.file.split(sep).join("/"),
     ...classify(h.id, registry, { today, warnDays }),
-    ...(h.id.startsWith("vertex:") ? { id: shownId(h.id) } : {}), // "gemini-2.5-pro (Vertex AI)"
+    ...(/^(vertex|azure):/.test(h.id) ? { id: shownId(h.id) } : {}), // "gemini-2.5-pro (Vertex AI)", "gpt-4o 2024-08-06 (Azure)"
   }));
   log(`Scanned ${root}: ${findings.length} model reference(s).`);
 

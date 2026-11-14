@@ -1,7 +1,7 @@
 # Cloud-platform retirement dates, kept in line with each platform's own pages by script every 6 hours (no AI):
-# Amazon Bedrock (tools/bedrock.mjs) and Google Vertex AI (tools/vertex.mjs).
+# Amazon Bedrock (tools/bedrock.mjs), Google Vertex AI (tools/vertex.mjs) and Microsoft Azure (tools/azure.mjs).
 # Each script refuses to write when a page parses to too few models or too much changes at once; the run then fails,
-# which shows on the stats digest and emails the repo owner. The other platform still updates.
+# which shows on the stats digest and emails the repo owner. The other platforms still update.
 # Pushes made with GITHUB_TOKEN don't start the release workflow: the live list at aidriftline.com picks the change
 # up on the website's next 6-hourly build, and the next release bundles it.
 name: platforms
@@ -29,7 +29,8 @@ jobs:
           fail=0
           node tools/bedrock.mjs --write > "$RUNNER_TEMP/bedrock.txt" 2>&1 || fail=1
           node tools/vertex.mjs --write > "$RUNNER_TEMP/vertex.txt" 2>&1 || fail=1
-          cat "$RUNNER_TEMP/bedrock.txt" "$RUNNER_TEMP/vertex.txt"
+          node tools/azure.mjs --write > "$RUNNER_TEMP/azure.txt" 2>&1 || fail=1
+          cat "$RUNNER_TEMP/bedrock.txt" "$RUNNER_TEMP/vertex.txt" "$RUNNER_TEMP/azure.txt"
           echo "fail=$fail" >> "$GITHUB_OUTPUT"
           if git diff --quiet registry/models.json; then echo "changed=no" >> "$GITHUB_OUTPUT"; else echo "changed=yes" >> "$GITHUB_OUTPUT"; fi
       - name: Test and push
@@ -38,8 +39,8 @@ jobs:
           npm test
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          summary=$(cat "$RUNNER_TEMP/bedrock.txt" "$RUNNER_TEMP/vertex.txt" | grep -E "^(Bedrock|Vertex): [0-9]+ change" | paste -sd ";" - | sed 's/;/; /g')
-          git commit -am "Registry re-checked $(date -u +%F): ${summary}" -m "$(cat "$RUNNER_TEMP/bedrock.txt" "$RUNNER_TEMP/vertex.txt")"
+          summary=$(cat "$RUNNER_TEMP/bedrock.txt" "$RUNNER_TEMP/vertex.txt" "$RUNNER_TEMP/azure.txt" | grep -E "^(Bedrock|Vertex|Azure): [0-9]+ change" | paste -sd ";" - | sed 's/;/; /g')
+          git commit -am "Registry re-checked $(date -u +%F): ${summary}" -m "$(cat "$RUNNER_TEMP/bedrock.txt" "$RUNNER_TEMP/vertex.txt" "$RUNNER_TEMP/azure.txt")"
           git pull --rebase && git push
       - name: Report a page that couldn't be read
         if: steps.sync.outputs.fail == '1'

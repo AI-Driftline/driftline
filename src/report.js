@@ -94,9 +94,9 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
       for (const r of onPlatform) lines.push(`- ${code(r.id)}: ${esc(platformText(r.entry, today))}`);
     }
     // Gemini API / Anthropic dates were used (no Vertex signs in the file), but Vertex's date differs: say so.
-    const vertexDiffers = rows.filter((r) => !r.entry?.platform && r.entry?.vertex);
+    const vertexDiffers = rows.filter((r) => !r.entry?.platform && (r.entry?.vertex || r.entry?.azure));
     if (vertexDiffers.length) {
-      lines.push("", "**If you call these through Vertex AI:**", "");
+      lines.push("", "**If you call these through Vertex AI or Azure:**", "");
       for (const r of vertexDiffers) lines.push(`- ${code(r.id)}: ${esc(vertexNote(r.entry, today))}`);
     }
     if (underReview.length) {
@@ -134,6 +134,6 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
 
   if (notices.length) lines.push("", ...notices.map((n) => `> ${n}`));
   lines.push("", `<sub>Retirement dates checked against official provider pages on ${registry.checked}${registry.source === "live" ? " (live list at aidriftline.com)" : ({ newer: " (list bundled with this version, newer than the live list)", unreachable: " (list bundled with this version; the live list could not be read)", offline: " (list bundled with this version)" })[registry.sourceWhy] || ""}. ` +
-    `Sources: [OpenAI](${registry.sources.openai}) · [Anthropic](${registry.sources.anthropic}) · [Google](${registry.sources.google})${registry.platforms?.bedrock ? ` · [Amazon Bedrock](${registry.platforms.bedrock.source})` : ""}${registry.platforms?.vertex ? ` · [Vertex AI](${registry.platforms.vertex.source})` : ""}.</sub>`);
+    `Sources: [OpenAI](${registry.sources.openai}) · [Anthropic](${registry.sources.anthropic}) · [Google](${registry.sources.google})${registry.platforms?.bedrock ? ` · [Amazon Bedrock](${registry.platforms.bedrock.source})` : ""}${registry.platforms?.vertex ? ` · [Vertex AI](${registry.platforms.vertex.source})` : ""}${registry.platforms?.azure ? ` · [Azure](${registry.platforms.azure.source})` : ""}.</sub>`);
   return lines.join("\n");
 }

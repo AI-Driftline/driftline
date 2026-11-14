@@ -75,6 +75,25 @@ export function buildRegistry(data) {
     for (const pm of p?.models || []) {
       if (!pm?.id || !/^\d{4}-\d{2}-\d{2}$/.test(pm.retires || "")) continue;
       const e = { ...pm, provider: pm.maker, platform, platform_name: p.name || platform, platform_source: p.sources?.[pm.page] || p.source, qualifier: "exact" };
+      if (platform === "azure") {
+        // Azure uses OpenAI's (and other makers') model names, with its own date per model version. Entries live under
+        // "azure:<id>" (earliest version: the one to plan for when the code doesn't say) and "azure:<id>@<version>".
+        const current = (v) => /^(ga|preview|generally available)$/i.test(v?.lifecycle || "");
+        const mk = (v, extra = {}) => ({ ...e, retires: v.retires, qualifier: current(v) ? "scheduled" : "exact", lifecycle: v.lifecycle,
+          ...(v.replacement ? { replacement: v.replacement } : {}), ...extra });
+        const base = mk(pm.versions?.[0] || pm, { replacement: pm.replacement });
+        if (!base.replacement) delete base.replacement;
+        lookup.set(`azure:${pm.id}`, base);
+        for (const v of pm.versions || []) if (v.version) lookup.set(`azure:${pm.id}@${v.version}`, mk(v, { version: v.version }));
+        // OpenAI's entry for the same model (o3 ↔ o3, gpt-4o-2024-05-13 ↔ gpt-4o version 2024-05-13) learns Azure's date.
+        for (const twin of [byId.get(pm.id), ...(pm.versions || []).map((v) => byId.get(`${pm.id}-${v.version}`) && { m: byId.get(`${pm.id}-${v.version}`), v })]) {
+          const m = twin?.m || twin, v = twin?.v || pm.versions?.[0];
+          if (!m || !v || twin === undefined) continue;
+          if (m.retires !== v.retires) m.azure = { retires: v.retires, ...(v.version ? { version: v.version } : {}), ...(v.replacement ? { replacement: v.replacement } : {}) };
+        }
+        platformModels.push(base);
+        continue;
+      }
       if (platform === "vertex") {
         // Vertex uses the Gemini API's and Anthropic's model names, with its own dates. Its entries live under
         // "vertex:<id>" and are used when the code shows it runs on Vertex (see resolveId).
@@ -104,7 +123,13 @@ export function buildRegistry(data) {
 
 // Bedrock's own model IDs: "<maker>.<model>", e.g. anthropic.claude-3-5-sonnet-20240620-v1:0 or meta.llama3-70b-instruct-v1:0.
 export const BEDROCK_ID = /^(ai21|amazon|anthropic|cohere|deepseek|google|luma|meta|minimax|mistral|moonshot|moonshotai|nvidia|openai|qwen|stability|twelvelabs|writer|zai)\.[a-z0-9]/;
-const PLATFORM_LABEL = { bedrock: "Amazon Bedrock", vertex: "Vertex AI" };
+const PLATFORM_LABEL = { bedrock: "Amazon Bedrock", vertex: "Vertex AI", azure: "Azure" };
+
+// Signs in a file that its OpenAI (or other) model calls go through Microsoft Azure (Azure OpenAI / Foundry).
+export const AZURE_SIGNS = /\bAzureOpenAI\b|AsyncAzureOpenAI|AzureChatOpenAI|AzureOpenAIEmbeddings|azure_endpoint|azure_deployment|openai\.azure\.com|cognitiveservices\.azure\.com|services\.ai\.azure\.com|AZURE_OPENAI|@azure\/openai|Azure\.AI\.OpenAI|azure-ai-inference|Microsoft\.CognitiveServices\/accounts\/deployments|azurerm_cognitive_deployment|api_type\s*[=:]\s*["']azure/;
+// Model version next to a model name in an Azure file (deployment templates): version: '2024-08-06'. Not api_version.
+const AZURE_VERSION = /(?<![\w-])(?:model[_-]?)?version["']?\s*[:=]\s*["']?([\w.-]+)["']?/i;
+const API_VERSION = /api[_-]?version/i;
 
 // Signs in a file that its Gemini/Claude calls go through Google Vertex AI rather than the Gemini API or Anthropic.
 export const VERTEX_SIGNS = /\bvertexai\b|vertex_ai|google[.-]cloud[.-]aiplatform|@google-cloud\/vertexai|@ai-sdk\/google-vertex|aiplatform\.googleapis\.com|publishers\/(?:google|anthropic)\/models|GOOGLE_GENAI_USE_VERTEXAI|ChatVertexAI|AnthropicVertex|anthropic\.vertex|\bVertexAI\s*\(|vertexai\s*[=:]\s*(?:True|true)/;
@@ -113,8 +138,17 @@ const vertexSpelling = (raw) => /^vertex_ai\/|publishers\/(?:google|anthropic)\/
 
 // The registry key for an ID as written in code. With onVertex (file shows Vertex signs) or a Vertex spelling, a
 // model Vertex lists is looked up as "vertex:<id>"; otherwise the plain ID (Gemini API / Anthropic dates).
-export function resolveId(raw, registry, { onVertex = false } = {}) {
-  const id = normalizeId(raw);
+export function resolveId(raw, registry, { onVertex = false, onAzure = false, version } = {}) {
+  const azureSpelled = /^azure\//i.test(raw.trim());
+  const id = normalizeId(azureSpelled ? raw.trim().slice(6) : raw);
+  if (onAzure || azureSpelled) {
+    // gpt-4o-2024-08-06 → gpt-4o version 2024-08-06; a version found next to the name in the file wins.
+    const snap = id.match(/^(.+)-(\d{4}-\d{2}-\d{2})$/);
+    const has = (k) => registry?.byId?.has(k);
+    if (snap && has(`azure:${snap[1]}@${snap[2]}`)) return `azure:${snap[1]}@${snap[2]}`;
+    if (version && has(`azure:${id}@${version}`)) return `azure:${id}@${version}`;
+    if (has(`azure:${id}`)) return `azure:${id}`;
+  }
   if (!onVertex && !vertexSpelling(raw)) return id;
   const lower = raw.trim().toLowerCase().replace(/^.*publishers\/(?:google|anthropic)\/models\//, "");
   // Claude on Vertex: claude-3-5-sonnet-v2@20241022 → claude-3-5-sonnet-v2; claude-3-haiku-20240307 → claude-3-haiku.
@@ -122,19 +156,32 @@ export function resolveId(raw, registry, { onVertex = false } = {}) {
   return registry?.byId?.has(`vertex:${vid}`) ? `vertex:${vid}` : id;
 }
 // How a key is shown: "vertex:gemini-2.5-pro" → "gemini-2.5-pro (Vertex AI)".
-export const shownId = (key) => String(key).startsWith("vertex:") ? `${String(key).slice(7)} (Vertex AI)` : key;
+export const shownId = (key) => String(key).startsWith("vertex:") ? `${String(key).slice(7)} (Vertex AI)`
+  : String(key).startsWith("azure:") ? `${String(key).slice(6).replace("@", " ")} (Azure)` : key;
+export { AZURE_VERSION, API_VERSION };
 
 // For a Gemini API / Anthropic entry whose Vertex date differs: one sentence, so Vertex users see it too.
+// (Also covers Azure: one sentence per platform whose date differs.)
 export function vertexNote(entry, today = new Date()) {
-  if (!entry?.vertex || entry.platform) return "";
-  const v = entry.vertex, past = v.retires <= today.toISOString().slice(0, 10);
-  return `On Vertex AI the date differs: ${past ? "retired" : "retires"} ${v.retires}${v.replacement ? ` (Vertex names ${v.replacement})` : ""}.`;
+  if (entry?.platform) return "";
+  const iso = today.toISOString().slice(0, 10), out = [];
+  if (entry?.vertex) { const v = entry.vertex; out.push(`On Vertex AI the date differs: ${v.retires <= iso ? "retired" : "retires"} ${v.retires}${v.replacement ? ` (Vertex names ${v.replacement})` : ""}.`); }
+  if (entry?.azure) { const a = entry.azure; out.push(`On Azure the date differs: ${a.retires <= iso ? "retired" : "retires"} ${a.retires}${a.version ? ` (version ${a.version})` : ""}${a.replacement ? `; Azure names ${a.replacement}` : ""}.`); }
+  return out.join(" ");
 }
+export const platformNotes = vertexNote;
 
 // Extra sentence for models on a cloud platform: whose dates these are, regions that differ, extended-access pricing.
 export function platformText(entry, today = new Date()) {
   if (!entry?.platform) return "";
   const name = entry.platform_name || PLATFORM_LABEL[entry.platform] || entry.platform;
+  if (entry.platform === "azure") {
+    const vs = entry.versions || [];
+    const parts = [`Date set by Azure${entry.maker === "openai" ? " (OpenAI's own date can differ)" : ", not by the model maker"}`];
+    if (!entry.version && vs.length > 1) parts.push(`it depends on the deployed version: ${vs.map((v) => `${v.version} → ${v.retires}`).join(", ")}; the version wasn't visible in the code, so the earliest is shown`);
+    if (entry.qualifier === "scheduled") parts.push(`${entry.lifecycle || "current"} model: Azure plans every model's retirement ahead`);
+    return parts.join("; ") + ".";
+  }
   const parts = [entry.platform === "vertex" && ["google", "anthropic"].includes(entry.maker) ? `Date set by Vertex AI (${entry.maker === "google" ? "the Gemini API's" : "Anthropic's"} own date can differ)` : `Date set by ${name}, not by the model maker`];
   const regs = entry.regions || [];
   if (regs.length > 1) {
@@ -212,6 +259,7 @@ export function classify(id, registry, { today = new Date(), warnDays = 90 } = {
   if (entry.qualifier === "not-before") status = "active";
   else if (days <= 0) status = entry.qualifier === "earliest" ? "at-risk" : "retired"; // Google only gives earliest dates
   else if (days <= warnDays) status = "at-risk";
-  else status = "deprecated";
+  // Azure lists a planned date even for current (GA/Preview) models; far off, that isn't a deprecation.
+  else status = entry.qualifier === "scheduled" ? "active" : "deprecated";
   return { id, status, days, entry };
 }

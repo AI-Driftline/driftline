@@ -66,7 +66,7 @@ async function main() {
       : `${f.id} ${STATUS_TEXT[f.status]} (${f.entry.retires}).`;
     const routedMore = f.entry.routes && migrationFor(f.entry)?.change === "params" ? ` Before then, apply the request changes the provider lists: ${migrationFor(f.entry).note}` : "";
     const review = f.entry.under_review ? ` ${reviewText(f.entry)}` : "";
-    const platform = f.entry.platform ? ` ${platformText(f.entry)}` : f.entry.vertex ? ` ${vertexNote(f.entry)}` : "";
+    const platform = f.entry.platform ? ` ${platformText(f.entry)}` : (f.entry.vertex || f.entry.azure) ? ` ${vertexNote(f.entry)}` : "";
     annotate(level, text + repl + more + routedMore + platform + review, f.file, f.line);
   }
 

@@ -16,7 +16,9 @@ Amazon Bedrock sets its own dates per model and region (https://docs.aws.amazon.
 
 Google Vertex AI (now "Gemini Enterprise Agent Platform") sets its own dates too, on three pages: Gemini/Imagen/Veo/embedding model versions, partner models (Claude, Jamba) and open models (`-maas` IDs). They live in `platforms.vertex` and are written only by `node tools/vertex.mjs --write`. Vertex uses the Gemini API's model names; a Vertex date never changes the Gemini API entry of the same name.
 
-The `platforms` workflow runs both scripts every 6 hours. Don't edit `platforms.*` by hand, and don't use them to change the provider entries.
+Microsoft Azure (Azure OpenAI and other Foundry models) sets its own date per model version (https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule). They live in `platforms.azure` and are written only by `node tools/azure.mjs --write`. Azure plans a date for every model, current ones included (lifecycle GA/Preview); those count as retiring only within 90 days.
+
+The `platforms` workflow runs all three scripts every 6 hours. Don't edit `platforms.*` by hand, and don't use them to change the provider entries.
 
 ## Entry fields
 
