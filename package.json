@@ -1,6 +1,6 @@
 {
   "name": "@aidriftline/driftline",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Finds OpenAI, Anthropic, Google, Amazon Bedrock, Vertex AI and Azure model IDs in your code and warns before they are retired. CLI, GitHub Action and MCP server.",
   "mcpName": "io.github.AI-Driftline/driftline",
   "type": "module",
