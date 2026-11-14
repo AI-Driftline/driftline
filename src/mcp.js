@@ -44,7 +44,7 @@ function describe(rawId, reg, today) {
     status: c.status, ...(m ? {
       provider: m.provider, retires: m.retires, qualifier: m.qualifier, days_left: c.days,
       replacement: m.replacement || null, ...(m.replacement_alt ? { replacement_alt: m.replacement_alt } : {}), ...(m.replacement_note ? { replacement_note: m.replacement_note } : {}),
-      ...(m.previous_replacement ? { previous_replacement: m.previous_replacement, replacement_changed: m.replacement_changed } : {}), routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: m.platform ? m.platform_source : page(m.aliasOf || m.id),
+      ...(m.previous_replacement ? { previous_replacement: m.previous_replacement, replacement_changed: m.replacement_changed } : {}), routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: m.platform === "bedrock" ? `https://aidriftline.com/models/bedrock/${m.id.replace(/:/g, "-")}/` : page(m.aliasOf || m.id),
     } : {}),
     ...(m && migrationFor(m) ? { migration: migrationFor(m) } : {}),
     ...(m?.under_review ? { under_review: m.under_review } : {}),
