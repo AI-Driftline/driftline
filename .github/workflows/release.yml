@@ -107,7 +107,8 @@ jobs:
         run: |
           v=${{ steps.bump.outputs.released }}
           git fetch -q origin "+refs/tags/*:refs/tags/*"
-          npmv=$(npm view @aidriftline/driftline version)
+          # npm can take a minute to show a version it just accepted; ask again before calling it a mismatch.
+          for i in 1 2 3 4 5 6; do npmv=$(npm view @aidriftline/driftline version); [ "$npmv" = "${v#v}" ] && break; sleep 20; done
           v0ok=$([ "$(git rev-parse "v0^{commit}")" = "$(git rev-parse "${v}^{commit}")" ] && echo yes || echo no)
           # The registry's search can take a little while to show a version it just accepted.
           for i in 1 2 3 4 5 6; do
