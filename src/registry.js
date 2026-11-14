@@ -75,6 +75,17 @@ export function buildRegistry(data) {
     for (const pm of p?.models || []) {
       if (!pm?.id || !/^\d{4}-\d{2}-\d{2}$/.test(pm.retires || "")) continue;
       const e = { ...pm, provider: pm.maker, platform, platform_name: p.name || platform, platform_source: p.sources?.[pm.page] || p.source, qualifier: "exact" };
+      if (p.direct) {
+        // A provider's own API (Groq, Mistral, xAI, Cohere, DeepSeek). Distinctive IDs are found under their plain name;
+        // ambiguous ones (a "/" — Groq's qwen/qwen3-32b is also an OpenRouter name — or a plain word like Cohere's
+        // "command") only under "<provider>:<id>", used when the file shows that provider (see PROVIDER_SIGNS).
+        const d = { ...e, ...(pm.routes ? { routes: true } : {}) };
+        lookup.set(`${platform}:${pm.id}`, d);
+        const ambiguous = pm.id.includes("/") || (!/\d/.test(pm.id) && !pm.id.startsWith(`${pm.maker}-`) && !pm.id.startsWith(`${platform}-`));
+        if (!ambiguous && !lookup.has(pm.id)) lookup.set(pm.id, d);
+        platformModels.push(d);
+        continue;
+      }
       if (platform === "azure") {
         // Azure uses OpenAI's (and other makers') model names, with its own date per model version. Entries live under
         // "azure:<id>" (earliest version: the one to plan for when the code doesn't say) and "azure:<id>@<version>".
@@ -123,7 +134,16 @@ export function buildRegistry(data) {
 
 // Bedrock's own model IDs: "<maker>.<model>", e.g. anthropic.claude-3-5-sonnet-20240620-v1:0 or meta.llama3-70b-instruct-v1:0.
 export const BEDROCK_ID = /^(ai21|amazon|anthropic|cohere|deepseek|google|luma|meta|minimax|mistral|moonshot|moonshotai|nvidia|openai|qwen|stability|twelvelabs|writer|zai)\.[a-z0-9]/;
-const PLATFORM_LABEL = { bedrock: "Amazon Bedrock", vertex: "Vertex AI", azure: "Azure" };
+const PLATFORM_LABEL = { bedrock: "Amazon Bedrock", vertex: "Vertex AI", azure: "Azure", groq: "Groq", mistral: "Mistral AI", xai: "xAI", cohere: "Cohere", deepseek: "DeepSeek" };
+
+// Signs in a file that it calls one of these providers' APIs (for their ambiguous model IDs).
+export const PROVIDER_SIGNS = {
+  groq: /\bgroq\b|GROQ_API_KEY|api\.groq\.com/i,
+  cohere: /\bcohere\b|CO_API_KEY|COHERE_API_KEY|api\.cohere\.(?:ai|com)/i,
+  mistral: /mistralai|MISTRAL_API_KEY|api\.mistral\.ai/i,
+  xai: /api\.x\.ai|XAI_API_KEY|xai_sdk|@ai-sdk\/xai/i,
+  deepseek: /deepseek/i,
+};
 
 // Signs in a file that its OpenAI (or other) model calls go through Microsoft Azure (Azure OpenAI / Foundry).
 export const AZURE_SIGNS = /\bAzureOpenAI\b|AsyncAzureOpenAI|AzureChatOpenAI|AzureOpenAIEmbeddings|azure_endpoint|azure_deployment|openai\.azure\.com|cognitiveservices\.azure\.com|services\.ai\.azure\.com|AZURE_OPENAI|@azure\/openai|Azure\.AI\.OpenAI|azure-ai-inference|Microsoft\.CognitiveServices\/accounts\/deployments|azurerm_cognitive_deployment|api_type\s*[=:]\s*["']azure/;
@@ -138,7 +158,7 @@ const vertexSpelling = (raw) => /^vertex_ai\/|publishers\/(?:google|anthropic)\/
 
 // The registry key for an ID as written in code. With onVertex (file shows Vertex signs) or a Vertex spelling, a
 // model Vertex lists is looked up as "vertex:<id>"; otherwise the plain ID (Gemini API / Anthropic dates).
-export function resolveId(raw, registry, { onVertex = false, onAzure = false, version } = {}) {
+export function resolveId(raw, registry, { onVertex = false, onAzure = false, version, providers } = {}) {
   const azureSpelled = /^azure\//i.test(raw.trim());
   const id = normalizeId(azureSpelled ? raw.trim().slice(6) : raw);
   if (onAzure || azureSpelled) {
@@ -149,6 +169,14 @@ export function resolveId(raw, registry, { onVertex = false, onAzure = false, ve
     if (version && has(`azure:${id}@${version}`)) return `azure:${id}@${version}`;
     if (has(`azure:${id}`)) return `azure:${id}`;
   }
+  // Groq, Cohere, … : ambiguous IDs (qwen/qwen3-32b, command) count only in files that call that provider, or with a
+  // "groq/" style prefix. The raw spelling is tried first: normalizeId strips "openai/" from Groq's openai/gpt-oss-120b.
+  const lowerRaw = raw.trim().toLowerCase();
+  for (const [p, on] of Object.entries(providers || {})) {
+    const pre = lowerRaw.startsWith(`${p}/`) ? lowerRaw.slice(p.length + 1) : null;
+    if (!on && pre === null) continue;
+    for (const cand of [lowerRaw, pre, id].filter(Boolean)) if (registry?.byId?.has(`${p}:${cand}`)) return `${p}:${cand}`;
+  }
   if (!onVertex && !vertexSpelling(raw)) return id;
   const lower = raw.trim().toLowerCase().replace(/^.*publishers\/(?:google|anthropic)\/models\//, "");
   // Claude on Vertex: claude-3-5-sonnet-v2@20241022 → claude-3-5-sonnet-v2; claude-3-haiku-20240307 → claude-3-haiku.
@@ -157,7 +185,8 @@ export function resolveId(raw, registry, { onVertex = false, onAzure = false, ve
 }
 // How a key is shown: "vertex:gemini-2.5-pro" → "gemini-2.5-pro (Vertex AI)".
 export const shownId = (key) => String(key).startsWith("vertex:") ? `${String(key).slice(7)} (Vertex AI)`
-  : String(key).startsWith("azure:") ? `${String(key).slice(6).replace("@", " ")} (Azure)` : key;
+  : String(key).startsWith("azure:") ? `${String(key).slice(6).replace("@", " ")} (Azure)`
+  : /^(groq|mistral|xai|cohere|deepseek):/.test(key) ? `${String(key).replace(/^[a-z]+:/, "")} (${PLATFORM_LABEL[String(key).split(":")[0]]})` : key;
 export { AZURE_VERSION, API_VERSION };
 
 // For a Gemini API / Anthropic entry whose Vertex date differs: one sentence, so Vertex users see it too.
@@ -175,6 +204,12 @@ export const platformNotes = vertexNote;
 export function platformText(entry, today = new Date()) {
   if (!entry?.platform) return "";
   const name = entry.platform_name || PLATFORM_LABEL[entry.platform] || entry.platform;
+  if (PROVIDER_SIGNS[entry.platform]) {
+    const host = entry.platform === "groq" && entry.maker !== "groq";
+    const parts = [host ? "Date set by Groq for its API (the model maker's own date can differ)" : `Date from ${name}'s own deprecation notes`];
+    if (entry.note) parts.push(entry.note.replace(/^DeepSeek: /, ""));
+    return parts.join("; ") + ".";
+  }
   if (entry.platform === "azure") {
     const vs = entry.versions || [];
     const parts = [`Date set by Azure${entry.maker === "openai" ? " (OpenAI's own date can differ)" : ", not by the model maker"}`];
@@ -226,7 +261,8 @@ export const isTextModel = (entry) => !entry?.kind || entry.kind === "text";
 // The replacement as people should read it: the model, plus the provider's extra instruction when there is one,
 // e.g. "gpt-6.1-sol (reasoning.mode: pro, in the Responses API)". Without the note, a rename alone is not the move.
 export const replacementText = (entry) => entry?.replacement
-  ? entry.replacement + (entry.replacement_alt ? ` or ${entry.replacement_alt}` : "") + (entry.replacement_note ? ` (${entry.replacement_note})` : "") : "";
+  ? entry.replacement + (entry.replacement_alt ? ` or ${entry.replacement_alt}` : "") + (entry.replacement_note ? ` (${entry.replacement_note})` : "")
+  : entry?.platform && entry.replacement_note ? entry.replacement_note : ""; // e.g. Cohere: "Cohere suggests x, y or z"
 
 // The live list marks an entry under_review when the provider's page no longer matches it (found by the page check
 // every 6 hours) and the registry hasn't been fixed yet. Say so instead of presenting the stored date as fact.

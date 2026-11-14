@@ -6302,6 +6302,913 @@
           "retires": "2026-12-15"
         }
       ]
+    },
+    "deepseek": {
+      "name": "DeepSeek",
+      "direct": true,
+      "maintained": "ai",
+      "source": "https://api-docs.deepseek.com/updates",
+      "checked": "2026-11-14",
+      "models": [
+        {
+          "id": "deepseek-chat",
+          "maker": "deepseek",
+          "kind": "text",
+          "retires": "2026-07-24",
+          "replacement": "deepseek-flash",
+          "replacement_note": "thinking disabled"
+        },
+        {
+          "id": "deepseek-reasoner",
+          "maker": "deepseek",
+          "kind": "text",
+          "retires": "2026-07-24",
+          "replacement": "deepseek-flash",
+          "replacement_note": "thinking enabled"
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "maker": "deepseek",
+          "kind": "text",
+          "retires": "2026-09-10",
+          "routes": true,
+          "replacement": "deepseek-flash",
+          "note": "DeepSeek: 'temporarily routed' to V4.1 Flash; the routing can end without a fixed date."
+        },
+        {
+          "id": "deepseek-v4-flash-vision-exp",
+          "maker": "deepseek",
+          "kind": "text",
+          "retires": "2026-09-10",
+          "routes": true,
+          "replacement": "deepseek-flash",
+          "note": "DeepSeek: 'temporarily routed' to V4.1 Flash; the routing can end without a fixed date."
+        }
+      ]
+    },
+    "groq": {
+      "name": "Groq",
+      "direct": true,
+      "source": "https://console.groq.com/docs/deprecations",
+      "checked": "2026-11-14",
+      "models": [
+        {
+          "id": "deepseek-r1-distill-llama-70b",
+          "maker": "deepseek",
+          "kind": "text",
+          "retires": "2025-10-02",
+          "replacement": "llama-3.3-70b-versatile",
+          "replacement_alt": "openai/gpt-oss-120b"
+        },
+        {
+          "id": "deepseek-r1-distill-llama-70b-specdec",
+          "maker": "deepseek",
+          "kind": "text",
+          "retires": "2025-04-14"
+        },
+        {
+          "id": "deepseek-r1-distill-qwen-32b",
+          "maker": "deepseek",
+          "kind": "text",
+          "retires": "2025-04-14",
+          "replacement": "qwen-qwq-32b"
+        },
+        {
+          "id": "distil-whisper-large-v3-en",
+          "maker": "openai",
+          "kind": "audio",
+          "retires": "2025-08-23",
+          "replacement": "whisper-large-v3-turbo"
+        },
+        {
+          "id": "gemma2-9b-it",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-10-08",
+          "replacement": "llama-3.1-8b-instant"
+        },
+        {
+          "id": "groq/compound",
+          "maker": "groq",
+          "kind": "text",
+          "retires": "2026-09-21"
+        },
+        {
+          "id": "groq/compound-mini",
+          "maker": "groq",
+          "kind": "text",
+          "retires": "2026-09-21"
+        },
+        {
+          "id": "llama-3.1-8b-instant",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2026-08-16",
+          "replacement": "openai/gpt-oss-20b"
+        },
+        {
+          "id": "llama-3.2-11b-vision-preview",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2025-04-14",
+          "replacement": "meta-llama/llama-4-scout-17b-16e-instruct"
+        },
+        {
+          "id": "llama-3.2-1b-preview",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2025-04-14",
+          "replacement": "llama-3.1-8b-instant"
+        },
+        {
+          "id": "llama-3.2-3b-preview",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2025-04-14",
+          "replacement": "llama-3.1-8b-instant"
+        },
+        {
+          "id": "llama-3.2-90b-vision-preview",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2025-04-14",
+          "replacement": "meta-llama/llama-4-scout-17b-16e-instruct"
+        },
+        {
+          "id": "llama-3.3-70b-specdec",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2025-04-14"
+        },
+        {
+          "id": "llama-3.3-70b-versatile",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2026-08-16",
+          "replacement": "openai/gpt-oss-120b",
+          "replacement_alt": "qwen/qwen3.6-27b"
+        },
+        {
+          "id": "llama-guard-3-8b",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2025-06-06",
+          "replacement": "meta-llama/llama-guard-4-12b"
+        },
+        {
+          "id": "llama3-70b-8192",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2025-08-30",
+          "replacement": "llama-3.3-70b-versatile"
+        },
+        {
+          "id": "llama3-8b-8192",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2025-08-30",
+          "replacement": "llama-3.1-8b-instant"
+        },
+        {
+          "id": "meta-llama/llama-4-maverick-17b-128e-instruct",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2026-03-09",
+          "replacement": "openai/gpt-oss-120b"
+        },
+        {
+          "id": "meta-llama/llama-4-scout-17b-16e-instruct",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2026-07-17",
+          "replacement": "openai/gpt-oss-120b",
+          "replacement_alt": "qwen/qwen3.6-27b"
+        },
+        {
+          "id": "meta-llama/llama-guard-4-12b",
+          "maker": "meta",
+          "kind": "text",
+          "retires": "2026-03-05",
+          "replacement": "openai/gpt-oss-safeguard-20b"
+        },
+        {
+          "id": "mistral-saba-24b",
+          "maker": "mistral",
+          "kind": "text",
+          "retires": "2025-07-30",
+          "replacement": "qwen/qwen3-32b"
+        },
+        {
+          "id": "moonshotai/kimi-k2-instruct",
+          "maker": "moonshot",
+          "kind": "text",
+          "retires": "2025-10-10",
+          "replacement": "openai/gpt-oss-120b"
+        },
+        {
+          "id": "moonshotai/kimi-k2-instruct-0905",
+          "maker": "moonshot",
+          "kind": "text",
+          "retires": "2026-04-15",
+          "replacement": "openai/gpt-oss-120b"
+        },
+        {
+          "id": "playai-tts",
+          "maker": "playai",
+          "kind": "audio",
+          "retires": "2025-12-31",
+          "replacement": "canopylabs/orpheus-v1-english"
+        },
+        {
+          "id": "playai-tts-arabic",
+          "maker": "playai",
+          "kind": "audio",
+          "retires": "2025-12-31",
+          "replacement": "canopylabs/orpheus-arabic-saudi"
+        },
+        {
+          "id": "qwen-2.5-32b",
+          "maker": "qwen",
+          "kind": "text",
+          "retires": "2025-04-14"
+        },
+        {
+          "id": "qwen-2.5-coder-32b",
+          "maker": "qwen",
+          "kind": "text",
+          "retires": "2025-04-14"
+        },
+        {
+          "id": "qwen-qwq-32b",
+          "maker": "qwen",
+          "kind": "text",
+          "retires": "2025-07-14",
+          "replacement": "qwen/qwen3-32b"
+        },
+        {
+          "id": "qwen/qwen3-32b",
+          "maker": "qwen",
+          "kind": "text",
+          "retires": "2026-07-17",
+          "replacement": "openai/gpt-oss-120b"
+        },
+        {
+          "id": "qwen/qwen3.6-27b",
+          "maker": "qwen",
+          "kind": "text",
+          "retires": "2026-09-14",
+          "replacement": "qwen/qwen3.8-27b"
+        }
+      ]
+    },
+    "mistral": {
+      "name": "Mistral AI",
+      "direct": true,
+      "source": "https://docs.mistral.ai/models",
+      "checked": "2026-11-14",
+      "models": [
+        {
+          "id": "codestral-2405",
+          "name": "Codestral",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2024-12-02",
+          "retires": "2025-06-16",
+          "replacement": "codestral-2508"
+        },
+        {
+          "id": "codestral-2501",
+          "name": "Codestral",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2025-11-06",
+          "retires": "2025-11-30",
+          "replacement": "codestral-2508"
+        },
+        {
+          "id": "devstral-2512",
+          "name": "Devstral 2",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-05-22",
+          "retires": "2026-07-31",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "devstral-medium-2507",
+          "name": "Devstral Medium 1.0",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-02-27",
+          "retires": "2026-05-31",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "devstral-small-2505",
+          "name": "Devstral Small 1.0",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2025-10-31",
+          "retires": "2025-11-30",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "devstral-small-2507",
+          "name": "Devstral Small 1.1",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-02-27",
+          "retires": "2026-05-31",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "labs-devstral-small-2512",
+          "name": "Devstral Small 2",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-02-27",
+          "retires": "2026-03-31",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "labs-leanstral-1-5",
+          "name": "Leanstral 1.5",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-09-29",
+          "retires": "2026-09-30"
+        },
+        {
+          "id": "labs-leanstral-2603",
+          "name": "Leanstral",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2026-05-22",
+          "retires": "2026-06-30",
+          "replacement": "labs-leanstral-1-5"
+        },
+        {
+          "id": "labs-mistral-small-creative",
+          "name": "Mistral Small Creative",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-03-31",
+          "retires": "2026-04-30",
+          "replacement": "ministral-8b-2512"
+        },
+        {
+          "id": "magistral-medium-2506",
+          "name": "Magistral Medium 1.0",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2025-10-31",
+          "retires": "2025-11-30",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "magistral-medium-2507",
+          "name": "Magistral Medium 1.1",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2025-10-31",
+          "retires": "2025-11-30",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "magistral-medium-2509",
+          "name": "Magistral Medium 1.2",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-05-22",
+          "retires": "2026-07-31",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "magistral-small-2506",
+          "name": "Magistral Small 1.0",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2025-10-31",
+          "retires": "2025-11-30",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "magistral-small-2507",
+          "name": "Magistral Small 1.1",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2025-10-31",
+          "retires": "2025-11-30",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "ministral-3b-2410",
+          "name": "Ministral 3B",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2025-12-02",
+          "retires": "2025-12-31",
+          "replacement": "ministral-3b-2512"
+        },
+        {
+          "id": "ministral-8b-2410",
+          "name": "Ministral 8B",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2025-12-02",
+          "retires": "2025-12-31",
+          "replacement": "ministral-8b-2512"
+        },
+        {
+          "id": "mistral-large-2402",
+          "name": "Mistral Large 1.0",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2024-11-30",
+          "retires": "2025-06-16",
+          "replacement": "mistral-large-2512"
+        },
+        {
+          "id": "mistral-large-2407",
+          "name": "Mistral Large 2.0",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2024-11-30",
+          "retires": "2025-03-30",
+          "replacement": "mistral-large-2512"
+        },
+        {
+          "id": "mistral-large-2411",
+          "name": "Mistral Large 2.1",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-02-27",
+          "retires": "2026-05-31",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "mistral-large-2512",
+          "name": "Mistral Large 3",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-10-31",
+          "retires": "2027-04-30",
+          "replacement": "mistral-large-4"
+        },
+        {
+          "id": "mistral-medium-2312",
+          "name": "Mistral Medium 1.0",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2024-11-30",
+          "retires": "2025-06-16",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "mistral-medium-2505",
+          "name": "Mistral Medium 3",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-05-22",
+          "retires": "2026-08-31",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "mistral-medium-2508",
+          "name": "Mistral Medium 3.1",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-05-22",
+          "retires": "2026-08-31",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "mistral-medium-3-5",
+          "name": "Mistral Medium 3.5",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-10-31",
+          "retires": "2027-04-30",
+          "replacement": "mistral-large-4"
+        },
+        {
+          "id": "mistral-moderation-2411",
+          "name": "Mistral Moderation",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-03-31",
+          "retires": "2026-06-30",
+          "replacement": "mistral-moderation-2603"
+        },
+        {
+          "id": "mistral-ocr-2503",
+          "name": "OCR",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2025-12-02",
+          "retires": "2025-12-31",
+          "replacement": "mistral-ocr-4-1"
+        },
+        {
+          "id": "mistral-ocr-2505",
+          "name": "OCR 2",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-02-27",
+          "retires": "2026-05-31",
+          "replacement": "mistral-ocr-4-1"
+        },
+        {
+          "id": "mistral-ocr-4-0",
+          "name": "OCR 4.0",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-09-29",
+          "retires": "2026-09-30",
+          "replacement": "mistral-ocr-4-1"
+        },
+        {
+          "id": "mistral-saba-2502",
+          "name": "Mistral Saba",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2025-06-10",
+          "retires": "2025-09-30",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "mistral-small-2402",
+          "name": "Mistral Small 1.0",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2024-11-30",
+          "retires": "2025-06-16",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "mistral-small-2409",
+          "name": "Mistral Small 2.0",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2025-11-06",
+          "retires": "2025-11-30",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "mistral-small-2501",
+          "name": "Mistral Small 3.0",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2025-11-06",
+          "retires": "2025-11-30",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "mistral-small-2503",
+          "name": "Mistral Small 3.1",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2025-11-06",
+          "retires": "2025-11-30",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "mistral-small-2506",
+          "name": "Mistral Small 3.2",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-04-30",
+          "retires": "2026-07-31",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "open-codestral-mamba",
+          "name": "Codestral Mamba 7B",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2025-06-06",
+          "retires": "2025-06-06",
+          "replacement": "codestral-2508"
+        },
+        {
+          "id": "open-mistral-7b",
+          "name": "Mistral 7B",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2024-11-30",
+          "retires": "2025-03-30",
+          "replacement": "ministral-8b-2512"
+        },
+        {
+          "id": "open-mistral-nemo-2407",
+          "name": "Mistral Nemo 12B",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-05-22",
+          "retires": "2026-07-31",
+          "replacement": "ministral-8b-2512"
+        },
+        {
+          "id": "open-mixtral-8x22b",
+          "name": "Mixtral 8x22B",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2024-11-30",
+          "retires": "2025-03-30",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "open-mixtral-8x7b",
+          "name": "Mixtral 8x7B",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Retired",
+          "deprecated": "2024-11-30",
+          "retires": "2025-03-30",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "pixtral-12b-2409",
+          "name": "Pixtral 12B",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2025-12-02",
+          "retires": "2025-12-31",
+          "replacement": "ministral-14b-2512"
+        },
+        {
+          "id": "pixtral-large-2411",
+          "name": "Pixtral Large",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-02-27",
+          "retires": "2026-05-31",
+          "replacement": "mistral-medium-3-5"
+        },
+        {
+          "id": "voxtral-mini-2507",
+          "name": "Voxtral Mini Transcribe",
+          "maker": "mistral",
+          "kind": "audio",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-02-27",
+          "retires": "2026-05-31",
+          "replacement": "voxtral-mini-2602"
+        },
+        {
+          "id": "voxtral-mini-2602",
+          "name": "Voxtral Mini Transcribe 2",
+          "maker": "mistral",
+          "kind": "audio",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-10-31",
+          "retires": "2027-04-30",
+          "replacement": "voxtral-mini-transcribe-3-0"
+        },
+        {
+          "id": "voxtral-mini-transcribe-realtime-2602",
+          "name": "Voxtral Mini Transcribe Realtime",
+          "maker": "mistral",
+          "kind": "audio",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-10-31",
+          "retires": "2027-04-30",
+          "replacement": "voxtral-mini-transcribe-realtime-3-0"
+        },
+        {
+          "id": "voxtral-mini-tts-2603",
+          "name": "Voxtral TTS",
+          "maker": "mistral",
+          "kind": "audio",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-10-31",
+          "retires": "2027-04-30",
+          "replacement": "voxtral-mini-tts-3-0"
+        },
+        {
+          "id": "zai-glm-5-2",
+          "name": "Z.ai GLM 5.2",
+          "maker": "zai",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-09-29",
+          "retires": "2026-10-31",
+          "replacement": "zai-glm-5-3"
+        }
+      ]
+    },
+    "xai": {
+      "name": "xAI",
+      "direct": true,
+      "source": "https://docs.x.ai/developers/models",
+      "checked": "2026-11-14",
+      "models": [
+        {
+          "id": "grok-3",
+          "maker": "xai",
+          "kind": "text",
+          "retires": "2026-05-15",
+          "routes": true,
+          "replacement": "grok-4.3",
+          "replacement_note": "reasoning_effort: none"
+        },
+        {
+          "id": "grok-4-0709",
+          "maker": "xai",
+          "kind": "text",
+          "retires": "2026-05-15",
+          "routes": true,
+          "replacement": "grok-4.3",
+          "replacement_note": "reasoning_effort: low"
+        },
+        {
+          "id": "grok-4-1-fast-non-reasoning",
+          "maker": "xai",
+          "kind": "text",
+          "retires": "2026-05-15",
+          "routes": true,
+          "replacement": "grok-4.3",
+          "replacement_note": "reasoning_effort: none"
+        },
+        {
+          "id": "grok-4-1-fast-reasoning",
+          "maker": "xai",
+          "kind": "text",
+          "retires": "2026-05-15",
+          "routes": true,
+          "replacement": "grok-4.3",
+          "replacement_note": "reasoning_effort: low"
+        },
+        {
+          "id": "grok-4-fast-non-reasoning",
+          "maker": "xai",
+          "kind": "text",
+          "retires": "2026-05-15",
+          "routes": true,
+          "replacement": "grok-4.3",
+          "replacement_note": "reasoning_effort: none"
+        },
+        {
+          "id": "grok-4-fast-reasoning",
+          "maker": "xai",
+          "kind": "text",
+          "retires": "2026-05-15",
+          "routes": true,
+          "replacement": "grok-4.3",
+          "replacement_note": "reasoning_effort: low"
+        },
+        {
+          "id": "grok-code-fast-1",
+          "maker": "xai",
+          "kind": "text",
+          "retires": "2026-05-15",
+          "routes": true,
+          "replacement": "grok-build-0.1"
+        },
+        {
+          "id": "grok-imagine-image-pro",
+          "maker": "xai",
+          "kind": "image",
+          "retires": "2026-05-15",
+          "routes": true,
+          "replacement": "grok-imagine-image-quality"
+        },
+        {
+          "id": "grok-imagine-image-quality",
+          "maker": "xai",
+          "kind": "image",
+          "retires": "2026-11-02",
+          "routes": true,
+          "replacement": "grok-imagine-image-2.0",
+          "replacement_note": "quality: \"low\""
+        }
+      ]
+    },
+    "cohere": {
+      "name": "Cohere",
+      "direct": true,
+      "source": "https://docs.cohere.com/docs/deprecations",
+      "checked": "2026-11-14",
+      "models": [
+        {
+          "id": "c4ai-aya-expanse-8b",
+          "maker": "cohere",
+          "kind": "text",
+          "retires": "2026-04-04",
+          "replacement_note": "Cohere suggests command-r7b-12-2024, command-a-03-2025 or command-a-reasoning-08-2025"
+        },
+        {
+          "id": "c4ai-aya-vision-8b",
+          "maker": "cohere",
+          "kind": "text",
+          "retires": "2026-04-04",
+          "replacement_note": "Cohere suggests command-r7b-12-2024, command-a-03-2025 or command-a-reasoning-08-2025"
+        },
+        {
+          "id": "command",
+          "maker": "cohere",
+          "kind": "text",
+          "retires": "2025-09-15",
+          "replacement_note": "Cohere suggests command-r-08-2024, command-r-plus-08-2024 or command-a-03-2025"
+        },
+        {
+          "id": "command-light",
+          "maker": "cohere",
+          "kind": "text",
+          "retires": "2025-09-15",
+          "replacement_note": "Cohere suggests command-r-08-2024, command-r-plus-08-2024 or command-a-03-2025"
+        },
+        {
+          "id": "command-r",
+          "maker": "cohere",
+          "kind": "text",
+          "retires": "2025-09-15",
+          "replacement_note": "Cohere suggests command-r-08-2024, command-r-plus-08-2024 or command-a-03-2025"
+        },
+        {
+          "id": "command-r-03-2024",
+          "maker": "cohere",
+          "kind": "text",
+          "retires": "2025-09-15",
+          "replacement_note": "Cohere suggests command-r-08-2024, command-r-plus-08-2024 or command-a-03-2025"
+        },
+        {
+          "id": "command-r-plus",
+          "maker": "cohere",
+          "kind": "text",
+          "retires": "2025-09-15",
+          "replacement_note": "Cohere suggests command-r-08-2024, command-r-plus-08-2024 or command-a-03-2025"
+        },
+        {
+          "id": "command-r-plus-04-2024",
+          "maker": "cohere",
+          "kind": "text",
+          "retires": "2025-09-15",
+          "replacement_note": "Cohere suggests command-r-08-2024, command-r-plus-08-2024 or command-a-03-2025"
+        },
+        {
+          "id": "embed-english-light-v2.0",
+          "maker": "cohere",
+          "kind": "embedding",
+          "retires": "2026-04-04",
+          "replacement_note": "Cohere suggests embed-english-v3.0, embed-multilingual-v3.0 or embed-v4.0"
+        },
+        {
+          "id": "embed-english-v2.0",
+          "maker": "cohere",
+          "kind": "embedding",
+          "retires": "2026-04-04",
+          "replacement_note": "Cohere suggests embed-english-v3.0, embed-multilingual-v3.0 or embed-v4.0"
+        },
+        {
+          "id": "embed-multilingual-v2.0",
+          "maker": "cohere",
+          "kind": "embedding",
+          "retires": "2026-04-04",
+          "replacement_note": "Cohere suggests embed-english-v3.0, embed-multilingual-v3.0 or embed-v4.0"
+        }
+      ]
     }
   }
 }

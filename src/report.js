@@ -85,12 +85,12 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
       const places = r.places.slice(0, 3).join(", ") + (r.places.length > 3 ? ` +${r.places.length - 3} more` : "");
       const docsOnly = r.places.length && byModel.get(r.id).docs === r.places.length ? " · docs only" : "";
       if (r.entry?.under_review) underReview.push(r);
-      lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly}${r.entry?.under_review ? " · 🔍 under review" : ""} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) + (r.entry.replacement_alt ? " or " + code(r.entry.replacement_alt) : "") + (r.entry.replacement_note ? " (" + esc(r.entry.replacement_note) + ")" : "") + changed(r.entry, today) : ""} | ${changeCell} | ${places} |`);
+      lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly}${r.entry?.under_review ? " · 🔍 under review" : ""} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) + (r.entry.replacement_alt ? " or " + code(r.entry.replacement_alt) : "") + (r.entry.replacement_note ? " (" + esc(r.entry.replacement_note) + ")" : "") + changed(r.entry, today) : r.entry?.replacement_note ? esc(r.entry.replacement_note) : ""} | ${changeCell} | ${places} |`);
     }
     if (all.length > rows.length) lines.push("", `_${all.length - rows.length} more model ID(s) with no retirement listed are not shown._`);
     const onPlatform = rows.filter((r) => r.entry?.platform && ["retired", "at-risk", "deprecated"].includes(r.status));
     if (onPlatform.length) {
-      lines.push("", "**On a cloud platform:**", "");
+      lines.push("", "**Where these dates come from:**", "");
       for (const r of onPlatform) lines.push(`- ${code(r.id)}: ${esc(platformText(r.entry, today))}`);
     }
     // Gemini API / Anthropic dates were used (no Vertex signs in the file), but Vertex's date differs: say so.

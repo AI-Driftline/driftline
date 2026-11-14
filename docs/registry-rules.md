@@ -8,7 +8,7 @@ How `registry/models.json` is kept in sync with the providers' deprecation pages
 - Anthropic: https://platform.claude.com/docs/en/about-claude/model-deprecations
 - Google: https://ai.google.dev/gemini-api/docs/deprecations
 
-Only these three pages count. No blog posts, forum threads or emails.
+Only these three pages count for `models`. No blog posts, forum threads or emails. (Cloud platforms and the other providers below have their own sections.)
 
 ## Cloud platforms (script-managed)
 
@@ -18,7 +18,19 @@ Google Vertex AI (now "Gemini Enterprise Agent Platform") sets its own dates too
 
 Microsoft Azure (Azure OpenAI and other Foundry models) sets its own date per model version (https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule). They live in `platforms.azure` and are written only by `node tools/azure.mjs --write`. Azure plans a date for every model, current ones included (lifecycle GA/Preview); those count as retiring only within 90 days.
 
-The `platforms` workflow runs all three scripts every 6 hours. Don't edit `platforms.*` by hand, and don't use them to change the provider entries.
+More providers' own pages are read by `node tools/direct.mjs --write` (Groq, Mistral AI, xAI, Cohere) into `platforms.groq`, `platforms.mistral`, `platforms.xai` and `platforms.cohere`. xAI redirects retired slugs to a newer model (`routes: true`).
+
+The `platforms` workflow runs these scripts every 6 hours.
+
+## DeepSeek (kept by the daily AI check)
+
+DeepSeek has no deprecation page; it announces changes in its news: https://api-docs.deepseek.com/updates. Entries live in `platforms.deepseek.models` and are edited by hand or by the daily AI check, following the same rules as above:
+
+- `id`, `maker: "deepseek"`, `kind`, `retires` (YYYY-MM-DD), optional `replacement`, `replacement_note`, `routes`, `note`.
+- "will be discontinued on <date>" / "discontinued in three months (<date>)" → `retires` = that date.
+- "has been retired; the name is temporarily routed to X" → `retires` = the date of that announcement, `routes: true`, `replacement` = the model name DeepSeek tells you to use.
+- A model DeepSeek says it keeps serving ("continue providing API services") → no entry.
+- Set `platforms.deepseek.checked` to today when you compared the page. The page check (`tools/check-pages.mjs`) flags new sentences there about retiring or routing a `deepseek-…` model. Don't edit `platforms.*` by hand, and don't use them to change the provider entries.
 
 ## Entry fields
 

@@ -106,13 +106,27 @@ for (const [provider, page] of Object.entries(pages)) {
   }
   nextState[provider] = seen;
 }
+// 3. Providers kept by the AI check from free-text news (platforms.<name>.maintained === "ai", e.g. DeepSeek):
+//    every entry must still be mentioned, and a new sentence about retiring / routing one of their models is a lead.
+for (const [name, p] of Object.entries(reg.platforms || {})) {
+  if (p.maintained !== "ai" || !p.source) continue;
+  const page = await fetchPage(p.source);
+  // Not counted as a problem: an unreachable news page (e.g. a network allowlist) must never block fixes to the main pages.
+  if (page.error || !page.text.includes(name)) { console.error(`Note: could not read the ${p.name || name} page (${page.error || "no model names on it"}): ${p.source}. Skipped.`); continue; }
+  for (const m of p.models || []) if (!page.text.includes(m.id)) problems.push({ kind: "missing", what: "listing", provider: name, id: m.id, msg: `\`${m.id}\` is no longer mentioned on the ${p.name || name} page.` });
+  const sentences = [...new Set((page.text.match(/[^.]*\b(?:retired|discontinued|deprecated|routed|no longer (?:available|supported))\b[^.]*\./gi) || [])
+    .filter((x) => new RegExp(`\\b${name}-[a-z0-9]`, "i").test(x)).map((x) => x.trim()))].sort();
+  const key = `${name}:retirement-sentences`;
+  if (state[key]) for (const x of sentences.filter((x) => !state[key].includes(x))) problems.push({ kind: "new", provider: name, id: name, msg: `New on the ${p.name || name} page: "${x.slice(0, 400)}"` });
+  nextState[key] = sentences;
+}
 if (statePath) writeFileSync(statePath, JSON.stringify(nextState, null, 1) + "\n");
 
 if (disputedPath && !problems.some((p) => p.kind === "page")) {
   const before = existsSync(disputedPath) ? JSON.parse(readFileSync(disputedPath, "utf8")) : {};
   const now = {};
   for (const p of problems.filter((x) => x.kind === "differs" || x.kind === "missing"))
-    now[p.id] = { since: before[p.id]?.since || today, provider: p.provider, what: p.what, page: reg.sources[p.provider] };
+    now[p.id] = { since: before[p.id]?.since || today, provider: p.provider, what: p.what, page: reg.sources[p.provider] || reg.platforms?.[p.provider]?.source };
   writeFileSync(disputedPath, JSON.stringify(now, null, 1) + "\n");
 }
 

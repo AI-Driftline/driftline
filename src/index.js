@@ -56,7 +56,7 @@ async function main() {
     const chg = replacementChange(f.entry);
     const mig = f.entry.routes ? null : migrationFor(f.entry);
     const more = mig && !mig.drop_in && mig.change !== "settings" ? ` Not just a rename: ${mig.note}` : mig?.change === "choose" ? ` ${mig.note}` : "";
-    const repl = f.entry?.replacement && !f.entry.routes ? ` Replacement: ${replacementText(f.entry)}.${chg ? ` (Changed by the provider on ${chg.on}; before it was ${chg.was}.)` : ""}` : "";
+    const repl = f.entry?.replacement && !f.entry.routes ? ` Replacement: ${replacementText(f.entry)}.${chg ? ` (Changed by the provider on ${chg.on}; before it was ${chg.was}.)` : ""}` : !f.entry?.replacement && replacementText(f.entry) ? ` ${replacementText(f.entry)}.` : "";
     const text = f.entry.routes && f.entry.replacement
       ? (f.days <= 0
         ? `Since ${f.entry.retires}, requests to ${f.id} are answered by ${f.entry.replacement}. The call still works, but the model behind it changed.`

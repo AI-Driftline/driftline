@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, extname, sep } from "node:path";
-import { looksLikeModelId, resolveId, VERTEX_SIGNS, AZURE_SIGNS, AZURE_VERSION, API_VERSION } from "./registry.js";
+import { looksLikeModelId, resolveId, VERTEX_SIGNS, AZURE_SIGNS, AZURE_VERSION, API_VERSION, PROVIDER_SIGNS } from "./registry.js";
 
 const SKIP_DIRS = new Set([
   ".git", "node_modules", "vendor", "dist", "build", "out", ".next", ".nuxt",
@@ -52,6 +52,7 @@ export function scanText(text, file, known) {
   const lines = text.split(/\r?\n/);
   const onVertex = VERTEX_SIGNS.test(text); // this file calls Gemini/Claude through Vertex AI: use Vertex's dates
   const onAzure = AZURE_SIGNS.test(text); // …or OpenAI (and other) models through Azure: Azure's dates, per version
+  const providers = Object.fromEntries(Object.entries(PROVIDER_SIGNS).map(([p, re]) => [p, re.test(text)])); // Groq, Cohere, …
   // Azure deployment templates put the model version next to the name (version: '2024-08-06'); never api_version.
   const versionNear = (i) => {
     for (const d of [0, 1, -1, 2, -2, 3, -3]) {
@@ -71,7 +72,7 @@ export function scanText(text, file, known) {
       const a = line.match(ASSIGNED);
       if (a) seen.add(a[1]);
     }
-    const ids = [...seen].map((raw) => resolveId(raw, { byId: known }, { onVertex, onAzure, version: onAzure ? versionNear(i) : undefined })).filter((id) => looksLikeModelId(id, known));
+    const ids = [...seen].map((raw) => resolveId(raw, { byId: known }, { onVertex, onAzure, version: onAzure ? versionNear(i) : undefined, providers })).filter((id) => looksLikeModelId(id, known));
     const context = MODEL_CONTEXT.test(line) || ids.some((id) => !BARE_SHORT.test(id)); // e.g. ["o1", "gpt-4o"]
     for (const id of ids) {
       if (BARE_SHORT.test(id) && !context) continue;

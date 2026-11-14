@@ -913,3 +913,46 @@ test("Azure page parser reads the per-maker tables and skips fine-tuned ones", a
   assert.deepEqual(out.map((m) => [m.id, m.maker, m.retires, m.replacement || null, m.versions.length]), [
     ["claude-mythos-preview", "anthropic", "2027-04-02", null, 1], ["gpt-4o", "openai", "2027-01-14", "gpt-5.1", 2]]);
 });
+
+// More providers' own pages (Groq, Mistral, xAI, Cohere, DeepSeek). Ambiguous IDs need the provider's signs in the file.
+const DIRECT = { models: Array(0), checked: "2026-11-14", sources: {}, platforms: {
+  groq: { name: "Groq", direct: true, source: "https://x/groq", models: [
+    { id: "qwen/qwen3-32b", maker: "qwen", kind: "text", retires: "2026-07-17", replacement: "openai/gpt-oss-120b" },
+    { id: "llama-3.3-70b-versatile", maker: "meta", kind: "text", retires: "2026-08-16", replacement: "openai/gpt-oss-120b" }] },
+  cohere: { name: "Cohere", direct: true, source: "https://x/cohere", models: [
+    { id: "command", maker: "cohere", kind: "text", retires: "2025-09-15", replacement_note: "Cohere suggests command-a-03-2025" },
+    { id: "command-r-plus-04-2024", maker: "cohere", kind: "text", retires: "2025-09-15" }] },
+  xai: { name: "xAI", direct: true, source: "https://x/xai", models: [
+    { id: "grok-3", maker: "xai", kind: "text", retires: "2026-05-15", routes: true, replacement: "grok-4.3", replacement_note: "reasoning_effort: none" }] },
+} };
+
+test("provider IDs: distinctive ones anywhere, ambiguous ones only with the provider's signs", async () => {
+  const { buildRegistry, replacementText } = await import("../src/registry.js");
+  const reg = buildRegistry(DIRECT);
+  const today = new Date("2026-11-14T00:00:00Z");
+  assert.deepEqual(scanText('from groq import Groq\nm = "qwen/qwen3-32b"\nn = "llama-3.3-70b-versatile"', "g.py", reg.byId).map((h) => h.id), ["groq:qwen/qwen3-32b", "groq:llama-3.3-70b-versatile"]);
+  assert.deepEqual(scanText('fetch("https://openrouter.ai/api/v1", { model: "qwen/qwen3-32b" })', "o.ts", reg.byId).map((h) => h.id), []); // OpenRouter's qwen/qwen3-32b is not Groq's
+  assert.deepEqual(scanText('m = "llama-3.3-70b-versatile"', "x.py", reg.byId).map((h) => h.id), ["llama-3.3-70b-versatile"]); // Groq-only name
+  assert.deepEqual(scanText('const parts = ["command", "subcommand"]', "cli.js", reg.byId).map((h) => h.id), []); // the word "command" is not Cohere's model
+  assert.deepEqual(scanText('import cohere\nr = co.chat(model="command")', "c.py", reg.byId).map((h) => h.id), ["cohere:command"]);
+  assert.equal(scanText('m = "groq/qwen/qwen3-32b"', "l.py", reg.byId)[0].id, "groq:qwen/qwen3-32b"); // LiteLLM-style prefix
+  assert.equal(replacementText(reg.byId.get("cohere:command")), "Cohere suggests command-a-03-2025");
+  const grok = classify("grok-3", reg, { today });
+  assert.equal(grok.status, "retired");
+  assert.equal(grok.entry.routes, true); // xAI redirects old slugs to grok-4.3
+  const { validRegistry } = await import("../src/registry.js");
+  assert.equal(validRegistry({ ...DIRECT, models: Array(50).fill({ id: "o3", provider: "openai", retires: "2026-12-11" }) }), true); // older versions still read the list
+});
+
+test("provider page parsers: Groq tables, Mistral markdown, xAI guides, Cohere notes", async () => {
+  const { parseGroq, parseMistral, parseXaiGuide, parseCohere } = await import("../tools/direct.mjs");
+  assert.deepEqual(parseGroq(`<table><tr><th>Deprecated Model</th><th>Shutdown Date</th><th>Recommended Replacement Model ID</th></tr>
+    <tr><td>llama-3.3-70b-versatile</td><td>08/16/26</td><td>openai/gpt-oss-120b or qwen/qwen3.6-27b</td></tr></table>`).map((m) => [m.id, m.retires, m.replacement, m.replacement_alt]),
+    [["llama-3.3-70b-versatile", "2026-08-16", "openai/gpt-oss-120b", "qwen/qwen3.6-27b"]]);
+  const md = `| Model | API name | Status |\n| --- | --- | --- |\n| [Mistral Large 4](/models/x) | \`mistral-large-4\` | GA |\n\n## Deprecated and retired models\n\n| Model | API name | Status | Context | Summary | Deprecation | Retirement | Replacement |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| [Mistral Large 3](/models/y) | \`mistral-large-2512\` | Deprecated | 256k | x | 2026-10-31 | 2027-04-30 | [Mistral Large 4](/models/x) |\n`;
+  assert.deepEqual(parseMistral(md).map((m) => [m.id, m.retires, m.replacement]), [["mistral-large-2512", "2027-04-30", "mistral-large-4"]]);
+  const g = parseXaiGuide("# Grok Model Retirement on May 15, 2026\n\n| Model being retired | Redirect target |\n|---|---|\n| `grok-3` | `grok-4.3` with `none` reasoning effort |\n");
+  assert.deepEqual(g.map((m) => [m.id, m.retires, m.routes, m.replacement, m.replacement_note]), [["grok-3", "2026-05-15", true, "grok-4.3", "reasoning_effort: none"]]);
+  const c = parseCohere("### 2025-09-15: Old models\n\nEffective September 15, 2025, the following deprecations will roll out.\n\nDeprecated Models:\n\n* `command-r-03-2024`  (and the alias `command-r`)\n* `summarize` (endpoint)\n\nFor command model replacements, we recommend you use `command-r-08-2024` or `command-a-03-2025`.\n");
+  assert.deepEqual(c.map((m) => [m.id, m.retires, m.replacement_note]), [["command-r", "2025-09-15", "Cohere suggests command-r-08-2024 or command-a-03-2025"], ["command-r-03-2024", "2025-09-15", "Cohere suggests command-r-08-2024 or command-a-03-2025"]]);
+});
