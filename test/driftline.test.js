@@ -198,9 +198,9 @@ const licensed = (answer) => async (url) => url.includes("lemonsqueezy")
   ? { status: 200, json: async () => ({ valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" } }) }
   : { ok: true, status: 200, text: async () => JSON.stringify(url.includes("anthropic") ? { content: [{ type: "text", text: answer }] } : { output_text: answer }) };
 
-test("cloud-platform spellings map to provider IDs", () => {
-  assert.equal(normalizeId("anthropic.claude-3-5-sonnet-20240620-v1:0"), "claude-3-5-sonnet-20240620");
-  assert.equal(normalizeId("us.anthropic.claude-3-5-sonnet-20240620-v2:0"), "claude-3-5-sonnet-20240620");
+test("cloud-platform spellings: Vertex maps to provider IDs, Bedrock keeps its own IDs", () => {
+  assert.equal(normalizeId("anthropic.claude-3-5-sonnet-20240620-v1:0"), "anthropic.claude-3-5-sonnet-20240620-v1:0");
+  assert.equal(normalizeId("us.anthropic.claude-3-5-sonnet-20240620-v2:0"), "anthropic.claude-3-5-sonnet-20240620-v2:0");
   assert.equal(normalizeId("claude-3-5-sonnet@20240620"), "claude-3-5-sonnet-20240620");
   assert.deepEqual(scanText('model="claude-3-5-sonnet@20240620"', "a.py").map((h) => h.id), ["claude-3-5-sonnet-20240620"]);
 });
@@ -346,7 +346,7 @@ test("chains that loop never make a model its own replacement", async () => {
 
 test("o1 next to other model IDs counts; inference-profile ARNs resolve", () => {
   assert.deepEqual(scanText('const picker = ["o1", "gpt-4o"]', "a.ts", registry.byId).map((h) => h.id).sort(), ["gpt-4o", "o1"]);
-  assert.equal(normalizeId("arn:aws:bedrock:us-east-1:123:inference-profile/us.anthropic.claude-3-5-sonnet-20241022-v2:0"), "claude-3-5-sonnet-20241022");
+  assert.equal(normalizeId("arn:aws:bedrock:us-east-1:123:inference-profile/us.anthropic.claude-3-5-sonnet-20241022-v2:0"), "anthropic.claude-3-5-sonnet-20241022-v2:0");
 });
 
 test("a current model's empty answer keeps the replacement's answer", async () => {
@@ -372,7 +372,7 @@ test("scanner stays fast on huge lines and skips bare o1 keys", () => {
 test("more ID spellings and file types", () => {
   assert.equal(normalizeId("claude-3-5-sonnet-v2@20241022"), "claude-3-5-sonnet-20241022");
   assert.equal(normalizeId("openrouter/openai/gpt-4"), "gpt-4");
-  assert.equal(normalizeId("arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0"), "claude-3-5-sonnet-20240620");
+  assert.equal(normalizeId("arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0"), "anthropic.claude-3-5-sonnet-20240620-v1:0");
   assert.equal(normalizeId("azure/gpt-4"), "azure/gpt-4"); // Azure retires on its own dates
   const dir = tempRepo({ "App.vue": 'const m = "gpt-4"\n', "nb.ipynb": '{"source": ["model = \\"gpt-4\\""]}\n' });
   assert.equal(scanDirectory(dir).length, 2);
@@ -754,4 +754,67 @@ test("an entry under review says so in the report instead of stating its date as
   const r = await run({ root: dir, today: TODAY, registry: reg });
   assert.match(r.markdown, /· 🔍 under review \|/);
   assert.match(r.markdown, /\*\*🔍 Under review:\*\*/);
+});
+
+// Amazon Bedrock sets its own dates per model and region; they win over the model maker's dates for Bedrock IDs.
+const BEDROCK = { models: [{ id: "claude-opus-4-1-20250805", provider: "anthropic", retires: "2026-08-05", qualifier: "exact", replacement: "claude-opus-4-8" }],
+  checked: "2026-11-14", sources: {}, platforms: { bedrock: { name: "Amazon Bedrock", source: "https://docs.aws.amazon.com/x", models: [
+    { id: "anthropic.claude-opus-4-1-20250805-v1:0", maker: "anthropic", kind: "text", retires: "2027-01-08", legacy: "2026-07-08", extended: "2026-10-08",
+      regions: [{ regions: ["us-east-1"], legacy: "2026-07-08", retires: "2027-01-08", extended: "2026-10-08" }] },
+    { id: "meta.llama3-70b-instruct-v1:0", maker: "meta", kind: "text", retires: "2027-03-30", legacy: "2026-09-30",
+      regions: [{ regions: ["us-east-1"], legacy: "2026-09-30", retires: "2027-03-30" }, { regions: ["us-gov-west-1"], legacy: "2026-11-09", retires: "2027-05-09" }] },
+  ] } } };
+
+test("Bedrock IDs use Bedrock's dates, not the model maker's", async () => {
+  const { buildRegistry, platformText } = await import("../src/registry.js");
+  const reg = buildRegistry(BEDROCK);
+  const today = new Date("2026-11-14T00:00:00Z");
+  const onBedrock = classify(normalizeId("us.anthropic.claude-opus-4-1-20250805-v1:0"), reg, { today });
+  assert.equal(onBedrock.status, "at-risk"); // 55 days on Bedrock, though Anthropic's own API retired it in August
+  assert.equal(onBedrock.entry.retires, "2027-01-08");
+  assert.equal(onBedrock.entry.replacement, "claude-opus-4-8"); // Anthropic's, marked as such
+  assert.match(platformText(onBedrock.entry, today), /Amazon Bedrock.*extended access since 2026-10-08/);
+  assert.equal(classify("claude-opus-4-1-20250805", reg, { today }).status, "retired");
+  const llama = classify(normalizeId("bedrock/meta.llama3-70b-instruct-v1:0"), reg, { today });
+  assert.equal(llama.status, "deprecated");
+  assert.match(platformText(llama.entry, today), /latest is 2027-05-09/);
+  // A Bedrock model not on Bedrock's list has no announced date there, whatever the maker says.
+  assert.equal(classify(normalizeId("anthropic.claude-sonnet-5-5-v1:0"), reg, { today }).status, "unknown");
+  assert.deepEqual(scanText('modelId: "eu.anthropic.claude-opus-4-1-20250805-v1:0"', "a.ts", reg.byId).map((h) => h.id), ["anthropic.claude-opus-4-1-20250805-v1:0"]);
+  // Older versions accept only OpenAI/Anthropic/Google in `models`; platform data must not break that.
+  const { validRegistry } = await import("../src/registry.js");
+  assert.equal(validRegistry({ ...BEDROCK, models: Array(50).fill(BEDROCK.models[0]) }), true);
+});
+
+test("Bedrock page parser reads single and multi-region blocks", async () => {
+  const { parseBedrock } = await import("../tools/bedrock.mjs");
+  const md = `**Models with a scheduled EOL date**
+- **Meta**
+  - **Model name:** Llama 3 70B Instruct
+  - **Model ID:** meta.llama3-70b-instruct-v1:0
+  - **Regions:** ap-south-1, us-east-1 / **Legacy date:** September 30, 2026 / **EOL date:** March 30, 2027 / **Public extended access start date:** To be announced
+  - **Regions:** us-gov-west-1 / **Legacy date:** November 9, 2026 / **EOL date:** May 9, 2027 / **Public extended access start date:** To be announced
+- **DeepSeek**
+  - **Model name:** DeepSeek-V3.1
+  - **Model ID:** deepseek.v3-v1:0 (bedrock-runtime), deepseek.v3.1 (bedrock-mantle)
+  - **Regions:** us-west-2
+  - **Legacy date:** September 30, 2026
+  - **EOL date:** March 30, 2027
+  - **Public extended access start date:** —
+**Models that have reached EOL**
+- **Cohere**
+  - **Model name:** Command R\\+
+  - **Model ID:** cohere.command-r-plus-v1:0
+  - **Regions:** us-east-1
+  - **Legacy date:** February 19, 2026
+  - **EOL date:** August 19, 2026
+  - **Public extended access start date:** May 19, 2026
+`;
+  const out = parseBedrock(md);
+  assert.deepEqual(out.map((m) => m.id), ["cohere.command-r-plus-v1:0", "deepseek.v3-v1:0", "deepseek.v3.1", "meta.llama3-70b-instruct-v1:0"]);
+  const llama = out.find((m) => m.id.startsWith("meta."));
+  assert.equal(llama.retires, "2027-03-30");
+  assert.equal(llama.regions.length, 2);
+  assert.equal(out[0].extended, "2026-05-19");
+  assert.equal(out[0].name, "Command R+");
 });

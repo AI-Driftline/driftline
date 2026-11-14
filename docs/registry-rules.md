@@ -10,6 +10,10 @@ How `registry/models.json` is kept in sync with the providers' deprecation pages
 
 Only these three pages count. No blog posts, forum threads or emails.
 
+## Cloud platforms (script-managed)
+
+Amazon Bedrock sets its own dates per model and region (https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle-legacy.html). They live in `platforms.bedrock` and are written only by `node tools/bedrock.mjs --write`, which the `bedrock` workflow runs every 6 hours. Don't edit `platforms.bedrock` by hand and don't use it to change the Anthropic entries: a Bedrock date applies only to the Bedrock model ID.
+
 ## Entry fields
 
 `id`, `provider` (openai | anthropic | google), `retires` (YYYY-MM-DD), `qualifier`, optional `replacement`, optional `replacement_alt`, optional `replacement_note`, optional `previous_replacement` + `replacement_changed` (see below), `kind` (omit for text; else audio | image | video | embedding | moderation | agent), `announced` (date of the notice, when the page gives one), `routes: true` (see below).

@@ -1,4 +1,4 @@
-import { replacementChange, reviewText } from "./registry.js";
+import { replacementChange, reviewText, platformText } from "./registry.js";
 import { migrationFor, MIGRATION_LABEL } from "./migration.js";
 
 const STATUS_LABEL = {
@@ -88,6 +88,11 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
       lines.push(`| ${code(r.id)}${r.entry?.aliasOf ? " · alias of " + code(r.entry.aliasOf) : ""}${r.entry?.kind && r.entry.kind !== "text" ? " · " + r.entry.kind : ""} | ${label(r)}${docsOnly}${r.entry?.under_review ? " · 🔍 under review" : ""} | ${esc(when(r))} | ${r.entry?.replacement ? code(r.entry.replacement) + (r.entry.replacement_alt ? " or " + code(r.entry.replacement_alt) : "") + (r.entry.replacement_note ? " (" + esc(r.entry.replacement_note) + ")" : "") + changed(r.entry, today) : ""} | ${changeCell} | ${places} |`);
     }
     if (all.length > rows.length) lines.push("", `_${all.length - rows.length} more model ID(s) with no retirement listed are not shown._`);
+    const onPlatform = rows.filter((r) => r.entry?.platform && ["retired", "at-risk", "deprecated"].includes(r.status));
+    if (onPlatform.length) {
+      lines.push("", "**On a cloud platform:**", "");
+      for (const r of onPlatform) lines.push(`- ${code(r.id)}: ${esc(platformText(r.entry, today))}`);
+    }
     if (underReview.length) {
       lines.push("", "**🔍 Under review:**", "");
       for (const r of underReview) lines.push(`- ${code(r.id)}: ${esc(reviewText(r.entry))}`);
@@ -123,6 +128,6 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
 
   if (notices.length) lines.push("", ...notices.map((n) => `> ${n}`));
   lines.push("", `<sub>Retirement dates checked against official provider pages on ${registry.checked}${registry.source === "live" ? " (live list at aidriftline.com)" : ({ newer: " (list bundled with this version, newer than the live list)", unreachable: " (list bundled with this version; the live list could not be read)", offline: " (list bundled with this version)" })[registry.sourceWhy] || ""}. ` +
-    `Sources: [OpenAI](${registry.sources.openai}) · [Anthropic](${registry.sources.anthropic}) · [Google](${registry.sources.google}).</sub>`);
+    `Sources: [OpenAI](${registry.sources.openai}) · [Anthropic](${registry.sources.anthropic}) · [Google](${registry.sources.google})${registry.platforms?.bedrock ? ` · [Amazon Bedrock](${registry.platforms.bedrock.source})` : ""}.</sub>`);
   return lines.join("\n");
 }

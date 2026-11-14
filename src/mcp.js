@@ -6,7 +6,7 @@
 import { readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline";
-import { loadBestRegistry, classify, normalizeId, replacementChange, replacementText, reviewText } from "./registry.js";
+import { loadBestRegistry, classify, normalizeId, replacementChange, replacementText, reviewText, platformText } from "./registry.js";
 import { migrationFor } from "./migration.js";
 import { scanDirectory } from "./scan.js";
 
@@ -19,7 +19,7 @@ export { loadBestRegistry }; // shared with the Action and CLI (src/registry.js)
 // One plain sentence an agent can pass on to the user.
 function advice(c, today = new Date()) {
   const m = c.entry;
-  if (!m) return "Not in Driftline's registry: no retirement is announced for it on the OpenAI, Anthropic or Google deprecation pages (or it is not a model ID).";
+  if (!m) return "Not in Driftline's registry: no retirement is announced for it on the OpenAI, Anthropic, Google or Amazon Bedrock deprecation pages (or it is not a model ID).";
   const who = WHO[m.provider] || m.provider;
   const chg = replacementChange(m, today);
   const mig = migrationFor(m);
@@ -44,11 +44,12 @@ function describe(rawId, reg, today) {
     status: c.status, ...(m ? {
       provider: m.provider, retires: m.retires, qualifier: m.qualifier, days_left: c.days,
       replacement: m.replacement || null, ...(m.replacement_alt ? { replacement_alt: m.replacement_alt } : {}), ...(m.replacement_note ? { replacement_note: m.replacement_note } : {}),
-      ...(m.previous_replacement ? { previous_replacement: m.previous_replacement, replacement_changed: m.replacement_changed } : {}), routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: page(m.aliasOf || m.id),
+      ...(m.previous_replacement ? { previous_replacement: m.previous_replacement, replacement_changed: m.replacement_changed } : {}), routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: m.platform ? m.platform_source : page(m.aliasOf || m.id),
     } : {}),
     ...(m && migrationFor(m) ? { migration: migrationFor(m) } : {}),
     ...(m?.under_review ? { under_review: m.under_review } : {}),
-    advice: (m?.under_review ? reviewText(m) + " " : "") + advice(c, today),
+    ...(m?.platform ? { platform: m.platform, ...(m.regions?.length > 1 ? { regions: m.regions } : {}), ...(m.extended ? { extended_access: m.extended } : {}) } : {}),
+    advice: (m?.under_review ? reviewText(m) + " " : "") + advice(c, today) + (m?.platform ? " " + platformText(m, today) : ""),
   };
 }
 
@@ -87,7 +88,7 @@ const TOOLS = [
   {
     name: "check_models",
     title: "Check model IDs for retirement",
-    description: "Look up OpenAI, Anthropic and Google model IDs and return, for each one, its retirement status, retirement date, days left and replacement. " +
+    description: "Look up OpenAI, Anthropic, Google and Amazon Bedrock model IDs and return, for each one, its retirement status, retirement date, days left and replacement. " +
       "Use it before writing, changing or keeping a model ID in code, or when the user asks whether a model still works. " +
       "To find the IDs inside a codebase use scan_project instead; to list everything retiring soon use upcoming_retirements. " +
       "Read-only. Data comes from the providers' official deprecation pages, re-checked daily at aidriftline.com (fetched with a 4 s timeout, falling back to the copy in the package when offline). " +
@@ -102,7 +103,7 @@ const TOOLS = [
   {
     name: "scan_project",
     title: "Scan a project for retiring model IDs",
-    description: "Scan a project folder for OpenAI, Anthropic and Google model IDs in code and config files and report the ones that are retired, retiring soon, deprecated or being re-routed, with file and line, most urgent first. " +
+    description: "Scan a project folder for OpenAI, Anthropic, Google and Amazon Bedrock model IDs in code and config files and report the ones that are retired, retiring soon, deprecated or being re-routed, with file and line, most urgent first. " +
       "Use it to audit a repository or before a release. For IDs you already know use check_models; for a time-based list use upcoming_retirements. " +
       "Read-only: reads files on this machine and never changes them. Scans subfolders recursively, skips .git, node_modules, vendor, dist, build and similar folders, and files over 1 MB. " +
       "Mentions in .md and .txt files are marked in_docs. Returns at most 200 findings (truncated: true when cut). Fails with an error if the path does not exist.",
@@ -121,12 +122,12 @@ const TOOLS = [
   {
     name: "upcoming_retirements",
     title: "List upcoming model retirements",
-    description: "List OpenAI, Anthropic and Google models whose retirement or re-routing date falls in the next N days, soonest first, with replacement for each. " +
+    description: "List OpenAI, Anthropic, Google and Amazon Bedrock models whose retirement or re-routing date falls in the next N days, soonest first, with replacement for each. " +
       "Use it to answer \"what is being retired soon?\" or to plan migrations. It does not look at code: use scan_project for that, or check_models for specific IDs. " +
       "Read-only. Models already past their date are not included (check_models reports those as retired). Anthropic \"not before\" dates are left out because those models are still active.",
     inputSchema: { type: "object", properties: {
       days: { type: "number", minimum: 1, maximum: 3650, default: 90, description: "Look-ahead window in days, 1 to 3650. Default 90." },
-      provider: { type: "string", enum: ["openai", "anthropic", "google"], description: "Only this provider. Omit for all three." },
+      provider: { type: "string", enum: ["openai", "anthropic", "google", "bedrock"], description: "Only this provider's own API, or \"bedrock\" for Amazon Bedrock's dates (any model maker). Omit for all." },
     } },
     outputSchema: { type: "object", properties: { days: { type: "number" }, count: { type: "number" }, models: { type: "array", items: MODEL_RESULT }, ...META }, required: ["days", "count", "models"] },
     annotations: { title: "List upcoming model retirements", ...READ_ONLY },
@@ -136,7 +137,7 @@ const TOOLS = [
 // When a model has to move, the open question is whether the replacement answers the same way.
 const SWITCHING = new Set(["retired", "at-risk", "deprecated"]);
 function nextStep(rows) {
-  const r = rows.find((x) => x.replacement && (SWITCHING.has(x.status) || x.routes));
+  const r = rows.find((x) => x.replacement && !x.platform && (SWITCHING.has(x.status) || x.routes)); // drift tests call the maker's own API
   if (!r) return {};
   return { next_step: `Before moving ${r.id} to ${r.replacement}, test the prompts this app really sends on both models: answers often change between model versions. ` +
     "Driftline Pro runs each prompt on the current model and the replacement in GitHub Actions and shows what changed (https://aidriftline.com/#drift)." };
@@ -165,8 +166,8 @@ export async function callTool(name, args = {}, { reg, source, today = new Date(
   }
   if (name === "upcoming_retirements") {
     const days = Number.isFinite(args.days) && args.days > 0 ? Math.min(args.days, 3650) : 90;
-    const list = reg.models
-      .filter((m) => m.qualifier !== "not-before" && (!args.provider || m.provider === args.provider))
+    const list = [...reg.models, ...(reg.platformModels || [])]
+      .filter((m) => m.qualifier !== "not-before" && (!args.provider || (args.provider === "bedrock" ? m.platform === "bedrock" : m.provider === args.provider && !m.platform)))
       .map((m) => describe(m.id, reg, today))
       .filter((r) => r.days_left > 0 && r.days_left <= days)
       .sort((a, b) => a.days_left - b.days_left || a.id.localeCompare(b.id));
@@ -187,7 +188,7 @@ export function startServer({ input = process.stdin, output = process.stdout, lo
         getRegistry(); // start the download early
         return { protocolVersion: params?.protocolVersion || "2025-06-18", capabilities: { tools: {} },
           serverInfo: { name: "driftline", version: VERSION },
-          instructions: "Driftline knows when OpenAI, Anthropic and Google retire their models (from their official deprecation pages, checked daily). Call check_models before adding or keeping a model ID in code, and scan_project to audit a codebase." };
+          instructions: "Driftline knows when OpenAI, Anthropic, Google and Amazon Bedrock retire models (from their official deprecation pages, checked daily). Call check_models before adding or keeping a model ID in code, and scan_project to audit a codebase." };
       case "ping": return {};
       case "tools/list": return { tools: TOOLS };
       case "tools/call": {

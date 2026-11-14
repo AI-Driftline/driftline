@@ -68,22 +68,58 @@ export function buildRegistry(data) {
     const names = [base, `${base}-latest`, ...(/-[a-z]+-\d$/.test(base) ? [`${base}-0`] : [])];
     for (const n of names) if (!lookup.has(n)) lookup.set(n, { ...latest, aliasOf: latest.id });
   }
-  return { ...data, models: [...byId.values()], byId: lookup };
+  // Cloud platforms with their own dates (data.platforms.bedrock, …). Kept outside `models` so older Driftline
+  // versions, which accept only OpenAI/Anthropic/Google entries there, still read the live list.
+  const platformModels = [];
+  for (const [platform, p] of Object.entries(data.platforms || {})) {
+    for (const pm of p?.models || []) {
+      if (!pm?.id || !/^\d{4}-\d{2}-\d{2}$/.test(pm.retires || "")) continue;
+      const e = { ...pm, provider: pm.maker, platform, platform_name: p.name || platform, platform_source: p.source, qualifier: "exact" };
+      // The platform names no replacement. For Claude, pass on Anthropic's, marked as such: its ID on the platform differs.
+      const base = pm.maker === "anthropic" ? byId.get(pm.id.replace(/^anthropic\./, "").replace(/-v\d+(?::\d+)?$/, "")) : null;
+      if (base?.replacement) { e.replacement = base.replacement; e.replacement_from = "anthropic"; }
+      lookup.set(pm.id, e);
+      platformModels.push(e);
+    }
+  }
+  return { ...data, models: [...byId.values()], byId: lookup, platformModels };
+}
+
+// Bedrock's own model IDs: "<maker>.<model>", e.g. anthropic.claude-3-5-sonnet-20240620-v1:0 or meta.llama3-70b-instruct-v1:0.
+export const BEDROCK_ID = /^(ai21|amazon|anthropic|cohere|deepseek|google|luma|meta|minimax|mistral|moonshot|moonshotai|nvidia|openai|qwen|stability|twelvelabs|writer|zai)\.[a-z0-9]/;
+const PLATFORM_LABEL = { bedrock: "Amazon Bedrock" };
+
+// Extra sentence for models on a cloud platform: whose dates these are, regions that differ, extended-access pricing.
+export function platformText(entry, today = new Date()) {
+  if (!entry?.platform) return "";
+  const name = entry.platform_name || PLATFORM_LABEL[entry.platform] || entry.platform;
+  const parts = [`Date set by ${name}, not by the model maker`];
+  const regs = entry.regions || [];
+  if (regs.length > 1) {
+    const last = regs[regs.length - 1];
+    const first = regs[0].regions.slice(0, 3).join(", ") + (regs[0].regions.length > 3 ? " …" : "");
+    parts.push(`${entry.retires} is the earliest (${first}); other regions differ, the latest is ${last.retires} (${last.regions.slice(0, 2).join(", ")}${last.regions.length > 2 ? " …" : ""})`);
+  }
+  const iso = today.toISOString().slice(0, 10);
+  if (entry.extended && entry.retires > iso) parts.push(entry.extended <= iso ? `in extended access since ${entry.extended}: the model maker may charge more` : `extended access from ${entry.extended}: the model maker may charge more`);
+  return parts.join("; ") + ".";
 }
 
 // Strip prefixes people put in front of model IDs, e.g. "models/gemini-2.0-flash" or "openai/gpt-4",
 // and map cloud-platform spellings to the provider's ID:
-//   Amazon Bedrock  "us.anthropic.claude-3-5-sonnet-20240620-v1:0" -> "claude-3-5-sonnet-20240620"
+//   Amazon Bedrock  "us.anthropic.claude-3-5-sonnet-20240620-v1:0" -> "anthropic.claude-3-5-sonnet-20240620-v1:0" (Bedrock's own dates)
 //   Google Vertex   "claude-3-5-sonnet@20240620"                     -> "claude-3-5-sonnet-20240620"
-//   Bedrock ARN     "arn:aws:bedrock:...:foundation-model/anthropic.claude-..." -> "claude-..."
+//   Bedrock ARN     "arn:aws:bedrock:...:foundation-model/anthropic.claude-..." -> "anthropic.claude-..."
 //   Router prefixes "openrouter/openai/gpt-4", "vertex_ai/gemini-2.0-flash" -> plain ID (not azure/: Azure retires on its own dates)
 export function normalizeId(raw) {
   let id = raw.trim().toLowerCase();
   if (id.startsWith("arn:aws:bedrock")) id = id.slice(id.lastIndexOf("/") + 1); // foundation-model/… or inference-profile/…
   let prev;
-  do { prev = id; id = id.replace(/^(models|openai|anthropic|google|gemini|vertex_ai|bedrock|openrouter)\//, ""); } while (id !== prev);
-  const bedrock = /^(?:(?:us|eu|apac|global)\.)?anthropic\./;
-  if (bedrock.test(id)) id = id.replace(bedrock, "").replace(/-v\d+(?::\d+)?$/, "");
+  do { prev = id; id = id.replace(/^(models|openai|anthropic|google|gemini|vertex_ai|bedrock|converse|invoke|openrouter)\//, ""); } while (id !== prev);
+  // Amazon Bedrock sets its own dates ("only the dates on this page apply"), so its IDs stay as they are and are
+  // looked up in the Bedrock list; a cross-region inference profile prefix (us., eu., global., …) is dropped.
+  const profile = id.replace(/^(?:us|eu|apac|global|us-gov|jp|au|ca)\./, "");
+  if (BEDROCK_ID.test(profile)) return profile;
   id = id.replace(/(?:-v\d+)?@(\d{8})$/, "-$1");     // Vertex: claude-3-5-sonnet-v2@20241022
   return id.startsWith("claude-") ? id.replace(/(\d)\.(\d)/g, "$1-$2") : id; // OpenRouter: claude-sonnet-4.5
 }

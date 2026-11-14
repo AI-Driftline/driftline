@@ -57,7 +57,7 @@ export async function run({
       // Drift tests are extra; the free scan must still produce its report.
       notices.push(`Drift tests stopped: ${e.message}. The scan results above are complete.`);
     }
-  } else if (findings.some((f) => FLAGGED.has(f.status))) {
+  } else if (findings.some((f) => FLAGGED.has(f.status) && !f.entry?.platform)) { // drift tests call the maker's own API, not Bedrock
     notices.push(`Before you switch, test the prompts your app really sends on the replacement model: list them in ${promptsFile} and Driftline Pro runs each one on both models and shows what changed. https://aidriftline.com/#drift`);
   }
 

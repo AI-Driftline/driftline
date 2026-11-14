@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // GitHub Action entry point.
-import { replacementText, replacementChange, loadBestRegistry, reviewText } from "./registry.js";
+import { replacementText, replacementChange, loadBestRegistry, reviewText, platformText } from "./registry.js";
 import { migrationFor } from "./migration.js";
 import { resolve } from "node:path";
 import { statSync } from "node:fs";
@@ -66,7 +66,8 @@ async function main() {
       : `${f.id} ${STATUS_TEXT[f.status]} (${f.entry.retires}).`;
     const routedMore = f.entry.routes && migrationFor(f.entry)?.change === "params" ? ` Before then, apply the request changes the provider lists: ${migrationFor(f.entry).note}` : "";
     const review = f.entry.under_review ? ` ${reviewText(f.entry)}` : "";
-    annotate(level, text + repl + more + routedMore + review, f.file, f.line);
+    const platform = f.entry.platform ? ` ${platformText(f.entry)}` : "";
+    annotate(level, text + repl + more + routedMore + platform + review, f.file, f.line);
   }
 
   // The report contains model answers; stop GitHub from reading any "::command::" lines inside it.

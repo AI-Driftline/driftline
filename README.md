@@ -4,7 +4,7 @@ See how your prompts change **before** an AI model is retired.
 
 ![Driftline flags retired and retiring models on the exact line of a pull request, then lists them in the job summary](docs/demo.gif)
 
-Driftline is a GitHub Action. It finds the OpenAI, Anthropic and Google model IDs in your code, checks them against the providers' published retirement dates, and runs your real prompts on both the current and the replacement model so you can see what changes before you switch.
+Driftline is a GitHub Action. It finds the OpenAI, Anthropic, Google and Amazon Bedrock model IDs in your code, checks them against the providers' published retirement dates, and runs your real prompts on both the current and the replacement model so you can see what changes before you switch.
 
 It runs inside your own CI with your own API keys. There is no Driftline server: prompts go straight from your runner to your AI provider.
 
@@ -108,6 +108,8 @@ Needs Node 20+. Free, no key.
 - Until a difference is fixed, the affected models are marked "under review" in reports, MCP answers and model pages, and email alerts for them wait, so nobody gets a wrong date.
 
 Each entry records the date it was last checked. Google publishes only the *earliest* possible shutdown date, so Driftline reports those models as "may stop working" rather than "retired". Anthropic's "not sooner than" dates are informational and never trigger a warning. Audio, image, video and embedding models are scanned and reported too, but only text models are drift-tested. Some Google models are not shut down but *routed*: after the date, requests to the old ID are answered by the replacement model (`routes: true` in the registry). Driftline flags those too, because the call keeps working while the answers change.
+
+Amazon Bedrock sets its own dates, per model and per region, and they often differ from the model maker's (Claude Opus 4.1 left Anthropic's API on 5 August 2026 but runs on Bedrock until 8 January 2027). Bedrock model IDs such as `us.anthropic.claude-opus-4-1-20250805-v1:0` or `meta.llama3-70b-instruct-v1:0` are checked against [Bedrock's own page](https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle-legacy.html), read by script every 6 hours. Reports show the earliest region's date, how the other regions differ, and when "extended access" (possibly higher prices) starts.
 
 Every model also has its own page with the date, replacement and source: [aidriftline.com/models](https://aidriftline.com/models/).
 

@@ -2022,5 +2022,1425 @@
       "replacement": "gpt-5",
       "announced": "2025-09-26"
     }
-  ]
+  ],
+  "platforms": {
+    "bedrock": {
+      "name": "Amazon Bedrock",
+      "source": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle-legacy.html",
+      "checked": "2026-11-14",
+      "models": [
+        {
+          "id": "ai21.jamba-1-5-large-v1:0",
+          "maker": "ai21",
+          "name": "Jamba 1.5 Large",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1"
+              ],
+              "legacy": "2026-05-26",
+              "retires": "2026-11-26",
+              "extended": "2026-08-26"
+            }
+          ],
+          "retires": "2026-11-26",
+          "legacy": "2026-05-26",
+          "extended": "2026-08-26"
+        },
+        {
+          "id": "ai21.jamba-1-5-mini-v1:0",
+          "maker": "ai21",
+          "name": "Jamba 1.5 Mini",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1"
+              ],
+              "legacy": "2026-05-26",
+              "retires": "2026-11-26",
+              "extended": "2026-08-26"
+            }
+          ],
+          "retires": "2026-11-26",
+          "legacy": "2026-05-26",
+          "extended": "2026-08-26"
+        },
+        {
+          "id": "amazon.nova-canvas-v1:0",
+          "maker": "amazon",
+          "name": "Nova Canvas",
+          "kind": "image",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "eu-west-1",
+                "us-east-1"
+              ],
+              "legacy": "2026-03-30",
+              "retires": "2026-09-30"
+            }
+          ],
+          "retires": "2026-09-30",
+          "legacy": "2026-03-30"
+        },
+        {
+          "id": "amazon.nova-reel-v1:0",
+          "maker": "amazon",
+          "name": "Nova Reel",
+          "kind": "video",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "eu-west-1",
+                "us-east-1"
+              ],
+              "legacy": "2026-03-30",
+              "retires": "2026-09-30"
+            }
+          ],
+          "retires": "2026-09-30",
+          "legacy": "2026-03-30"
+        },
+        {
+          "id": "amazon.nova-reel-v1:1",
+          "maker": "amazon",
+          "name": "Nova Reel",
+          "kind": "video",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1"
+              ],
+              "legacy": "2026-03-30",
+              "retires": "2026-09-30"
+            }
+          ],
+          "retires": "2026-09-30",
+          "legacy": "2026-03-30"
+        },
+        {
+          "id": "amazon.nova-sonic-v1:0",
+          "maker": "amazon",
+          "name": "Nova Sonic",
+          "kind": "audio",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "eu-north-1",
+                "us-east-1"
+              ],
+              "legacy": "2026-03-13",
+              "retires": "2026-09-14"
+            }
+          ],
+          "retires": "2026-09-14",
+          "legacy": "2026-03-13"
+        },
+        {
+          "id": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+          "maker": "anthropic",
+          "name": "Claude 3.5 Sonnet",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-2",
+                "ap-south-1",
+                "ap-southeast-1"
+              ],
+              "legacy": "2026-10-10",
+              "retires": "2026-11-13",
+              "extended": "2026-10-10"
+            }
+          ],
+          "retires": "2026-11-13",
+          "legacy": "2026-10-10",
+          "extended": "2026-10-10"
+        },
+        {
+          "id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+          "maker": "anthropic",
+          "name": "Claude 3.5 Sonnet v2",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-2",
+                "ap-south-1",
+                "ap-southeast-1"
+              ],
+              "legacy": "2026-10-10",
+              "retires": "2026-11-13",
+              "extended": "2026-10-10"
+            }
+          ],
+          "retires": "2026-11-13",
+          "legacy": "2026-10-10",
+          "extended": "2026-10-10"
+        },
+        {
+          "id": "anthropic.claude-3-7-sonnet-20250219-v1:0",
+          "maker": "anthropic",
+          "name": "Claude 3.7 Sonnet",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-south-1",
+                "eu-west-2"
+              ],
+              "legacy": "2026-10-10",
+              "retires": "2026-11-13",
+              "extended": "2026-10-10"
+            }
+          ],
+          "retires": "2026-11-13",
+          "legacy": "2026-10-10",
+          "extended": "2026-10-10"
+        },
+        {
+          "id": "anthropic.claude-3-haiku-20240307-v1:0",
+          "maker": "anthropic",
+          "name": "Claude 3 Haiku",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-southeast-2",
+                "eu-central-1",
+                "eu-west-1",
+                "eu-west-2",
+                "eu-west-3",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-03-10",
+              "retires": "2026-09-10",
+              "extended": "2026-06-10"
+            },
+            {
+              "regions": [
+                "us-gov-east-1",
+                "us-gov-west-1"
+              ],
+              "legacy": "2026-03-10",
+              "retires": "2026-09-10",
+              "extended": "2026-06-10"
+            },
+            {
+              "regions": [
+                "ap-northeast-2",
+                "ap-south-1",
+                "ap-southeast-1"
+              ],
+              "legacy": "2026-10-10",
+              "retires": "2026-11-13",
+              "extended": "2026-10-10"
+            },
+            {
+              "regions": [
+                "eu-central-2",
+                "sa-east-1"
+              ],
+              "legacy": "2026-10-13",
+              "retires": "2026-11-13",
+              "extended": "2026-10-13"
+            },
+            {
+              "regions": [
+                "ca-central-1"
+              ],
+              "legacy": "2026-10-15",
+              "retires": "2026-11-27",
+              "extended": "2026-10-15"
+            }
+          ],
+          "retires": "2026-09-10",
+          "legacy": "2026-03-10",
+          "extended": "2026-06-10"
+        },
+        {
+          "id": "anthropic.claude-3-sonnet-20240229-v1:0",
+          "maker": "anthropic",
+          "name": "Claude 3 Sonnet",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-south-1",
+                "ap-southeast-1",
+                "eu-west-2"
+              ],
+              "legacy": "2026-10-10",
+              "retires": "2026-11-13",
+              "extended": "2026-10-10"
+            },
+            {
+              "regions": [
+                "sa-east-1"
+              ],
+              "legacy": "2026-10-13",
+              "retires": "2026-11-13",
+              "extended": "2026-10-13"
+            },
+            {
+              "regions": [
+                "ca-central-1"
+              ],
+              "legacy": "2026-10-15",
+              "retires": "2026-11-27",
+              "extended": "2026-10-15"
+            }
+          ],
+          "retires": "2026-11-13",
+          "legacy": "2026-10-10",
+          "extended": "2026-10-10"
+        },
+        {
+          "id": "anthropic.claude-opus-4-1-20250805-v1:0",
+          "maker": "anthropic",
+          "name": "Claude Opus 4.1",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-07-08",
+              "retires": "2027-01-08",
+              "extended": "2026-10-08"
+            }
+          ],
+          "retires": "2027-01-08",
+          "legacy": "2026-07-08",
+          "extended": "2026-10-08"
+        },
+        {
+          "id": "anthropic.claude-sonnet-4-20250514-v1:0",
+          "maker": "anthropic",
+          "name": "Claude Sonnet 4",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "eu-central-1",
+                "eu-north-1",
+                "eu-south-1",
+                "eu-south-2",
+                "eu-west-1",
+                "eu-west-3",
+                "us-east-1",
+                "us-east-2",
+                "us-west-1",
+                "us-west-2",
+                "ap-east-2",
+                "ap-northeast-2",
+                "ap-northeast-3",
+                "ap-south-1",
+                "ap-south-2",
+                "ap-southeast-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "ap-southeast-4",
+                "ap-southeast-5",
+                "ap-southeast-7",
+                "il-central-1"
+              ],
+              "legacy": "2026-04-14",
+              "retires": "2026-10-14",
+              "extended": "2026-07-14"
+            }
+          ],
+          "retires": "2026-10-14",
+          "legacy": "2026-04-14",
+          "extended": "2026-07-14"
+        },
+        {
+          "id": "anthropic.claude-sonnet-4-5-20250929-v1:0",
+          "maker": "anthropic",
+          "name": "Claude Sonnet 4.5",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "af-south-1",
+                "ap-east-2",
+                "ap-northeast-1",
+                "ap-northeast-2",
+                "ap-northeast-3",
+                "ap-south-1",
+                "ap-south-2",
+                "ap-southeast-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "ap-southeast-4",
+                "ap-southeast-5",
+                "ap-southeast-6",
+                "ap-southeast-7",
+                "ca-central-1",
+                "ca-west-1",
+                "eu-central-1",
+                "eu-central-2",
+                "eu-north-1",
+                "eu-south-1",
+                "eu-south-2",
+                "eu-west-1",
+                "eu-west-2",
+                "eu-west-3",
+                "il-central-1",
+                "mx-central-1",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-10-08",
+              "retires": "2027-04-08",
+              "extended": "2027-01-08"
+            },
+            {
+              "regions": [
+                "us-gov-east-1",
+                "us-gov-west-1"
+              ],
+              "legacy": "2026-10-27",
+              "retires": "2027-04-27",
+              "extended": "2027-01-27"
+            }
+          ],
+          "retires": "2027-04-08",
+          "legacy": "2026-10-08",
+          "extended": "2027-01-08"
+        },
+        {
+          "id": "cohere.command-r-plus-v1:0",
+          "maker": "cohere",
+          "name": "Command R+",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-02-19",
+              "retires": "2026-08-19",
+              "extended": "2026-05-19"
+            }
+          ],
+          "retires": "2026-08-19",
+          "legacy": "2026-02-19",
+          "extended": "2026-05-19"
+        },
+        {
+          "id": "cohere.command-r-v1:0",
+          "maker": "cohere",
+          "name": "Command R",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-02-19",
+              "retires": "2026-08-19",
+              "extended": "2026-05-19"
+            }
+          ],
+          "retires": "2026-08-19",
+          "legacy": "2026-02-19",
+          "extended": "2026-05-19"
+        },
+        {
+          "id": "deepseek.r1-v1:0",
+          "maker": "deepseek",
+          "name": "DeepSeek-R1",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "deepseek.v3-v1:0",
+          "maker": "deepseek",
+          "name": "DeepSeek-V3.1",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "eu-north-1",
+                "eu-west-2",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "deepseek.v3.1",
+          "maker": "deepseek",
+          "name": "DeepSeek-V3.1",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "eu-north-1",
+                "eu-west-2",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "google.gemma-3-12b-it",
+          "maker": "google",
+          "name": "Gemma 3 12B IT",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "google.gemma-3-27b-it",
+          "maker": "google",
+          "name": "Gemma 3 27B PT",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "google.gemma-3-4b-it",
+          "maker": "google",
+          "name": "Gemma 3 4B IT",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "meta.llama3-1-405b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 3.1 405B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-01-07",
+              "retires": "2026-07-07",
+              "extended": "2026-04-07"
+            }
+          ],
+          "retires": "2026-07-07",
+          "legacy": "2026-01-07",
+          "extended": "2026-04-07"
+        },
+        {
+          "id": "meta.llama3-1-70b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 3.1 70B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "meta.llama3-1-8b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 3.1 8B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "meta.llama3-2-11b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 3.2 11B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-01-07",
+              "retires": "2026-07-07",
+              "extended": "2026-04-07"
+            }
+          ],
+          "retires": "2026-07-07",
+          "legacy": "2026-01-07",
+          "extended": "2026-04-07"
+        },
+        {
+          "id": "meta.llama3-2-1b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 3.2 1B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "eu-central-1",
+                "eu-west-1",
+                "eu-west-3",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-01-07",
+              "retires": "2026-07-07",
+              "extended": "2026-04-07"
+            }
+          ],
+          "retires": "2026-07-07",
+          "legacy": "2026-01-07",
+          "extended": "2026-04-07"
+        },
+        {
+          "id": "meta.llama3-2-3b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 3.2 3B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "eu-central-1",
+                "eu-west-1",
+                "eu-west-3",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-01-07",
+              "retires": "2026-07-07",
+              "extended": "2026-04-07"
+            }
+          ],
+          "retires": "2026-07-07",
+          "legacy": "2026-01-07",
+          "extended": "2026-04-07"
+        },
+        {
+          "id": "meta.llama3-2-90b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 3.2 90B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-01-07",
+              "retires": "2026-07-07",
+              "extended": "2026-04-07"
+            }
+          ],
+          "retires": "2026-07-07",
+          "legacy": "2026-01-07",
+          "extended": "2026-04-07"
+        },
+        {
+          "id": "meta.llama3-3-70b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 3.3 70B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "meta.llama3-70b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 3 70B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-south-1",
+                "ca-central-1",
+                "eu-west-2",
+                "us-east-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            },
+            {
+              "regions": [
+                "us-gov-west-1"
+              ],
+              "legacy": "2026-11-09",
+              "retires": "2027-05-09"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "meta.llama3-8b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 3 8B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-south-1",
+                "ca-central-1",
+                "eu-west-2",
+                "us-east-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            },
+            {
+              "regions": [
+                "us-gov-west-1"
+              ],
+              "legacy": "2026-11-09",
+              "retires": "2027-05-09"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "meta.llama4-maverick-17b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 4 Maverick 17B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "meta.llama4-scout-17b-instruct-v1:0",
+          "maker": "meta",
+          "name": "Llama 4 Scout 17B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "minimax.minimax-m2",
+          "maker": "minimax",
+          "name": "MiniMax M2",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "minimax.minimax-m2.1",
+          "maker": "minimax",
+          "name": "MiniMax M2.1",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "eu-central-1",
+                "eu-north-1",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "mistral.devstral-2-123b",
+          "maker": "mistral",
+          "name": "Devstral 2 123B",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "eu-central-1",
+                "eu-north-1",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "mistral.mistral-7b-instruct-v0:2",
+          "maker": "mistral",
+          "name": "Mistral 7B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-south-1",
+                "ap-southeast-2",
+                "ca-central-1",
+                "eu-west-1",
+                "eu-west-2",
+                "eu-west-3",
+                "sa-east-1",
+                "us-east-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "mistral.mixtral-8x7b-instruct-v0:1",
+          "maker": "mistral",
+          "name": "Mixtral 8x7B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-south-1",
+                "ap-southeast-2",
+                "ca-central-1",
+                "eu-west-1",
+                "eu-west-2",
+                "eu-west-3",
+                "sa-east-1",
+                "us-east-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "mistral.voxtral-mini-3b-2507",
+          "maker": "mistral",
+          "name": "Voxtral Mini 3B 2507",
+          "kind": "audio",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "mistral.voxtral-small-24b-2507",
+          "maker": "mistral",
+          "name": "Voxtral Small 24B 2507",
+          "kind": "audio",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "moonshot.kimi-k2-thinking",
+          "maker": "moonshot",
+          "name": "Kimi K2 Thinking",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "moonshotai.kimi-k2-thinking",
+          "maker": "moonshot",
+          "name": "Kimi K2 Thinking",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "nvidia.nemotron-nano-12b-v2",
+          "maker": "nvidia",
+          "name": "NVIDIA Nemotron Nano 12B v2 VL BF16",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "nvidia.nemotron-nano-9b-v2",
+          "maker": "nvidia",
+          "name": "NVIDIA Nemotron Nano 9B v2",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "qwen.qwen3-coder-30b-a3b-instruct",
+          "maker": "qwen",
+          "name": "Qwen3-Coder-30B-A3B-Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "eu-central-1",
+                "eu-north-1",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "qwen.qwen3-coder-30b-a3b-v1:0",
+          "maker": "qwen",
+          "name": "Qwen3-Coder-30B-A3B-Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "eu-central-1",
+                "eu-north-1",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "qwen.qwen3-coder-480b-a35b-instruct",
+          "maker": "qwen",
+          "name": "Qwen3 Coder 480B A35B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "eu-north-1",
+                "eu-west-2",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "qwen.qwen3-coder-480b-a35b-v1:0",
+          "maker": "qwen",
+          "name": "Qwen3 Coder 480B A35B Instruct",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "eu-north-1",
+                "eu-west-2",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "twelvelabs.marengo-embed-2-7-v1:0",
+          "maker": "twelvelabs",
+          "name": "Marengo Embed v2.7",
+          "kind": "embedding",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-2",
+                "eu-west-1",
+                "us-east-1"
+              ],
+              "legacy": "2026-05-29",
+              "retires": "2026-11-30",
+              "extended": "2026-08-29"
+            }
+          ],
+          "retires": "2026-11-30",
+          "legacy": "2026-05-29",
+          "extended": "2026-08-29"
+        },
+        {
+          "id": "twelvelabs.marengo-embed-3-0-v1:0",
+          "maker": "twelvelabs",
+          "name": "Marengo Embed 3.0",
+          "kind": "embedding",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-2"
+              ],
+              "legacy": "2026-09-22",
+              "retires": "2027-03-22"
+            }
+          ],
+          "retires": "2027-03-22",
+          "legacy": "2026-09-22"
+        },
+        {
+          "id": "twelvelabs.pegasus-1-2-v1:0",
+          "maker": "twelvelabs",
+          "name": "Pegasus v1.2",
+          "kind": "video",
+          "regions": [
+            {
+              "regions": [
+                "af-south-1",
+                "ap-east-2",
+                "ap-northeast-1",
+                "ap-northeast-2",
+                "ap-northeast-3",
+                "ap-south-1",
+                "ap-south-2",
+                "ap-southeast-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "ap-southeast-4",
+                "ap-southeast-5",
+                "ap-southeast-7",
+                "ca-central-1",
+                "ca-west-1",
+                "eu-central-1",
+                "eu-central-2",
+                "eu-north-1",
+                "eu-south-1",
+                "eu-south-2",
+                "eu-west-1",
+                "eu-west-2",
+                "eu-west-3",
+                "il-central-1",
+                "mx-central-1",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-22",
+              "retires": "2027-03-22"
+            }
+          ],
+          "retires": "2027-03-22",
+          "legacy": "2026-09-22"
+        },
+        {
+          "id": "writer.palmyra-x4-v1:0",
+          "maker": "writer",
+          "name": "Palmyra X4",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-09",
+              "retires": "2027-03-09"
+            }
+          ],
+          "retires": "2027-03-09",
+          "legacy": "2026-09-09"
+        },
+        {
+          "id": "writer.palmyra-x5-v1:0",
+          "maker": "writer",
+          "name": "Palmyra X5",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-1",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-21",
+              "retires": "2027-03-21"
+            }
+          ],
+          "retires": "2027-03-21",
+          "legacy": "2026-09-21"
+        },
+        {
+          "id": "zai.glm-4.7",
+          "maker": "zai",
+          "name": "GLM 4.7",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "eu-north-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        },
+        {
+          "id": "zai.glm-4.7-flash",
+          "maker": "zai",
+          "name": "GLM 4.7 Flash",
+          "kind": "text",
+          "regions": [
+            {
+              "regions": [
+                "ap-northeast-1",
+                "ap-south-1",
+                "ap-southeast-2",
+                "ap-southeast-3",
+                "eu-central-1",
+                "eu-north-1",
+                "eu-south-1",
+                "eu-west-1",
+                "eu-west-2",
+                "sa-east-1",
+                "us-east-1",
+                "us-east-2",
+                "us-west-2"
+              ],
+              "legacy": "2026-09-30",
+              "retires": "2027-03-30"
+            }
+          ],
+          "retires": "2027-03-30",
+          "legacy": "2026-09-30"
+        }
+      ]
+    }
+  }
 }
