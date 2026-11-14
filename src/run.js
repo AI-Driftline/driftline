@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { loadRegistry, classify, isTextModel, replacementChange } from "./registry.js";
+import { loadRegistry, classify, isTextModel, replacementChange, shownId } from "./registry.js";
 import { scanDirectory } from "./scan.js";
 import { loadPrompts } from "./prompts.js";
 import { complete, providerOf, keyFor, missingKeyMessage } from "./providers.js";
@@ -34,6 +34,7 @@ export async function run({
     ...h,
     file: prefix && !prefix.startsWith("..") ? `${prefix}/${h.file.split(sep).join("/")}` : h.file.split(sep).join("/"),
     ...classify(h.id, registry, { today, warnDays }),
+    ...(h.id.startsWith("vertex:") ? { id: shownId(h.id) } : {}), // "gemini-2.5-pro (Vertex AI)"
   }));
   log(`Scanned ${root}: ${findings.length} model reference(s).`);
 
@@ -75,7 +76,7 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
   }
   // Models in code (not docs) that are going away and have a known replacement, soonest first.
   const flaggedModels = [...new Set(findings
-    .filter((f) => !f.doc && FLAGGED.has(f.status) && f.entry?.replacement && isTextModel(f.entry))
+    .filter((f) => !f.doc && FLAGGED.has(f.status) && f.entry?.replacement && isTextModel(f.entry) && !f.entry.platform) // drift tests call the maker's own API
     .sort((a, b) => a.days - b.days)
     .map((f) => f.id))];
   // A prompt without "model" is tested once, on the model that retires first: two API calls per prompt.

@@ -818,3 +818,54 @@ test("Bedrock page parser reads single and multi-region blocks", async () => {
   assert.equal(out[0].extended, "2026-05-19");
   assert.equal(out[0].name, "Command R+");
 });
+
+// Google Vertex AI uses the Gemini API's model names with its own dates; the file's code decides which apply.
+const VERTEX = { models: [
+    { id: "gemini-2.5-pro", provider: "google", retires: "2026-12-01", qualifier: "exact", routes: true, replacement: "gemini-3.5-flash" },
+    { id: "claude-3-5-sonnet-20241022", provider: "anthropic", retires: "2025-10-22", qualifier: "exact", replacement: "claude-sonnet-5-5" },
+  ], checked: "2026-11-14", sources: {}, platforms: { vertex: { name: "Vertex AI", source: "https://x/versions", sources: { gemini: "https://x/versions", partner: "https://x/partner" }, models: [
+    { id: "gemini-2.5-pro", maker: "google", kind: "text", retires: "2026-10-20", replacement: "gemini-3.8-flash", page: "gemini" },
+    { id: "gemini-3.6-flash", maker: "google", kind: "text", retires: "2026-11-19", replacement: "gemini-3.8-flash", page: "gemini" },
+    { id: "claude-3-5-sonnet-v2", maker: "anthropic", kind: "text", retires: "2026-02-19", page: "partner" },
+    { id: "deepseek-r1-0528-maas", maker: "deepseek", kind: "text", retires: "2026-10-21", page: "open" },
+  ] } } };
+
+test("Vertex dates apply when the file shows Vertex signs or the ID is written the Vertex way", async () => {
+  const { buildRegistry, resolveId, vertexNote, shownId } = await import("../src/registry.js");
+  const reg = buildRegistry(VERTEX);
+  const today = new Date("2026-11-14T00:00:00Z");
+  const vertexFile = 'client = genai.Client(vertexai=True)\nresp = client.models.generate_content(model="gemini-2.5-pro")';
+  const apiFile = 'client = genai.Client(api_key=k)\nresp = client.models.generate_content(model="gemini-2.5-pro")';
+  const onVertex = scanText(vertexFile, "v.py", reg.byId), onApi = scanText(apiFile, "a.py", reg.byId);
+  assert.deepEqual(onVertex.map((h) => h.id), ["vertex:gemini-2.5-pro"]);
+  assert.deepEqual(onApi.map((h) => h.id), ["gemini-2.5-pro"]);
+  assert.equal(classify(onVertex[0].id, reg, { today }).status, "retired"); // calls fail on Vertex since 20 Oct
+  assert.equal(classify(onApi[0].id, reg, { today }).entry.routes, true); // Gemini API re-routes on 1 Dec
+  assert.match(vertexNote(reg.byId.get("gemini-2.5-pro"), today), /retired 2026-10-20/);
+  assert.equal(shownId("vertex:gemini-2.5-pro"), "gemini-2.5-pro (Vertex AI)");
+  // Vertex spellings need no file signs: Claude's @date, vertex_ai/ prefix, MaaS IDs.
+  assert.equal(resolveId("claude-3-5-sonnet-v2@20241022", reg), "vertex:claude-3-5-sonnet-v2");
+  assert.equal(resolveId("vertex_ai/gemini-2.5-pro", reg), "vertex:gemini-2.5-pro");
+  assert.equal(resolveId("deepseek-r1-0528-maas", reg), "vertex:deepseek-r1-0528-maas");
+  // Claude on Vertex: Vertex names no replacement, Anthropic's is passed on and marked.
+  assert.equal(reg.byId.get("vertex:claude-3-5-sonnet-v2").replacement_from, "anthropic");
+  // A Gemini ID Vertex lists but the Gemini API doesn't retire keeps no date outside Vertex code.
+  assert.equal(classify("gemini-3.6-flash", reg, { today }).status, "unknown");
+  assert.equal(classify("deepseek-r1-0528-maas", reg, { today }).status, "retired"); // exists only on Vertex
+});
+
+test("Vertex page parsers read tables, partner paragraphs and MaaS tables", async () => {
+  const { parseGemini, parsePartner, parseOpen } = await import("../tools/vertex.mjs");
+  const g = parseGemini(`<h3>Gemini models</h3><table><tr><th>Model ID</th></tr>
+    <tr><td><code>gemini-2.5-pro</code></td><td>June 17, 2025</td><td>October 20, 2026</td><td>gemini-3.8-flash or gemini-3.5-flash</td></tr>
+    <tr><td><code>gemini-3.8-flash</code></td><td>September 2, 2026</td><td>September 2, 2027 or later</td><td></td></tr></table>
+    <h3>Embeddings models</h3><table><tr><td>text-embedding-005</td><td>November 18, 2024</td><td>April 1, 2027</td><td></td></tr>
+    <tr><td>gemini-embedding-001</td><td>May 20, 2025</td><td>No sooner than May 20, 2028</td><td></td></tr></table>`);
+  assert.deepEqual(g.map((m) => [m.id, m.retires, m.kind, m.replacement || null, m.replacement_alt || null]), [
+    ["gemini-2.5-pro", "2026-10-20", "text", "gemini-3.8-flash", "gemini-3.5-flash"], ["text-embedding-005", "2027-04-01", "embedding", null, null]]);
+  const p = parsePartner(`<article><h2>Anthropic's Claude 3 Haiku on Google Cloud</h2><p>Anthropic's Claude 3 Haiku on Google Cloud is <strong>deprecated as of February 23, 2026</strong> and will
+    be <strong>shut down on August 23, 2026</strong>.</p><table><tr><td>Model ID</td><td>claude-3-haiku</td></tr></table></article>`);
+  assert.deepEqual(p.map((m) => [m.id, m.maker, m.retires]), [["claude-3-haiku", "anthropic", "2026-08-23"]]);
+  const o = parseOpen(`<table><tr><td>llama-3.3-70b-instruct-maas</td><td>July 21, 2026</td><td>October 21, 2026</td><td>Self-deploy</td></tr></table>`);
+  assert.deepEqual(o.map((m) => [m.id, m.maker, m.retires]), [["llama-3.3-70b-instruct-maas", "meta", "2026-10-21"]]);
+});

@@ -86,7 +86,7 @@ const RULES = [
 export function migrationFor(entry) {
   if (!entry?.replacement) return null;
   // On a cloud platform the replacement has a different model ID there (and may not be offered in every region).
-  if (entry.platform) return { change: "platform", drop_in: false, note: `${entry.platform_name || entry.platform} names no replacement. ${entry.replacement} is Anthropic's; look up its ${entry.platform_name || entry.platform} model ID and check it is offered in your region.`, guide: entry.platform_source || null };
+  if (entry.platform && entry.replacement_from) return { change: "platform", drop_in: false, note: `${entry.platform_name || entry.platform} names no replacement. ${entry.replacement} is Anthropic's; look up its ${entry.platform_name || entry.platform} model ID and check it is offered in your region.`, guide: entry.platform_source || null };
   // A provider's own instruction next to the replacement (registry replacement_note) comes first.
   const setting = entry.replacement_note
     ? { change: "settings", drop_in: false, note: `Also set ${entry.replacement_note}.`, guide: /reasoning\.mode/.test(entry.replacement_note) ? OPENAI + "reasoning" : null }

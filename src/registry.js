@@ -74,7 +74,23 @@ export function buildRegistry(data) {
   for (const [platform, p] of Object.entries(data.platforms || {})) {
     for (const pm of p?.models || []) {
       if (!pm?.id || !/^\d{4}-\d{2}-\d{2}$/.test(pm.retires || "")) continue;
-      const e = { ...pm, provider: pm.maker, platform, platform_name: p.name || platform, platform_source: p.source, qualifier: "exact" };
+      const e = { ...pm, provider: pm.maker, platform, platform_name: p.name || platform, platform_source: p.sources?.[pm.page] || p.source, qualifier: "exact" };
+      if (platform === "vertex") {
+        // Vertex uses the Gemini API's and Anthropic's model names, with its own dates. Its entries live under
+        // "vertex:<id>" and are used when the code shows it runs on Vertex (see resolveId).
+        lookup.set(`vertex:${pm.id}`, e);
+        // Plain name too, but only for names that exist nowhere else: -maas open models, "@version" IDs and partner
+        // models other than Claude. A Gemini ID without an entry here may still run on the Gemini API (no date there).
+        if (!lookup.has(pm.id) && (/-maas$|@/.test(pm.id) || !["google", "anthropic"].includes(pm.maker))) lookup.set(pm.id, e);
+        // The Gemini API / Anthropic entry for the same model learns Vertex's date, so reports can mention it.
+        // claude-3-5-sonnet-v2 → the newest claude-3-5-sonnet-YYYYMMDD snapshot.
+        const twin = byId.get(pm.id) || (pm.maker === "anthropic" ? [...byId.values()].filter((m) => m.provider === "anthropic" && m.id.replace(/-\d{8}$/, "") === pm.id.replace(/-v\d+$/, "")).sort((a, b) => b.id.localeCompare(a.id))[0] : null);
+        if (twin && twin.retires !== pm.retires) twin.vertex = { retires: pm.retires, ...(pm.replacement ? { replacement: pm.replacement } : {}) };
+        // Vertex names no replacement for Claude: pass on Anthropic's, marked as such (as for Bedrock).
+        if (pm.maker === "anthropic" && !pm.replacement && twin?.replacement) { e.replacement = twin.replacement; e.replacement_from = "anthropic"; }
+        platformModels.push(e);
+        continue;
+      }
       // The platform names no replacement. For Claude, pass on Anthropic's, marked as such: its ID on the platform differs.
       const base = pm.maker === "anthropic" ? byId.get(pm.id.replace(/^anthropic\./, "").replace(/-v\d+(?::\d+)?$/, "")) : null;
       if (base?.replacement) { e.replacement = base.replacement; e.replacement_from = "anthropic"; }
@@ -82,18 +98,44 @@ export function buildRegistry(data) {
       platformModels.push(e);
     }
   }
+  for (const [k, v] of lookup) if (v.aliasOf && !v.vertex && byId.get(v.aliasOf)?.vertex) lookup.set(k, { ...v, vertex: byId.get(v.aliasOf).vertex });
   return { ...data, models: [...byId.values()], byId: lookup, platformModels };
 }
 
 // Bedrock's own model IDs: "<maker>.<model>", e.g. anthropic.claude-3-5-sonnet-20240620-v1:0 or meta.llama3-70b-instruct-v1:0.
 export const BEDROCK_ID = /^(ai21|amazon|anthropic|cohere|deepseek|google|luma|meta|minimax|mistral|moonshot|moonshotai|nvidia|openai|qwen|stability|twelvelabs|writer|zai)\.[a-z0-9]/;
-const PLATFORM_LABEL = { bedrock: "Amazon Bedrock" };
+const PLATFORM_LABEL = { bedrock: "Amazon Bedrock", vertex: "Vertex AI" };
+
+// Signs in a file that its Gemini/Claude calls go through Google Vertex AI rather than the Gemini API or Anthropic.
+export const VERTEX_SIGNS = /\bvertexai\b|vertex_ai|google[.-]cloud[.-]aiplatform|@google-cloud\/vertexai|@ai-sdk\/google-vertex|aiplatform\.googleapis\.com|publishers\/(?:google|anthropic)\/models|GOOGLE_GENAI_USE_VERTEXAI|ChatVertexAI|AnthropicVertex|anthropic\.vertex|\bVertexAI\s*\(|vertexai\s*[=:]\s*(?:True|true)/;
+// The ID itself says Vertex: a "vertex_ai/" prefix, a publishers/… resource path, Claude's "@date" spelling, a MaaS ID.
+const vertexSpelling = (raw) => /^vertex_ai\/|publishers\/(?:google|anthropic)\/models\/|^claude-[\w.-]+@\d{8}$|-maas$/i.test(raw.trim());
+
+// The registry key for an ID as written in code. With onVertex (file shows Vertex signs) or a Vertex spelling, a
+// model Vertex lists is looked up as "vertex:<id>"; otherwise the plain ID (Gemini API / Anthropic dates).
+export function resolveId(raw, registry, { onVertex = false } = {}) {
+  const id = normalizeId(raw);
+  if (!onVertex && !vertexSpelling(raw)) return id;
+  const lower = raw.trim().toLowerCase().replace(/^.*publishers\/(?:google|anthropic)\/models\//, "");
+  // Claude on Vertex: claude-3-5-sonnet-v2@20241022 → claude-3-5-sonnet-v2; claude-3-haiku-20240307 → claude-3-haiku.
+  const vid = /^claude-/.test(lower) ? lower.replace(/^vertex_ai\//, "").replace(/@\d{8}$/, "").replace(/-\d{8}$/, "") : id;
+  return registry?.byId?.has(`vertex:${vid}`) ? `vertex:${vid}` : id;
+}
+// How a key is shown: "vertex:gemini-2.5-pro" → "gemini-2.5-pro (Vertex AI)".
+export const shownId = (key) => String(key).startsWith("vertex:") ? `${String(key).slice(7)} (Vertex AI)` : key;
+
+// For a Gemini API / Anthropic entry whose Vertex date differs: one sentence, so Vertex users see it too.
+export function vertexNote(entry, today = new Date()) {
+  if (!entry?.vertex || entry.platform) return "";
+  const v = entry.vertex, past = v.retires <= today.toISOString().slice(0, 10);
+  return `On Vertex AI the date differs: ${past ? "retired" : "retires"} ${v.retires}${v.replacement ? ` (Vertex names ${v.replacement})` : ""}.`;
+}
 
 // Extra sentence for models on a cloud platform: whose dates these are, regions that differ, extended-access pricing.
 export function platformText(entry, today = new Date()) {
   if (!entry?.platform) return "";
   const name = entry.platform_name || PLATFORM_LABEL[entry.platform] || entry.platform;
-  const parts = [`Date set by ${name}, not by the model maker`];
+  const parts = [entry.platform === "vertex" && ["google", "anthropic"].includes(entry.maker) ? `Date set by Vertex AI (${entry.maker === "google" ? "the Gemini API's" : "Anthropic's"} own date can differ)` : `Date set by ${name}, not by the model maker`];
   const regs = entry.regions || [];
   if (regs.length > 1) {
     const last = regs[regs.length - 1];

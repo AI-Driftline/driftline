@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, extname, sep } from "node:path";
-import { normalizeId, looksLikeModelId } from "./registry.js";
+import { looksLikeModelId, resolveId, VERTEX_SIGNS } from "./registry.js";
 
 const SKIP_DIRS = new Set([
   ".git", "node_modules", "vendor", "dist", "build", "out", ".next", ".nuxt",
@@ -50,6 +50,7 @@ export function scanText(text, file, known) {
   const hits = [];
   const doc = isDocFile(file);
   const lines = text.split(/\r?\n/);
+  const onVertex = VERTEX_SIGNS.test(text); // this file calls Gemini/Claude through Vertex AI: use Vertex's dates
   lines.forEach((raw, i) => {
     // Escaped quotes (\"gpt-4\") appear in notebooks and JSON-in-JSON; read them as plain quotes.
     const line = raw.replace(/\\(["'`])/g, "$1");
@@ -59,7 +60,7 @@ export function scanText(text, file, known) {
       const a = line.match(ASSIGNED);
       if (a) seen.add(a[1]);
     }
-    const ids = [...seen].map(normalizeId).filter((id) => looksLikeModelId(id, known));
+    const ids = [...seen].map((raw) => resolveId(raw, { byId: known }, { onVertex })).filter((id) => looksLikeModelId(id, known));
     const context = MODEL_CONTEXT.test(line) || ids.some((id) => !BARE_SHORT.test(id)); // e.g. ["o1", "gpt-4o"]
     for (const id of ids) {
       if (BARE_SHORT.test(id) && !context) continue;

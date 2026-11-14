@@ -12,7 +12,11 @@ Only these three pages count. No blog posts, forum threads or emails.
 
 ## Cloud platforms (script-managed)
 
-Amazon Bedrock sets its own dates per model and region (https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle-legacy.html). They live in `platforms.bedrock` and are written only by `node tools/bedrock.mjs --write`, which the `bedrock` workflow runs every 6 hours. Don't edit `platforms.bedrock` by hand and don't use it to change the Anthropic entries: a Bedrock date applies only to the Bedrock model ID.
+Amazon Bedrock sets its own dates per model and region (https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle-legacy.html). They live in `platforms.bedrock` and are written only by `node tools/bedrock.mjs --write`.
+
+Google Vertex AI (now "Gemini Enterprise Agent Platform") sets its own dates too, on three pages: Gemini/Imagen/Veo/embedding model versions, partner models (Claude, Jamba) and open models (`-maas` IDs). They live in `platforms.vertex` and are written only by `node tools/vertex.mjs --write`. Vertex uses the Gemini API's model names; a Vertex date never changes the Gemini API entry of the same name.
+
+The `platforms` workflow runs both scripts every 6 hours. Don't edit `platforms.*` by hand, and don't use them to change the provider entries.
 
 ## Entry fields
 

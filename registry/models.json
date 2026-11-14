@@ -3441,6 +3441,572 @@
           "legacy": "2026-09-30"
         }
       ]
+    },
+    "vertex": {
+      "name": "Vertex AI",
+      "source": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions",
+      "sources": {
+        "gemini": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions",
+        "partner": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deprecations/partner-models",
+        "open": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deprecations/open-models"
+      },
+      "checked": "2026-11-14",
+      "models": [
+        {
+          "id": "chat-bison",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-04-21",
+          "replacement": "gemini-2.5-flash-lite",
+          "page": "gemini"
+        },
+        {
+          "id": "claude-3-5-haiku",
+          "maker": "anthropic",
+          "name": "Haiku",
+          "kind": "text",
+          "deprecated": "2026-01-05",
+          "retires": "2026-07-05",
+          "page": "partner"
+        },
+        {
+          "id": "claude-3-5-sonnet",
+          "maker": "anthropic",
+          "name": "Sonnet",
+          "kind": "text",
+          "deprecated": "2025-08-20",
+          "retires": "2026-02-19",
+          "page": "partner"
+        },
+        {
+          "id": "claude-3-5-sonnet-v2",
+          "maker": "anthropic",
+          "name": "Sonnet v2",
+          "kind": "text",
+          "deprecated": "2025-08-20",
+          "retires": "2026-02-19",
+          "page": "partner"
+        },
+        {
+          "id": "claude-3-7-sonnet",
+          "maker": "anthropic",
+          "name": "Sonnet",
+          "kind": "text",
+          "deprecated": "2025-11-11",
+          "retires": "2026-05-11",
+          "page": "partner"
+        },
+        {
+          "id": "claude-3-haiku",
+          "maker": "anthropic",
+          "name": "Claude 3 Haiku on Google Cloud Anthropic's Claude 3 Haiku",
+          "kind": "text",
+          "deprecated": "2026-02-23",
+          "retires": "2026-08-23",
+          "page": "partner"
+        },
+        {
+          "id": "claude-3-opus",
+          "maker": "anthropic",
+          "name": "Claude 3 Opus on Google Cloud Anthropic's Claude 3 Opus",
+          "kind": "text",
+          "deprecated": "2025-06-30",
+          "retires": "2025-08-01",
+          "page": "partner"
+        },
+        {
+          "id": "claude-sonnet-4-5",
+          "maker": "anthropic",
+          "name": "Google Cloud",
+          "kind": "text",
+          "deprecated": "2026-09-29",
+          "retires": "2026-11-30",
+          "page": "partner"
+        },
+        {
+          "id": "code-gecko",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-04-21",
+          "replacement": "gemini-2.5-flash-lite",
+          "page": "gemini"
+        },
+        {
+          "id": "deepseek-ocr-maas",
+          "maker": "deepseek",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "deepseek-r1-0528-maas",
+          "maker": "deepseek",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "deepseek-v3.1-maas",
+          "maker": "deepseek",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "deepseek-v3.2-maas",
+          "maker": "deepseek",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "gemini-1.0-pro-001",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-04-21",
+          "released": "2024-02-15",
+          "replacement": "gemini-2.5-flash",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-1.0-pro-002",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-04-21",
+          "released": "2024-04-09",
+          "replacement": "gemini-2.5-flash",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-1.0-pro-vision-001",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-04-21",
+          "released": "2024-02-15",
+          "replacement": "gemini-2.5-flash",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-1.5-flash-001",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-05-24",
+          "released": "2024-05-24",
+          "replacement": "gemini-2.5-flash-lite",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-1.5-flash-002",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-09-24",
+          "released": "2024-09-24",
+          "replacement": "gemini-2.5-flash-lite",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-1.5-pro-001",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-05-24",
+          "released": "2024-05-24",
+          "replacement": "gemini-2.5-flash",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-1.5-pro-002",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-09-24",
+          "released": "2024-09-24",
+          "replacement": "gemini-2.5-flash",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-2.0-flash",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2026-06-01",
+          "released": "2025-02-05",
+          "replacement": "gemini-3.5-flash-lite",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-2.0-flash-lite",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2026-06-01",
+          "released": "2025-02-25",
+          "replacement": "gemini-3.5-flash-lite",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-2.5-flash",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2026-10-20",
+          "released": "2025-06-17",
+          "replacement": "gemini-3.8-flash",
+          "replacement_alt": "gemini-3.5-flash-lite",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-2.5-flash-image",
+          "maker": "google",
+          "kind": "image",
+          "retires": "2027-03-15",
+          "released": "2025-10-02",
+          "replacement": "gemini-3.1-flash-lite-image",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-2.5-flash-lite",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2026-10-20",
+          "released": "2025-07-22",
+          "replacement": "gemini-3.8-flash",
+          "replacement_alt": "gemini-3.5-flash-lite",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-2.5-pro",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2026-10-20",
+          "released": "2025-06-17",
+          "replacement": "gemini-3.8-flash",
+          "replacement_alt": "gemini-3.5-flash",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-3.6-flash",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2026-11-19",
+          "released": "2026-07-21",
+          "replacement": "gemini-3.8-flash",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-3.7-flash",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2027-01-28",
+          "released": "2026-08-13",
+          "replacement": "gemini-3.8-flash",
+          "page": "gemini"
+        },
+        {
+          "id": "gemini-live-2.5-flash-native-audio",
+          "maker": "google",
+          "kind": "audio",
+          "retires": "2026-12-13",
+          "released": "2025-12-12",
+          "replacement": "gemini-3.8-live",
+          "page": "gemini"
+        },
+        {
+          "id": "glm-4.7-maas",
+          "maker": "zai",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "glm-5-maas",
+          "maker": "zai",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "gpt-oss-20b-maas",
+          "maker": "openai",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "imagegeneration@002",
+          "maker": "google",
+          "kind": "image",
+          "retires": "2026-06-30",
+          "released": "2023-08-17",
+          "replacement": "gemini-2.5-flash-image",
+          "page": "gemini"
+        },
+        {
+          "id": "imagegeneration@003",
+          "maker": "google",
+          "kind": "image",
+          "retires": "2026-06-30",
+          "replacement": "gemini-2.5-flash-image",
+          "page": "gemini"
+        },
+        {
+          "id": "imagegeneration@004",
+          "maker": "google",
+          "kind": "image",
+          "retires": "2026-06-30",
+          "replacement": "gemini-2.5-flash-image",
+          "page": "gemini"
+        },
+        {
+          "id": "imagegeneration@005",
+          "maker": "google",
+          "kind": "image",
+          "retires": "2026-06-30",
+          "released": "2023-11-22",
+          "replacement": "gemini-2.5-flash-image",
+          "page": "gemini"
+        },
+        {
+          "id": "imagegeneration@006",
+          "maker": "google",
+          "kind": "image",
+          "retires": "2026-06-30",
+          "released": "2024-03-27",
+          "replacement": "gemini-2.5-flash-image",
+          "page": "gemini"
+        },
+        {
+          "id": "imagen-3.0-generate-001",
+          "maker": "google",
+          "kind": "image",
+          "retires": "2026-06-30",
+          "released": "2024-12-10",
+          "replacement": "gemini-2.5-flash-image",
+          "page": "gemini"
+        },
+        {
+          "id": "imagen-3.0-generate-002",
+          "maker": "google",
+          "kind": "image",
+          "retires": "2026-06-30",
+          "released": "2025-01-29",
+          "replacement": "gemini-2.5-flash-image",
+          "page": "gemini"
+        },
+        {
+          "id": "imagen-4.0-generate-001",
+          "maker": "google",
+          "kind": "image",
+          "retires": "2026-06-30",
+          "released": "2025-08-14",
+          "replacement": "gemini-2.5-flash-image",
+          "page": "gemini"
+        },
+        {
+          "id": "imagen-4.0-ultra-generate-001",
+          "maker": "google",
+          "kind": "image",
+          "retires": "2026-06-30",
+          "released": "2025-08-14",
+          "replacement": "gemini-2.5-flash-image",
+          "page": "gemini"
+        },
+        {
+          "id": "imagetext",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-09-24",
+          "released": "2023-06-07",
+          "replacement": "gemini-2.5-flash-image",
+          "page": "gemini"
+        },
+        {
+          "id": "jamba-1.5-large",
+          "maker": "ai21",
+          "name": "Large",
+          "kind": "text",
+          "deprecated": "2025-08-27",
+          "retires": "2026-02-27",
+          "page": "partner"
+        },
+        {
+          "id": "jamba-1.5-mini",
+          "maker": "ai21",
+          "name": "Mini",
+          "kind": "text",
+          "deprecated": "2025-08-27",
+          "retires": "2026-02-27",
+          "page": "partner"
+        },
+        {
+          "id": "kimi-k2-thinking-maas",
+          "maker": "moonshot",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "llama-3.3-70b-instruct-maas",
+          "maker": "meta",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "minimax-m2-maas",
+          "maker": "minimax",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "multilingual-e5-large-instruct-maas",
+          "maker": "other",
+          "kind": "embedding",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "multilingual-e5-small-maas",
+          "maker": "other",
+          "kind": "embedding",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "multimodalembedding@001",
+          "maker": "google",
+          "kind": "embedding",
+          "retires": "2027-04-01",
+          "released": "2024-02-12",
+          "page": "gemini"
+        },
+        {
+          "id": "qwen3-235b-a22b-instruct-2507-maas",
+          "maker": "qwen",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "qwen3-coder-480b-a35b-instruct-maas",
+          "maker": "qwen",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "qwen3-next-80b-a3b-instruct-maas",
+          "maker": "qwen",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "qwen3-next-80b-a3b-thinking-maas",
+          "maker": "qwen",
+          "kind": "text",
+          "deprecated": "2026-07-21",
+          "retires": "2026-10-21",
+          "page": "open"
+        },
+        {
+          "id": "text-bison",
+          "maker": "google",
+          "kind": "text",
+          "retires": "2025-04-21",
+          "replacement": "gemini-2.5-flash-lite",
+          "page": "gemini"
+        },
+        {
+          "id": "text-embedding-004",
+          "maker": "google",
+          "kind": "embedding",
+          "retires": "2027-04-01",
+          "released": "2024-05-14",
+          "page": "gemini"
+        },
+        {
+          "id": "text-embedding-005",
+          "maker": "google",
+          "kind": "embedding",
+          "retires": "2027-04-01",
+          "released": "2024-11-18",
+          "page": "gemini"
+        },
+        {
+          "id": "text-multilingual-embedding-002",
+          "maker": "google",
+          "kind": "embedding",
+          "retires": "2027-04-01",
+          "released": "2024-05-14",
+          "page": "gemini"
+        },
+        {
+          "id": "textembedding-gecko-multilingual@001",
+          "maker": "google",
+          "kind": "embedding",
+          "retires": "2025-05-24",
+          "released": "2023-11-02",
+          "replacement": "gemini-embedding-001",
+          "page": "gemini"
+        },
+        {
+          "id": "textembedding-gecko@001",
+          "maker": "google",
+          "kind": "embedding",
+          "retires": "2025-04-21",
+          "released": "2023-06-07",
+          "replacement": "gemini-embedding-001",
+          "page": "gemini"
+        },
+        {
+          "id": "textembedding-gecko@002",
+          "maker": "google",
+          "kind": "embedding",
+          "retires": "2025-04-21",
+          "released": "2023-11-02",
+          "replacement": "gemini-embedding-001",
+          "page": "gemini"
+        },
+        {
+          "id": "veo-2.0-generate-001",
+          "maker": "google",
+          "kind": "video",
+          "retires": "2026-06-30",
+          "released": "2025-05-27",
+          "replacement": "veo-3.1-generate-001",
+          "page": "gemini"
+        },
+        {
+          "id": "veo-3.0-fast-generate-001",
+          "maker": "google",
+          "kind": "video",
+          "retires": "2026-06-30",
+          "released": "2025-07-29",
+          "replacement": "veo-3.1-fast-generate-001",
+          "page": "gemini"
+        },
+        {
+          "id": "veo-3.0-generate-001",
+          "maker": "google",
+          "kind": "video",
+          "retires": "2026-06-30",
+          "released": "2025-07-29",
+          "replacement": "veo-3.1-generate-001",
+          "page": "gemini"
+        }
+      ]
     }
   }
 }
