@@ -29,6 +29,9 @@ inputs:
   registry:
     description: Where the model list comes from. "live" (default) reads aidriftline.com/models.json, updated as soon as a provider changes a date or replacement, and falls back to the copy bundled with this version. "bundled" never fetches.
     default: "live"
+  sarif-file:
+    description: "Also write the findings as SARIF to this file (e.g. driftline.sarif), for github/codeql-action/upload-sarif to show them in code scanning. Empty: no SARIF."
+    default: ""
   github-token:
     description: Token used to open the issue. Needs issues:write.
     default: ${{ github.token }}
@@ -37,6 +40,8 @@ outputs:
     description: Number of model references found.
   at-risk:
     description: Number of references to retired or soon-to-retire models.
+  sarif-file:
+    description: Path of the SARIF file written (empty when sarif-file wasn't set).
 runs:
   using: node24
   main: src/index.js

@@ -982,3 +982,21 @@ test("fix replaces plain renames, keeps prefixes, skips the rest with a reason",
   assert.equal(after, 'a = "gpt-4.1"\nb = "openai/gpt-4.1"\nc = "gpt-4-0613-custom"\nd = "gemini-2.0-flash"\ne = "gpt-4o-mini-2024-07-18"\n');
   assert.equal((await import("node:fs")).readFileSync(join(dir, "notes.md"), "utf8"), "We moved off `gpt-4-0613`.\n");
 });
+
+test("SARIF: one result per flagged reference, with level, location and replacement", async () => {
+  const { toSarif } = await import("../src/sarif.js");
+  const findings = [
+    { id: "gpt-4-0613", file: "src\\app.py", line: 3, doc: false, status: "retired", entry: { id: "gpt-4-0613", provider: "openai", retires: "2026-06-06", replacement: "gpt-4.1" } },
+    { id: "o3", file: "README.md", line: 9, doc: true, status: "at-risk", entry: { id: "o3", provider: "openai", retires: "2026-12-11", replacement: "gpt-6.1-sol" } },
+    { id: "gpt-5.1", file: "a.py", line: 1, doc: false, status: "active", entry: { id: "gpt-5.1", provider: "openai", retires: "2027-07-13" } },
+  ];
+  const s = toSarif(findings, { version: "9.9.9" });
+  assert.equal(s.version, "2.1.0");
+  assert.equal(s.runs[0].tool.driver.name, "Driftline");
+  const r = s.runs[0].results;
+  assert.equal(r.length, 2); // active models are not results
+  assert.deepEqual([r[0].ruleId, r[0].level, r[0].locations[0].physicalLocation.artifactLocation.uri, r[0].locations[0].physicalLocation.region.startLine],
+    ["driftline/retired-model", "error", "src/app.py", 3]);
+  assert.match(r[0].message.text, /Replacement: gpt-4\.1/);
+  assert.equal(r[1].level, "note"); // mentions in docs never block
+});

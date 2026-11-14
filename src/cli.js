@@ -18,7 +18,8 @@ import { activate, deactivate } from "./license.js";
 
 const JSON_OUT = process.argv.includes("--json");
 const DRY_RUN = process.argv.includes("--dry-run");
-const [cmd, arg] = process.argv.slice(2).filter((a) => a !== "--json" && a !== "--dry-run");
+const SARIF = (() => { const i = process.argv.indexOf("--sarif"); return i > 0 ? process.argv[i + 1] || "driftline.sarif" : ""; })();
+const [cmd, arg] = process.argv.slice(2).filter((a, i, all) => a !== "--json" && a !== "--dry-run" && a !== "--sarif" && all[i - 1] !== "--sarif");
 const flag = (name) => { const i = process.argv.indexOf(`--${name}`); return i > 0 ? process.argv[i + 1] : ""; };
 
 // "git@github.com:acme/app.git" or "https://github.com/acme/app" -> "acme"
@@ -41,6 +42,7 @@ Usage:
 Options:
   --json             print the scan (or the fix plan) as JSON
   --dry-run          with fix: show what would change, write nothing
+  --sarif <file>     also write the findings as SARIF (for GitHub code scanning)
   --account <name>   GitHub account to activate for (default: origin remote owner)
   -h, --help         show this help
   -v, --version      show the version
@@ -96,5 +98,11 @@ if (cmd === "-h" || cmd === "--help" || cmd === "help") {
     });
     console.log(JSON.stringify({ findings: result.findings.map(pick), drift: result.drift || [] }, null, 2));
   } else console.log(result.markdown);
+  if (SARIF) {
+    const { toSarif } = await import("./sarif.js");
+    const { writeFileSync } = await import("node:fs");
+    writeFileSync(SARIF, JSON.stringify(toSarif(result.findings, { version: JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version }), null, 2) + "\n");
+    console.error(`SARIF written to ${SARIF}`);
+  }
   process.exitCode = result.findings.some((f) => f.status === "retired" && !f.doc) ? 1 : 0;
 }

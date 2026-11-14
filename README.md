@@ -39,11 +39,13 @@ Outside CI: `npx -y @aidriftline/driftline .` scans any repository once, an [MCP
 | `license-key` | | Driftline Pro license code from `activate`; without it only the scan runs |
 | `create-issue` | `false` | Open or update one issue labelled `driftline`. Model answers are never put in the issue |
 | `show-answers` | `true` | Show model answers in the job summary. In a public repository job summaries are public, so set `false` if your prompts contain private data |
+| `sarif-file` | | Also write the findings as SARIF to this file, for [code scanning](#see-findings-in-github-code-scanning-sarif) |
+| `registry` | `live` | `live` reads the list at aidriftline.com (falls back to the bundled copy); `bundled` never fetches |
 | `github-token` | `github.token` | Needs `issues: write` when `create-issue` is on |
 
-Outputs: `findings` (model references found) and `at-risk` (references to retired or soon-to-retire models).
+Outputs: `findings` (model references found), `at-risk` (references to retired or soon-to-retire models) and `sarif-file` (when written).
 
-Model IDs written the Amazon Bedrock way (`anthropic.claude-…-v1:0`, including ARNs), the Google Vertex AI way (`claude-…@20240620`) or with a router prefix (`openrouter/openai/gpt-4`, `vertex_ai/…`) are recognized too. Azure OpenAI deployments follow Microsoft's own retirement dates and are not checked. Mentions in Markdown and text files, such as a changelog, are reported as notices but never fail the build.
+Model IDs written the Amazon Bedrock way (`anthropic.claude-…-v1:0`, including ARNs), the Google Vertex AI way (`claude-…@20240620`, `…-maas`) or with a router prefix (`openrouter/openai/gpt-4`, `vertex_ai/…`, `azure/…`, `groq/…`) are recognized too, and Bedrock, Vertex AI and Azure get their own dates (see [Retirement data](#retirement-data)). Mentions in Markdown and text files, such as a changelog, are reported as notices but never fail the build.
 
 Drift tests make two API calls per prompt: one to the current model, one to the replacement. A prompt without `model` is tested on the model in your code that retires first. Calls time out after two minutes and are retried once if the provider is busy. When a provider names a replacement that is itself being retired, Driftline points to the model at the end of that chain.
 
@@ -69,6 +71,26 @@ npx @aidriftline/driftline path/to/your/repo --json   # same, as JSON
 ```
 
 Exit code 1 means a retired model is used in code.
+
+### See findings in GitHub code scanning (SARIF)
+
+Add `sarif-file` and upload it; findings then show under **Security → Code scanning**, with retired models as errors, models retiring soon as warnings and other deprecations as notes:
+
+```yaml
+    permissions: { contents: read, security-events: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: AI-Driftline/driftline@v0
+        with:
+          sarif-file: driftline.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: driftline.sarif
+          category: driftline
+```
+
+Code scanning is free on public repositories; private ones need GitHub Code Security. Locally: `npx @aidriftline/driftline . --sarif driftline.sarif`.
 
 ### Fix the easy ones
 

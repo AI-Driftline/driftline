@@ -76,6 +76,16 @@ async function main() {
   console.log("\n" + result.markdown);
   console.log(`::${token}::`);
   writeSummary(result.markdown);
+  // SARIF for GitHub code scanning: upload it with github/codeql-action/upload-sarif in the next step.
+  const sarifFile = input("sarif-file", "");
+  if (sarifFile) {
+    const { toSarif } = await import("./sarif.js");
+    const { writeFileSync, readFileSync } = await import("node:fs");
+    const version = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
+    writeFileSync(resolve(workspace, sarifFile), JSON.stringify(toSarif(result.findings, { version }), null, 2) + "\n");
+    setOutput("sarif-file", sarifFile);
+    console.log(`SARIF written to ${sarifFile}. Upload it with github/codeql-action/upload-sarif to see the findings in code scanning.`);
+  }
   setOutput("findings", result.findings.length);
   setOutput("at-risk", result.atRisk);
 
