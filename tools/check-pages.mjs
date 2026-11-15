@@ -10,6 +10,8 @@
 // started. The website build marks them "under review" in the live list, so the Action, MCP, emails and posts stop
 // presenting them as fact until the registry is fixed. Not rewritten when a page couldn't be read.
 //
+// --summary writes one line per source for the status page: could the page be read, and how many differences.
+//
 // Prints a report and, inside GitHub Actions, sets the step output problems=<count>. Exit code is 0 unless the
 // script itself fails, so the workflow decides what to do (open or update an issue).
 // Used by the 6-hourly website workflow and by the daily registry check before it pushes.
@@ -21,6 +23,7 @@ const opt = (name) => { const i = args.indexOf(name); return i >= 0 ? args.splic
 const statePath = opt("--state");
 const outPath = opt("--out");
 const disputedPath = opt("--disputed");
+const summaryPath = opt("--summary");
 const regPath = resolve(args[0] || new URL("../registry/models.json", import.meta.url).pathname);
 const reg = JSON.parse(readFileSync(regPath, "utf8"));
 const today = new Date().toISOString().slice(0, 10);
@@ -60,6 +63,7 @@ async function fetchPage(url) {
 
 const problems = [];
 const pages = {};
+const unread = new Set(); // AI-kept news pages that couldn't be read (not counted as problems)
 for (const [provider, url] of Object.entries(reg.sources)) {
   const p = await fetchPage(url);
   const known = reg.models.filter((m) => m.provider === provider);
@@ -112,7 +116,7 @@ for (const [name, p] of Object.entries(reg.platforms || {})) {
   if (p.maintained !== "ai" || !p.source) continue;
   const page = await fetchPage(p.source);
   // Not counted as a problem: an unreachable news page (e.g. a network allowlist) must never block fixes to the main pages.
-  if (page.error || !page.text.includes(name)) { console.error(`Note: could not read the ${p.name || name} page (${page.error || "no model names on it"}): ${p.source}. Skipped.`); continue; }
+  if (page.error || !page.text.includes(name)) { unread.add(name); console.error(`Note: could not read the ${p.name || name} page (${page.error || "no model names on it"}): ${p.source}. Skipped.`); continue; }
   for (const m of p.models || []) if (!page.text.includes(m.id)) problems.push({ kind: "missing", what: "listing", provider: name, id: m.id, msg: `\`${m.id}\` is no longer mentioned on the ${p.name || name} page.` });
   const sentences = [...new Set((page.text.match(/[^.]*\b(?:retired|discontinued|deprecated|routed|no longer (?:available|supported))\b[^.]*\./gi) || [])
     .filter((x) => new RegExp(`\\b${name}-[a-z0-9]`, "i").test(x)).map((x) => x.trim()))].sort();
@@ -128,6 +132,16 @@ if (disputedPath && !problems.some((p) => p.kind === "page")) {
   for (const p of problems.filter((x) => x.kind === "differs" || x.kind === "missing"))
     now[p.id] = { since: before[p.id]?.since || today, provider: p.provider, what: p.what, page: reg.sources[p.provider] || reg.platforms?.[p.provider]?.source };
   writeFileSync(disputedPath, JSON.stringify(now, null, 1) + "\n");
+}
+
+if (summaryPath) {
+  const sources = {};
+  for (const name of [...Object.keys(reg.sources), ...Object.entries(reg.platforms || {}).filter(([, p]) => p.maintained === "ai" && p.source).map(([k]) => k)]) {
+    const mine = problems.filter((p) => p.provider === name);
+    sources[name] = mine.some((p) => p.kind === "page") || unread.has(name) ? { result: "unreadable" }
+      : { result: mine.some((p) => p.kind !== "new") ? "differs" : mine.length ? "new" : "ok", differences: mine.filter((p) => p.kind !== "new").length, new: mine.filter((p) => p.kind === "new").length };
+  }
+  writeFileSync(summaryPath, JSON.stringify({ at: new Date().toISOString(), sources }, null, 1) + "\n");
 }
 
 const report = problems.length

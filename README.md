@@ -137,6 +137,7 @@ Needs Node 20+. Free, no key.
 - A script compares every entry with those pages every 6 hours (date, replacement, new models on a page).
 - An AI check runs daily, and right away when the script finds a difference. It follows written rules ([`docs/registry-rules.md`](docs/registry-rules.md)), and its changes ship only after they pass the same script and the test suite.
 - Until a difference is fixed, the affected models are marked "under review" in reports, MCP answers and model pages, and email alerts for them wait, so nobody gets a wrong date.
+- You can see it working: [aidriftline.com/status](https://aidriftline.com/status/) shows when each of the 11 sources was last read, whether it matches, what changed recently and what is under review ([status.json](https://aidriftline.com/status.json) for scripts).
 
 Each entry records the date it was last checked. Google publishes only the *earliest* possible shutdown date, so Driftline reports those models as "may stop working" rather than "retired". Anthropic's "not sooner than" dates are informational and never trigger a warning. Audio, image, video and embedding models are scanned and reported too, but only text models are drift-tested. Some Google models are not shut down but *routed*: after the date, requests to the old ID are answered by the replacement model (`routes: true` in the registry). Driftline flags those too, because the call keeps working while the answers change.
 
