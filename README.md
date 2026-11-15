@@ -122,7 +122,7 @@ jobs:
           fail-on: never
 ```
 
-Driftline keeps one pull request on the branch `driftline/model-updates`: later runs rebuild it from the default branch and update it, and it is closed once nothing is left to rename. Its description lists every change and every line left for you, with the reason. Also turn on **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests** (in an organization, turn it on in the organization's settings first). Pull requests opened with the default token don't start your other workflows; pass a personal access token as `github-token` if your checks should run on it.
+Driftline keeps one pull request on the branch `driftline/model-updates`: later runs rebuild it from the default branch and update it, and it is closed once nothing is left to rename. Its description lists every change, and a checklist of the lines a rename can't fix, with what to change and the provider's guide (ticks are kept when the pull request is updated). With a Pro license and a prompt file, it also shows your prompts tested on the replacement, with a verdict: safe to merge, read first, or don't merge yet. [See an example](https://aidriftline.com/#pr). Also turn on **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests** (in an organization, turn it on in the organization's settings first). Pull requests opened with the default token don't start your other workflows; pass a personal access token as `github-token` if your checks should run on it.
 
 ## For AI coding agents
 
