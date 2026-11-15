@@ -40,7 +40,14 @@ export function planFixes(root, registry, { today = new Date(), warnDays = 90 } 
     const plain = h.id.replace(/^[a-z]+:/, "").replace(/@.*$/, ""); // registry key → the ID as providers write it
     const why = reason(f);
     const to = why ? null : rewrite(h.raw, plain, f.entry.replacement);
-    if (why || !to) { skipped.push({ file: h.file, line: h.line, id: plain, status: c.status, reason: why || `written as "${h.raw}", which Driftline won't rewrite automatically` }); continue; }
+    if (why || !to) {
+      const mig = why && !f.doc ? migrationFor(f.entry) : null;
+      const guide = typeof mig?.guide === "function" ? mig.guide(f.entry) : mig?.guide || null;
+      skipped.push({ file: h.file, line: h.line, id: plain, status: c.status, retires: f.entry.retires, doc: Boolean(f.doc),
+        to: f.entry.replacement || null, alt: f.entry.replacement_alt || null, guide,
+        reason: why || `written as "${h.raw}", which Driftline won't rewrite automatically` });
+      continue;
+    }
     changes.push({ file: h.file, line: h.line, id: plain, from: h.raw, to, status: c.status, retires: f.entry.retires });
   }
   // One change per spelling per line (the same ID twice on a line is one replacement).

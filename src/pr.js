@@ -67,11 +67,7 @@ export function prBody({ changes, skipped }, { cap = 100, drift = [], runUrl = "
     ...changes.slice(0, cap).map(row),
   ];
   if (changes.length > cap) out.push("", `…and ${changes.length - cap} more in the diff.`);
-  if (skipped.length) {
-    out.push("", `### Left for you (${skipped.length})`, "", "A rename isn't enough here, so Driftline didn't touch these lines:", "");
-    out.push(...skipped.slice(0, cap).map((s) => `- \`${s.file}:${s.line}\` ${s.id}: ${s.reason}`));
-    if (skipped.length > cap) out.push(`- …and ${skipped.length - cap} more (run \`npx @aidriftline/driftline fix --dry-run\`).`);
-  }
+  out.push(...leftForYou(skipped, cap));
   const tested = drift.filter((d) => d.result !== "skipped");
   if (tested.length) {
     const count = (r) => tested.filter((d) => d.result === r).length;
@@ -98,6 +94,56 @@ export function prBody({ changes, skipped }, { cap = 100, drift = [], runUrl = "
     "<sub>Opened by the [Driftline](https://github.com/AI-Driftline/driftline) Action. It updates this pull request on later runs and closes it when nothing is left to rename.</sub>",
   );
   return out.join("\n");
+}
+
+// Lines a rename can't fix, grouped by model and reason, as a checklist. Mentions in documentation are listed
+// apart, without boxes: they are never changed.
+function leftForYou(skipped, cap) {
+  const code = skipped.filter((s) => !s.doc), docs = skipped.filter((s) => s.doc);
+  if (!skipped.length) return [];
+  const out = [];
+  if (code.length) {
+    out.push("", `### Left for you (${code.length})`, "", "A rename isn't enough for these lines, so Driftline didn't touch them. Tick them off as you go; the ticks are kept when this pull request is updated.");
+    const groups = new Map();
+    for (const s of code) {
+      const k = `${s.id}\n${s.reason}`;
+      if (!groups.has(k)) groups.set(k, { ...s, places: [] });
+      groups.get(k).places.push(`${s.file}:${s.line}`);
+    }
+    let shown = 0;
+    for (const g of groups.values()) {
+      if (shown >= cap) break;
+      const to = g.to ? ` → \`${g.to}\`${g.alt ? ` or \`${g.alt}\`` : ""}` : "";
+      out.push("", `#### \`${g.id}\`${to}${g.retires ? ` · ${g.status === "retired" ? "retired" : "retires"} ${g.retires}` : ""}`, "",
+        `${g.reason.charAt(0).toUpperCase()}${g.reason.slice(1)}${/[.!?]$/.test(g.reason) ? "" : "."}${g.guide ? ` [Provider's guide](${g.guide})` : ""}`, "");
+      for (const p of g.places.slice(0, cap - shown)) out.push(`- [ ] \`${p}\``);
+      shown += g.places.length;
+    }
+    if (code.length > cap) out.push("", `…and ${code.length - cap} more (run \`npx @aidriftline/driftline fix --dry-run\`).`);
+  }
+  if (docs.length) {
+    const list = docs.slice(0, 20).map((s) => `\`${s.file}:${s.line}\``).join(", ");
+    out.push("", `Also mentioned in documentation, left as written: ${list}${docs.length > 20 ? ` and ${docs.length - 20} more` : ""}.`);
+  }
+  return out;
+}
+
+// Carries the ticked boxes of the current pull request text over to the new one (same heading, same line).
+export function keepTicks(next, previous = "") {
+  const ticked = new Set();
+  let head = "";
+  for (const l of String(previous || "").split(/\r?\n/)) {
+    if (l.startsWith("#### ")) head = l;
+    const m = l.match(/^- \[[xX]\] (`[^`]+`)/);
+    if (m) ticked.add(`${head}\n${m[1]}`);
+  }
+  if (!ticked.size) return next;
+  head = "";
+  return next.split("\n").map((l) => {
+    if (l.startsWith("#### ")) head = l;
+    const m = l.match(/^- \[ \] (`[^`]+`)/);
+    return m && ticked.has(`${head}\n${m[1]}`) ? l.replace("- [ ]", "- [x]") : l;
+  }).join("\n");
 }
 
 async function failure(res, what) {
@@ -129,7 +175,7 @@ export async function upsertPullRequest(body, { token, repo, base, fetchImpl = f
     return { url: existing.html_url, closed: true };
   }
   if (existing) {
-    const res = await fetchImpl(`${api}/repos/${repo}/pulls/${existing.number}`, { method: "PATCH", headers, body: JSON.stringify({ title: PR_TITLE, body }) });
+    const res = await fetchImpl(`${api}/repos/${repo}/pulls/${existing.number}`, { method: "PATCH", headers, body: JSON.stringify({ title: PR_TITLE, body: keepTicks(body, existing.body) }) });
     if (!res.ok) throw await failure(res, "update the pull request");
     return { url: existing.html_url, updated: true };
   }
