@@ -44,7 +44,8 @@ export function planFixes(root, registry, { today = new Date(), warnDays = 90 } 
       const mig = why && !f.doc ? migrationFor(f.entry) : null;
       const guide = typeof mig?.guide === "function" ? mig.guide(f.entry) : mig?.guide || null;
       skipped.push({ file: h.file, line: h.line, id: plain, status: c.status, retires: f.entry.retires, doc: Boolean(f.doc),
-        to: f.entry.replacement || null, alt: f.entry.replacement_alt || null, guide,
+        to: f.entry.replacement || null, alt: f.entry.replacement_alt || null, guide, days: c.days,
+        change: why && mig && !mig.drop_in && why.startsWith("more than a rename") ? MIGRATION_LABEL[mig.change] : null, note: mig?.note || null,
         reason: why || `written as "${h.raw}", which Driftline won't rewrite automatically` });
       continue;
     }

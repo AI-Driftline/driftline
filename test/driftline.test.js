@@ -1097,16 +1097,17 @@ test("fix PR: Pro drift results go in as scores with a verdict, never the answer
 
 test("fix PR: lines left for you are grouped per model with the guide, and ticks survive an update", async () => {
   const { prBody, keepTicks } = await import("../src/pr.js");
-  const gem = { id: "gemini-2.0-flash", to: "gemini-3.5-flash", status: "retired", retires: "2026-06-01", reason: "more than a rename: API change (use generateContent)", guide: "https://ai.google.dev/x" };
+  const gem = { id: "gemini-2.0-flash", to: "gemini-3.5-flash", status: "retired", retires: "2026-06-01", days: -160, reason: "more than a rename: API change (use generateContent)", guide: "https://ai.google.dev/x" };
   const plan = { changes: [], skipped: [
     { ...gem, file: "a.py", line: 4 }, { ...gem, file: "b.py", line: 9 },
-    { id: "gpt-4o-mini-2024-07-18", to: "gpt-5-mini", alt: "gpt-5-nano", status: "at-risk", retires: "2026-12-11", file: "c.py", line: 1, reason: "the provider names two replacements" },
+    { id: "gpt-4o-mini-2024-07-18", to: "gpt-5-mini", alt: "gpt-5-nano", status: "at-risk", retires: "2026-12-11", days: 26, file: "c.py", line: 1, reason: "the provider names two replacements" },
     { id: "gpt-4-0613", file: "README.md", line: 3, doc: true, reason: "documentation file (left as written)" },
   ] };
   const md = prBody(plan);
   assert.match(md, /### Left for you \(3\)/);
-  assert.match(md, /#### `gemini-2\.0-flash` → `gemini-3\.5-flash` · retired 2026-06-01\n\nMore than a rename: API change \(use generateContent\)\. \[Provider's guide\]\(https:\/\/ai\.google\.dev\/x\)\n\n- \[ \] `a\.py:4`\n- \[ \] `b\.py:9`/);
-  assert.match(md, /`gpt-5-mini` or `gpt-5-nano`/);
+  assert.match(md, /#### `gemini-2\.0-flash` → `gemini-3\.5-flash` · shutdown date passed \(2026-06-01\)\n\nMore than a rename: API change \(use generateContent\)\. \[Provider's guide\]\(https:\/\/ai\.google\.dev\/x\)\n\n- \[ \] `a\.py:4`\n- \[ \] `b\.py:9`/);
+  assert.match(md, /`gpt-5-mini` or `gpt-5-nano` · retires 2026-12-11/);
+  assert.match(prBody({ changes: [], skipped: [{ ...gem, file: "a.py", line: 4, change: "Parameter changes", note: "Remove temperature." }] }), /\*\*Parameter changes\.\*\* Remove temperature\. \[Provider's guide\]/);
   assert.match(md, /Also mentioned in documentation, left as written: `README\.md:3`\./);
   assert.ok(!md.includes("- [ ] `README.md:3`"));
   const ticked = md.replace("- [ ] `b.py:9`", "- [x] `b.py:9`");

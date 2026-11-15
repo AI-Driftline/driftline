@@ -114,8 +114,9 @@ function leftForYou(skipped, cap) {
     for (const g of groups.values()) {
       if (shown >= cap) break;
       const to = g.to ? ` → \`${g.to}\`${g.alt ? ` or \`${g.alt}\`` : ""}` : "";
-      out.push("", `#### \`${g.id}\`${to}${g.retires ? ` · ${g.status === "retired" ? "retired" : "retires"} ${g.retires}` : ""}`, "",
-        `${g.reason.charAt(0).toUpperCase()}${g.reason.slice(1)}${/[.!?]$/.test(g.reason) ? "" : "."}${g.guide ? ` [Provider's guide](${g.guide})` : ""}`, "");
+      const when = !g.retires ? "" : g.days <= 0 ? ` · shutdown date passed (${g.retires})` : ` · retires ${g.retires}`;
+      const why = g.change && g.note ? `**${g.change}.** ${g.note}` : `${g.reason.charAt(0).toUpperCase()}${g.reason.slice(1)}`;
+      out.push("", `#### \`${g.id}\`${to}${when}`, "", `${why}${/[.!?]$/.test(why) ? "" : "."}${g.guide ? ` [Provider's guide](${g.guide})` : ""}`, "");
       for (const p of g.places.slice(0, cap - shown)) out.push(`- [ ] \`${p}\``);
       shown += g.places.length;
     }
