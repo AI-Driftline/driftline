@@ -9,6 +9,7 @@
 //           "api"      a different API, method or endpoint
 //           "re-embed" stored embeddings have to be recomputed
 //           "choose"   the provider names more than one replacement; which one depends on how you use it
+//           "features" same call, but the replacement can't do something the old model could (images in, fill-in-the-middle)
 
 const OPENAI = "https://developers.openai.com/api/docs/guides/";
 const GOOGLE = "https://ai.google.dev/gemini-api/docs/";
@@ -64,6 +65,43 @@ const RULES = [
     guide: GOOGLE + "imagen",
   },
   {
+    // Vertex's older Imagen and image-captioning models (imagegeneration@00x, imagetext) use the predict call.
+    when: (e) => /^(imagegeneration@|imagetext$)/.test(e.id) && /^gemini-/.test(e.replacement || ""),
+    change: "api",
+    note: "The old model used the predict call with an image request; Gemini image models use generateContent, and images come back as content parts.",
+    guide: "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/model-versions",
+  },
+  {
+    when: (e) => /^playai-tts/.test(e.id),
+    change: "params",
+    note: "Same speech endpoint, but the voice names are different: pick one of the new model's voices, or the call fails.",
+    guide: "https://console.groq.com/docs/text-to-speech",
+  },
+  {
+    when: (e) => /llama-guard/.test(e.id) && /safeguard/.test(e.replacement || ""),
+    change: "api",
+    note: "gpt-oss-safeguard checks text against a policy you write in the system prompt and answers in the format you ask for. Llama Guard's fixed categories and safe/unsafe answer don't carry over.",
+    guide: "https://console.groq.com/docs/model/openai/gpt-oss-safeguard-20b",
+  },
+  {
+    when: (e) => /llama-4-(scout|maverick)/.test(e.id) && /gpt-oss/.test(e.replacement || ""),
+    change: "features",
+    note: "gpt-oss reads text only: calls that send images need a different model.",
+    guide: null,
+  },
+  {
+    when: (e) => /^phi-4-multimodal/.test(e.id) && !/multimodal/.test(e.replacement || ""),
+    change: "features",
+    note: "The replacement reads text only: calls that send images or audio need a different model.",
+    guide: null,
+  },
+  {
+    when: (e) => /codestral/.test(e.id) && !/codestral/.test(e.replacement || ""),
+    change: "features",
+    note: "Fill-in-the-middle (code completion with a prompt and a suffix) works only on Codestral models; chat calls are a rename.",
+    guide: "https://docs.mistral.ai/capabilities/code_generation/",
+  },
+  {
     when: (e) => e.provider === "google" && /^veo-/.test(e.id),
     change: "api",
     note: "Gemini Omni Flash uses the Interactions API (interactions.create), not Veo's video-generation call. Google also offers Veo itself on Gemini Enterprise Agent Platform.",
@@ -99,5 +137,5 @@ export function migrationFor(entry) {
 
 // Short label for tables: "Rename" or what else is needed.
 export const MIGRATION_LABEL = {
-  rename: "Rename", settings: "Rename + setting", platform: "New platform ID", params: "Parameter changes", api: "API change", "re-embed": "Re-embed data", choose: "Pick one of two",
+  rename: "Rename", settings: "Rename + setting", platform: "New platform ID", params: "Parameter changes", api: "API change", "re-embed": "Re-embed data", choose: "Pick one of two", features: "Fewer features",
 };

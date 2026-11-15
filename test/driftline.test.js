@@ -1000,3 +1000,16 @@ test("SARIF: one result per flagged reference, with level, location and replacem
   assert.match(r[0].message.text, /Replacement: gpt-4\.1/);
   assert.equal(r[1].level, "note"); // mentions in docs never block
 });
+
+test("migrationFor: platform and provider families where a rename isn't enough", async () => {
+  const { migrationFor } = await import("../src/migration.js");
+  const at = (e) => migrationFor({ retires: "2027-01-01", ...e })?.change;
+  assert.equal(at({ id: "imagegeneration@006", provider: "google", platform: "vertex", replacement: "gemini-2.5-flash-image" }), "api");
+  assert.equal(at({ id: "playai-tts", provider: "playai", platform: "groq", replacement: "canopylabs/orpheus-v1-english" }), "params");
+  assert.equal(at({ id: "meta-llama/llama-guard-4-12b", provider: "meta", platform: "groq", replacement: "openai/gpt-oss-safeguard-20b" }), "api");
+  assert.equal(at({ id: "meta-llama/llama-4-scout-17b-16e-instruct", provider: "meta", platform: "groq", replacement: "openai/gpt-oss-120b" }), "features");
+  assert.equal(at({ id: "phi-4-multimodal-instruct", provider: "microsoft", platform: "azure", replacement: "microsoft--phi-4" }), "features");
+  assert.equal(at({ id: "codestral-2501", provider: "mistral", platform: "azure", replacement: "mistral-large-4-latest" }), "features");
+  assert.equal(at({ id: "codestral-2501", provider: "mistral", platform: "mistral", replacement: "codestral-2508" }), "rename");
+  assert.equal(at({ id: "llama-guard-3-8b", provider: "meta", platform: "groq", replacement: "meta-llama/llama-guard-4-12b" }), "rename");
+});
