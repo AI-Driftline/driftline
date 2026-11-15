@@ -23,6 +23,9 @@ inputs:
   create-issue:
     description: Open or update a GitHub issue with the report ("true" or "false").
     default: "false"
+  fix-pr:
+    description: 'Open one pull request that renames retiring model IDs where a rename is safe, and keep it up to date ("true" or "false"). Runs only on the default branch. Needs "contents: write" and "pull-requests: write", and "Allow GitHub Actions to create and approve pull requests" turned on in the repository settings.'
+    default: "false"
   show-answers:
     description: Include model answers in the job summary ("true" or "false"). They are never put in the issue.
     default: "true"
@@ -33,7 +36,7 @@ inputs:
     description: "Also write the findings as SARIF to this file (e.g. driftline.sarif), for github/codeql-action/upload-sarif to show them in code scanning. Empty: no SARIF."
     default: ""
   github-token:
-    description: Token used to open the issue. Needs issues:write.
+    description: Token used to open the issue (issues:write) and the fix pull request (contents:write, pull-requests:write). Pull requests opened with the default token don't start other workflows; pass a personal access token if your checks should run on it.
     default: ${{ github.token }}
 outputs:
   findings:

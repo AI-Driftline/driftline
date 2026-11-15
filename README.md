@@ -38,10 +38,11 @@ Outside CI: `npx -y @aidriftline/driftline .` scans any repository once, an [MCP
 | `prompts-file` | `.driftline/prompts.yml` | Prompts for drift tests (YAML or JSON). Looked up from the repository root, then from `path` |
 | `license-key` | | Driftline Pro license code from `activate`; without it only the scan runs |
 | `create-issue` | `false` | Open or update one issue labelled `driftline`. Model answers are never put in the issue |
+| `fix-pr` | `false` | Open one pull request with the safe renames from [`fix`](#fix-the-easy-ones) and keep it up to date. Only from the default branch |
 | `show-answers` | `true` | Show model answers in the job summary. In a public repository job summaries are public, so set `false` if your prompts contain private data |
 | `sarif-file` | | Also write the findings as SARIF to this file, for [code scanning](#see-findings-in-github-code-scanning-sarif) |
 | `registry` | `live` | `live` reads the list at aidriftline.com (falls back to the bundled copy); `bundled` never fetches |
-| `github-token` | `github.token` | Needs `issues: write` when `create-issue` is on |
+| `github-token` | `github.token` | Needs `issues: write` when `create-issue` is on, `contents: write` and `pull-requests: write` when `fix-pr` is on |
 
 Outputs: `findings` (model references found), `at-risk` (references to retired or soon-to-retire models) and `sarif-file` (when written).
 
@@ -100,6 +101,28 @@ npx @aidriftline/driftline fix             # change it
 ```
 
 `fix` replaces a retired or retiring model ID with its replacement only where Driftline's migration rules say a new name is the whole change, and keeps what's around it (`openai/gpt-4-0613` → `openai/gpt-4.1`). It leaves everything else alone and lists it with the reason: request or API changes, a provider that names two replacements, Bedrock and Azure IDs, models under review, and documentation files. A rename keeps the call working, but answers can still change, so test your prompts on the new model before you ship.
+
+To get the same changes as a pull request from CI, turn on `fix-pr` in a scheduled workflow:
+
+```yaml
+on:
+  schedule: [{ cron: "0 6 * * 1" }]   # every Monday
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  driftline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: AI-Driftline/driftline@v0
+        with:
+          fix-pr: true
+          fail-on: never
+```
+
+Driftline keeps one pull request on the branch `driftline/model-updates`: later runs rebuild it from the default branch and update it, and it is closed once nothing is left to rename. Its description lists every change and every line left for you, with the reason. Also turn on **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests**. Pull requests opened with the default token don't start your other workflows; pass a personal access token as `github-token` if your checks should run on it.
 
 ## For AI coding agents
 

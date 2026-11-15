@@ -181,7 +181,7 @@ test("run without provider key reports a clear error per prompt", async () => {
 });
 
 // ---------- edge cases (found by break-testing, 2026-10-11) ----------
-import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { renderReport } from "../src/report.js";
 import { providerOf } from "../src/providers.js";
@@ -1012,4 +1012,67 @@ test("migrationFor: platform and provider families where a rename isn't enough",
   assert.equal(at({ id: "codestral-2501", provider: "mistral", platform: "azure", replacement: "mistral-large-4-latest" }), "features");
   assert.equal(at({ id: "codestral-2501", provider: "mistral", platform: "mistral", replacement: "codestral-2508" }), "rename");
   assert.equal(at({ id: "llama-guard-3-8b", provider: "meta", platform: "groq", replacement: "meta-llama/llama-guard-4-12b" }), "rename");
+});
+
+// Fix pull request: one branch with the safe renames, pushed only when it changed; the checkout is left as it was.
+test("fix PR: branch built from the plan, pushed once, checkout untouched", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const { buildRegistry } = await import("../src/registry.js");
+  const { planFixes } = await import("../src/fix.js");
+  const { pushFixBranch, BRANCH, authArgs } = await import("../src/pr.js");
+  const reg = buildRegistry({ checked: "2026-11-14", sources: {}, models: [
+    { id: "gpt-4-0613", provider: "openai", retires: "2026-06-06", qualifier: "exact", replacement: "gpt-4.1" },
+  ] });
+  const sh = (cwd, ...a) => execFileSync("git", a, { cwd, encoding: "utf8" }).trim();
+  const remote = mkdtempSync(join(tmpdir(), "driftline-remote-"));
+  sh(remote, "init", "-q", "--bare");
+  const dir = tempRepo({ "src/app.py": 'a = "gpt-4-0613"\n', "other.txt": "local edit\n" });
+  sh(dir, "init", "-q", "-b", "main");
+  sh(dir, "add", ".");
+  sh(dir, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "init");
+  sh(dir, "remote", "add", "origin", remote);
+  writeFileSync(join(dir, "other.txt"), "changed by an earlier step\n"); // not part of the fix: must not be committed
+  const today = new Date("2026-11-14T00:00:00Z");
+  const plan = planFixes(join(dir, "src"), reg, { today });
+  const first = pushFixBranch({ repoRoot: dir, root: join(dir, "src"), changes: plan.changes, message: "fix" });
+  assert.equal(first.pushed, true);
+  assert.equal(sh(remote, "show", `${BRANCH}:src/app.py`), 'a = "gpt-4.1"');
+  assert.deepEqual(sh(remote, "show", "--name-only", "--format=", BRANCH).split("\n"), ["src/app.py"]);
+  assert.equal(sh(dir, "rev-parse", "--abbrev-ref", "HEAD"), "main");
+  assert.equal(readFileSync(join(dir, "src/app.py"), "utf8"), 'a = "gpt-4-0613"\n');
+  assert.equal(readFileSync(join(dir, "other.txt"), "utf8"), "changed by an earlier step\n");
+  assert.equal(sh(dir, "worktree", "list").split("\n").length, 1);
+  const again = pushFixBranch({ repoRoot: dir, root: join(dir, "src"), changes: plan.changes, message: "fix" });
+  assert.equal(again.unchanged, true);
+  const a = authArgs("tok", "https://github.com");
+  assert.deepEqual([a[1], a[3].startsWith("http.https://github.com/.extraheader=AUTHORIZATION: basic ")], ["http.https://github.com/.extraheader=", true]);
+  assert.ok(!a.join(" ").includes("tok"));
+});
+
+test("fix PR: opened as draft (or not, where drafts aren't allowed), updated, closed", async () => {
+  const { upsertPullRequest, prBody, PR_TITLE } = await import("../src/pr.js");
+  const calls = [];
+  const fake = (existing, draftOk = true) => async (url, opts = {}) => {
+    const body = opts.body ? JSON.parse(opts.body) : null;
+    calls.push([opts.method || "GET", url, body]);
+    if (!opts.method) return reply(200, existing ? [{ number: 3, html_url: "pr3" }] : []);
+    if (opts.method === "POST" && body.draft && !draftOk) return reply(422, { message: "Draft pull requests are not supported" });
+    return reply(200, { number: 4, html_url: "pr4" });
+  };
+  const opened = await upsertPullRequest("b", { token: "t", repo: "acme/app", base: "main", fetchImpl: fake(false, false) });
+  assert.equal(opened.opened, true);
+  assert.match(calls[0][1], /head=acme%3Adriftline%2Fmodel-updates/);
+  assert.deepEqual(calls.slice(1).map((c) => [c[0], c[2].draft, c[2].head, c[2].base, c[2].title]), [["POST", true, "driftline/model-updates", "main", PR_TITLE], ["POST", false, "driftline/model-updates", "main", PR_TITLE]]);
+  calls.length = 0;
+  assert.equal((await upsertPullRequest("b2", { token: "t", repo: "acme/app", base: "main", fetchImpl: fake(true) })).updated, true);
+  assert.deepEqual([calls[1][0], calls[1][1].endsWith("/pulls/3"), calls[1][2].body], ["PATCH", true, "b2"]);
+  calls.length = 0;
+  assert.equal((await upsertPullRequest("done", { token: "t", repo: "acme/app", base: "main", close: true, fetchImpl: fake(true) })).closed, true);
+  assert.equal(calls[1][2].state, "closed");
+  assert.ok((await upsertPullRequest("x", { token: "t", repo: "acme/app", base: "main", close: true, fetchImpl: fake(false) })).skipped);
+  const err = await upsertPullRequest("b", { token: "t", repo: "acme/app", base: "main", fetchImpl: async () => reply(403, { message: "nope" }) }).catch((e) => e);
+  assert.match(err.message, /pull-requests: write/);
+  const md = prBody({ changes: [{ file: "a.py", line: 1, from: "gpt-4-0613", to: "gpt-4.1", status: "retired", retires: "2026-06-06" }], skipped: [{ file: "b.py", line: 2, id: "gemini-2.0-flash", reason: "more than a rename" }] });
+  assert.match(md, /`gpt-4-0613` → `gpt-4.1`/);
+  assert.match(md, /Left for you \(1\)/);
 });
