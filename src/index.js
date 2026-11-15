@@ -145,7 +145,8 @@ async function fixPullRequest({ workspace, root, reg, warnDays, drift = [] }) {
   const n = plan.changes.length;
   const b = pr.pushFixBranch({ repoRoot: workspace, root, changes: plan.changes, auth, message: `Update ${n} retiring AI model ID${n === 1 ? "" : "s"} (Driftline)` });
   const runUrl = process.env.GITHUB_RUN_ID ? `${process.env.GITHUB_SERVER_URL || "https://github.com"}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}` : "";
-  const r = await pr.upsertPullRequest(pr.prBody(plan, { drift, runUrl }), { token, repo, base });
+  const { relative } = await import("node:path");
+  const r = await pr.upsertPullRequest(pr.prBody(pr.fromRepoRoot(plan, relative(workspace, root)), { drift, runUrl }), { token, repo, base });
   console.log(`${r.opened ? "Opened" : "Updated"} pull request${b.unchanged ? " (code unchanged since the last run)" : ""}: ${r.url}`);
 }
 

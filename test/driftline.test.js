@@ -1161,3 +1161,13 @@ test("fix PR: a push refused for lack of permission says which permission to add
   const plan = planFixes(dir, reg, { today: new Date("2026-11-14T00:00:00Z") });
   assert.throws(() => pushFixBranch({ repoRoot: dir, root: dir, changes: plan.changes, message: "fix" }), /contents: write/);
 });
+
+test("fix PR: in a monorepo the pull request names files from the repository root", async () => {
+  const { prBody, fromRepoRoot } = await import("../src/pr.js");
+  const plan = { changes: [{ file: "llm.py", line: 2, from: "gpt-4.1-nano", to: "gpt-5.6-luna", status: "retired", retires: "2026-10-23" }], skipped: [{ file: "llm.py", line: 3, id: "x", reason: "more than a rename" }] };
+  const md = prBody(fromRepoRoot(plan, "services/api"));
+  assert.match(md, /`services\/api\/llm\.py:2`/);
+  assert.match(md, /- \[ \] `services\/api\/llm\.py:3`/);
+  assert.equal(fromRepoRoot(plan, ""), plan);
+  assert.equal(plan.changes[0].file, "llm.py"); // the plan used for the edit keeps its own paths
+});

@@ -74,6 +74,14 @@ export function pairsInBody(body = "") {
 }
 export const CLOSED_BY_DRIFTLINE = "Nothing is left to rename";
 
+// The plan with file paths from the repository root, for the pull request text (fix works relative to the scanned folder).
+export function fromRepoRoot(plan, prefix) {
+  if (!prefix || prefix === ".") return plan;
+  const p = prefix.replace(/\\/g, "/").replace(/\/$/, "");
+  const fix = (x) => ({ ...x, file: `${p}/${x.file.replace(/\\/g, "/")}` });
+  return { changes: plan.changes.map(fix), skipped: plan.skipped.map(fix) };
+}
+
 export function prBody({ changes, skipped }, { cap = 100, drift = [], runUrl = "" } = {}) {
   const row = (c) => `| \`${c.file}:${c.line}\` | \`${c.from}\` → \`${c.to}\` | ${c.status === "retired" ? "retired" : "retires"} ${c.retires} |`;
   const out = [
