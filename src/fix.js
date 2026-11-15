@@ -31,7 +31,7 @@ function rewrite(raw, plain, replacement) {
 }
 
 export function planFixes(root, registry, { today = new Date(), warnDays = 90 } = {}) {
-  const hits = scanDirectory(root, { known: registry.byId });
+  const hits = scanDirectory(root, { ignore: [".driftline/"], known: registry.byId }); // the prompt file names the model to test, not the one in use
   const changes = [], skipped = [];
   for (const h of hits) {
     const c = classify(h.id, registry, { today, warnDays });

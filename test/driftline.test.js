@@ -969,6 +969,7 @@ test("fix replaces plain renames, keeps prefixes, skips the rest with a reason",
   const dir = tempRepo({
     "app.py": 'a = "gpt-4-0613"\nb = "openai/gpt-4-0613"\nc = "gpt-4-0613-custom"\nd = "gemini-2.0-flash"\ne = "gpt-4o-mini-2024-07-18"\n',
     "notes.md": "We moved off `gpt-4-0613`.\n",
+    ".driftline/prompts.yml": "prompts:\n  - id: a\n    model: gpt-4-0613\n    prompt: hi\n",
   });
   const today = new Date("2026-11-14T00:00:00Z");
   const plan = planFixes(dir, reg, { today });
