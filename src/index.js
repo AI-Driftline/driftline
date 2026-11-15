@@ -127,9 +127,18 @@ async function fixPullRequest({ workspace, root, reg, warnDays, drift = [] }) {
   const base = await pr.defaultBranch({ token, repo });
   if (process.env.GITHUB_REF !== `refs/heads/${base}`) return console.log(`Fix pull request skipped: it is only made from ${base}.`);
   const plan = planFixes(root, reg, { warnDays });
+  const state = await pr.prState({ token, repo });
+  // Someone pushed their own work to the branch: leave the branch and the pull request exactly as they are.
+  if (state.open) {
+    const people = [...new Set(await pr.humanCommits({ token, repo, number: state.open.number }))];
+    if (people.length) return console.log(`::notice::Driftline left its pull request as it is: ${people.join(", ")} added commits to ${pr.BRANCH} (${state.open.html_url}). Merge or close it, and Driftline takes over again on the next run.`);
+  }
   if (!plan.changes.length) {
-    const r = await pr.upsertPullRequest("Nothing is left to rename: the retiring model IDs are gone from the default branch. Closing this pull request.", { token, repo, base, close: true });
+    const r = await pr.upsertPullRequest(`${pr.CLOSED_BY_DRIFTLINE}: the retiring model IDs are gone from the default branch. Closing this pull request.`, { token, repo, base, close: true });
     return console.log(r.closed ? `Closed pull request: ${r.url}` : r.skipped);
+  }
+  if (!state.open && pr.closedByUser(state.closed, plan.changes)) {
+    return console.log(`Fix pull request not reopened: it was closed on ${state.closed.closed_at.slice(0, 10)} (${state.closed.html_url}) and every rename it would make was already in it. A new one opens when another model needs renaming.`);
   }
   const auth = pr.authArgs(token);
   if (auth.length) console.log(`::add-mask::${auth[3].split("basic ")[1]}`);

@@ -1117,3 +1117,47 @@ test("fix PR: lines left for you are grouped per model with the guide, and ticks
   assert.match(keepTicks(prBody(plan), ticked.replace("shutdown date passed", "retires")), /- \[x\] `b\.py:9`/); // wording changes don't drop ticks
   assert.equal(keepTicks("- [ ] `b.py:9`", "#### other\n- [x] `b.py:9`"), "- [ ] `b.py:9`"); // a tick under another model doesn't carry over
 });
+
+test("fix PR: people's commits stop updates; merges and Driftline's own commits don't", async () => {
+  const { humanCommits } = await import("../src/pr.js");
+  const bot = { author: { login: "github-actions[bot]" }, commit: { author: { email: "41898282+github-actions[bot]@users.noreply.github.com" } }, parents: [{}] };
+  const merge = { author: { login: "alice" }, commit: { author: { email: "a@x" } }, parents: [{}, {}] }; // GitHub's "Update branch"
+  const own = { author: { login: "alice" }, commit: { author: { email: "a@x" } }, parents: [{}] };
+  const call = (list) => humanCommits({ token: "t", repo: "o/r", number: 3, fetchImpl: async () => reply(200, list) });
+  assert.deepEqual(await call([bot]), []);
+  assert.deepEqual(await call([bot, merge]), []);
+  assert.deepEqual(await call([bot, merge, own]), ["alice"]);
+});
+
+test("fix PR: a pull request the user closed stays closed until a new rename appears", async () => {
+  const { prBody, closedByUser, pairsInBody, CLOSED_BY_DRIFTLINE } = await import("../src/pr.js");
+  const ch = (from, to, line = 1) => ({ file: "a.py", line, from, to, status: "at-risk", retires: "2027-01-14" });
+  const body = prBody({ changes: [ch("gpt-4o-mini-2024-07-18", "gpt-6-luna"), ch("gpt-4.1-nano", "gpt-5.6-luna", 2)], skipped: [] });
+  assert.deepEqual([...pairsInBody(body)], ["gpt-4.1-nano→gpt-5.6-luna", "gpt-4o-mini-2024-07-18→gpt-6-luna"]);
+  const closed = { body, merged_at: null, closed_at: "2026-11-20T00:00:00Z" };
+  assert.equal(closedByUser(closed, [ch("gpt-4o-mini-2024-07-18", "gpt-6-luna", 9)]), true);   // same rename, moved line: stays closed
+  assert.equal(closedByUser(closed, [ch("gpt-4o-mini-2024-07-18", "gpt-6.1-luna")]), false);     // provider changed its advice: new
+  assert.equal(closedByUser(closed, [ch("o3", "gpt-6.1-sol")]), false);                           // another model: new
+  assert.equal(closedByUser({ ...closed, merged_at: "2026-11-21T00:00:00Z" }, [ch("gpt-4o-mini-2024-07-18", "gpt-6-luna")]), false); // merged, not declined
+  assert.equal(closedByUser({ ...closed, body: `${CLOSED_BY_DRIFTLINE}: gone` }, [ch("gpt-4o-mini-2024-07-18", "gpt-6-luna")]), false); // Driftline closed it
+  const old = "| `a.py:1` | `gpt-4o-mini-2024-07-18` → `gpt-6-luna` | retires 2027-01-14 |"; // pull request from before the tag existed
+  assert.equal(closedByUser({ ...closed, body: old }, [ch("gpt-4o-mini-2024-07-18", "gpt-6-luna")]), true);
+  assert.equal(closedByUser({ ...closed, body: "edited by hand" }, [ch("gpt-4o-mini-2024-07-18", "gpt-6-luna")]), false); // unknown: don't guess
+});
+
+test("fix PR: a push refused for lack of permission says which permission to add", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const { buildRegistry } = await import("../src/registry.js");
+  const { planFixes } = await import("../src/fix.js");
+  const { pushFixBranch } = await import("../src/pr.js");
+  const reg = buildRegistry({ checked: "2026-11-14", sources: {}, models: [{ id: "gpt-4-0613", provider: "openai", retires: "2026-06-06", qualifier: "exact", replacement: "gpt-4.1" }] });
+  const sh = (cwd, ...a) => execFileSync("git", a, { cwd, encoding: "utf8" }).trim();
+  const remote = mkdtempSync(join(tmpdir(), "driftline-remote-"));
+  sh(remote, "init", "-q", "--bare");
+  sh(remote, "config", "receive.denyNonFastForwards", "true");
+  writeFileSync(join(remote, "hooks", "pre-receive"), "#!/bin/sh\necho 'remote: Permission to o/r.git denied to github-actions[bot].' >&2\nexit 1\n", { mode: 0o755 });
+  const dir = tempRepo({ "a.py": 'a = "gpt-4-0613"\n' });
+  sh(dir, "init", "-q", "-b", "main"); sh(dir, "add", "."); sh(dir, "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "init"); sh(dir, "remote", "add", "origin", remote);
+  const plan = planFixes(dir, reg, { today: new Date("2026-11-14T00:00:00Z") });
+  assert.throws(() => pushFixBranch({ repoRoot: dir, root: dir, changes: plan.changes, message: "fix" }), /contents: write/);
+});

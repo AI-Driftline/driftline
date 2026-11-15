@@ -18,7 +18,9 @@ function git(cwd, args) {
     return execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
   } catch (e) {
     const cmd = args.find((a, i) => !a.startsWith("-") && args[i - 1] !== "-c");
-    throw new Error(`git ${cmd} failed: ${String(e.stderr || "").trim().split("\n").pop().slice(0, 200)}`);
+    const err = new Error(`git ${cmd} failed: ${String(e.stderr || "").trim().split("\n").pop().slice(0, 200)}`);
+    err.detail = String(e.stderr || ""); // all of git's output, for recognizing the cause
+    throw err;
   }
 }
 
@@ -47,7 +49,13 @@ export function pushFixBranch({ repoRoot, root, changes, message, remote = "orig
       git(tree, [...auth, "fetch", "-q", "--depth=1", remote, `refs/heads/${BRANCH}`]);
       unchanged = git(tree, ["rev-parse", "FETCH_HEAD^{tree}"]) === git(tree, ["rev-parse", "HEAD^{tree}"]);
     } catch {} // no such branch yet
-    if (!unchanged) git(tree, [...auth, "push", "-q", "--force", remote, `HEAD:refs/heads/${BRANCH}`]);
+    if (!unchanged) {
+      try { git(tree, [...auth, "push", "-q", "--force", remote, `HEAD:refs/heads/${BRANCH}`]); }
+      catch (e) {
+        if (/\b403\b|denied|not allowed|Permission/i.test(`${e.message}\n${e.detail || ""}`)) throw new Error(`could not push the branch ${BRANCH}: the workflow token can't write to this repository. Add "contents: write" and "pull-requests: write" under "permissions:" in the workflow. (${e.message})`);
+        throw e;
+      }
+    }
     return { pushed: !unchanged, unchanged };
   } finally {
     git(repoRoot, ["worktree", "remove", "--force", tree]);
@@ -57,6 +65,15 @@ export function pushFixBranch({ repoRoot, root, changes, message, remote = "orig
 // The pull request text: what changed, and what a rename can't fix.
 // With Pro, `drift` holds the prompt tests from the same run: they go in as scores only (answers stay in the job
 // summary, as with the issue, since anyone who can read the pull request would see them).
+// Which renames a pull request proposed ("from→to" pairs, file positions left out so moved lines don't count as new).
+export const pairsOf = (changes) => [...new Set(changes.map((c) => `${c.from}→${c.to}`))].sort();
+export function pairsInBody(body = "") {
+  const tag = String(body).match(/<!-- driftline:renames (.*?) -->/);
+  if (tag) return new Set(tag[1].split("|").filter(Boolean));
+  return new Set([...String(body).matchAll(/\| `[^`]+` \| `([^`]+)` → `([^`]+)` \|/g)].map((m) => `${m[1]}→${m[2]}`)); // older pull requests
+}
+export const CLOSED_BY_DRIFTLINE = "Nothing is left to rename";
+
 export function prBody({ changes, skipped }, { cap = 100, drift = [], runUrl = "" } = {}) {
   const row = (c) => `| \`${c.file}:${c.line}\` | \`${c.from}\` → \`${c.to}\` | ${c.status === "retired" ? "retired" : "retires"} ${c.retires} |`;
   const out = [
@@ -91,7 +108,8 @@ export function prBody({ changes, skipped }, { cap = 100, drift = [], runUrl = "
   }
   out.push(
     "",
-    "<sub>Opened by the [Driftline](https://github.com/AI-Driftline/driftline) Action. It updates this pull request on later runs and closes it when nothing is left to rename.</sub>",
+    "<sub>Opened by the [Driftline](https://github.com/AI-Driftline/driftline) Action. It updates this pull request on later runs and closes it when nothing is left to rename. If you push your own commits to this branch, Driftline stops updating it; if you close it, Driftline opens a new one only when another model needs renaming.</sub>",
+    `<!-- driftline:renames ${pairsOf(changes).join("|")} -->`,
   );
   return out.join("\n");
 }
@@ -185,6 +203,32 @@ export async function upsertPullRequest(body, { token, repo, base, fetchImpl = f
   if (res.status === 422) res = await open(false); // draft pull requests aren't available on every plan
   if (!res.ok) throw await failure(res, "open the pull request");
   return { url: (await res.json()).html_url, opened: true };
+}
+
+// The newest open and the newest closed Driftline pull request (from BRANCH), if any.
+export async function prState({ token, repo, fetchImpl = fetch }) {
+  const api = process.env.GITHUB_API_URL || "https://api.github.com";
+  const res = await fetchImpl(`${api}/repos/${repo}/pulls?state=all&sort=created&direction=desc&per_page=20&head=${encodeURIComponent(`${repo.split("/")[0]}:${BRANCH}`)}`,
+    { headers: { authorization: `Bearer ${token}`, accept: "application/vnd.github+json" } });
+  if (!res.ok) throw await failure(res, "list pull requests");
+  const all = await res.json();
+  return { open: all.find((p) => p.state === "open") || null, closed: all.find((p) => p.state === "closed") || null };
+}
+
+// Commits on the pull request that people made (not Driftline's own, not merges such as GitHub's "Update branch").
+export async function humanCommits({ token, repo, number, fetchImpl = fetch }) {
+  const api = process.env.GITHUB_API_URL || "https://api.github.com";
+  const res = await fetchImpl(`${api}/repos/${repo}/pulls/${number}/commits?per_page=100`, { headers: { authorization: `Bearer ${token}`, accept: "application/vnd.github+json" } });
+  if (!res.ok) throw await failure(res, "read the pull request's commits");
+  return (await res.json()).filter((c) => (c.parents || []).length < 2 && c.commit?.author?.email !== BOT[1] && c.author?.login !== BOT[0])
+    .map((c) => c.author?.login || c.commit?.author?.name || "someone");
+}
+
+// A pull request the user closed (not merged, not closed by Driftline) stays closed while it already covered every rename.
+export function closedByUser(closed, changes) {
+  if (!closed || closed.merged_at || String(closed.body || "").startsWith(CLOSED_BY_DRIFTLINE)) return false;
+  const before = pairsInBody(closed.body);
+  return before.size > 0 && pairsOf(changes).every((p) => before.has(p));
 }
 
 export async function defaultBranch({ token, repo, fetchImpl = fetch }) {
