@@ -82,7 +82,7 @@ async function failure(res, what) {
   let detail = "";
   try { detail = ((await res.json())?.message || "").slice(0, 200); } catch {}
   const hint = res.status === 403
-    ? ' Give the workflow "contents: write" and "pull-requests: write", and turn on "Allow GitHub Actions to create and approve pull requests" in the repository\'s Actions settings.'
+    ? ' Give the workflow "contents: write" and "pull-requests: write", and turn on "Allow GitHub Actions to create and approve pull requests" in the repository\'s Actions settings (in the organization\'s settings first if it is greyed out). The changes are on the branch driftline/model-updates meanwhile.'
     : "";
   return new Error(`Could not ${what}: HTTP ${res.status}${detail ? ` (${detail})` : ""}.${hint}`);
 }
