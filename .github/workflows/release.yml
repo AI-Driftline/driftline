@@ -98,9 +98,9 @@ jobs:
           v=$(node -p "require('./server.json').version")
           if curl -fsS "https://registry.modelcontextprotocol.io/v0/servers?search=io.github.AI-Driftline/driftline&limit=100" | grep -qE "\"version\": *\"$v\""; then echo "MCP Registry already has $v"; exit 0; fi
           curl -sL "https://github.com/modelcontextprotocol/registry/releases/download/v1.8.9/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
-          ./mcp-publisher login github-oidc
-          # npm can take several minutes before a new version is visible to the registry's check.
-          for i in $(seq 1 12); do ./mcp-publisher publish && exit 0; sleep 60; done; exit 1
+          # npm can take several minutes before a new version is visible to the registry's check. The registry's login
+          # token expires after a few minutes, so log in again before every try (15 Nov: a 0.9.1 retry failed on that).
+          for i in $(seq 1 12); do ./mcp-publisher login github-oidc && ./mcp-publisher publish && exit 0; sleep 60; done; exit 1
       # 5) All three must say the same version, or this run fails (shows on the stats digest; rerun to finish).
       - name: Check npm, @v0 and MCP Registry agree
         if: steps.bump.outputs.released
