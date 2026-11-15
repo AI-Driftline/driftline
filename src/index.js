@@ -103,7 +103,7 @@ async function main() {
   }
 
   if (input("fix-pr", "false") === "true") {
-    try { await fixPullRequest({ workspace, root, reg, warnDays }); }
+    try { await fixPullRequest({ workspace, root, reg, warnDays, drift: result.drift }); }
     catch (e) { annotate("warning", `Driftline pull request: ${e.message}`); }
   }
 
@@ -118,7 +118,7 @@ async function main() {
 }
 
 // One pull request with the safe renames, kept up to date; only from the default branch, never from a pull request.
-async function fixPullRequest({ workspace, root, reg, warnDays }) {
+async function fixPullRequest({ workspace, root, reg, warnDays, drift = [] }) {
   const token = input("github-token"), repo = process.env.GITHUB_REPOSITORY;
   if (!token || !repo) return console.log("Fix pull request skipped: no GitHub token or repository.");
   if ((process.env.GITHUB_EVENT_NAME || "").startsWith("pull_request")) return console.log("Fix pull request skipped: this run is for a pull request.");
@@ -135,7 +135,8 @@ async function fixPullRequest({ workspace, root, reg, warnDays }) {
   if (auth.length) console.log(`::add-mask::${auth[3].split("basic ")[1]}`);
   const n = plan.changes.length;
   const b = pr.pushFixBranch({ repoRoot: workspace, root, changes: plan.changes, auth, message: `Update ${n} retiring AI model ID${n === 1 ? "" : "s"} (Driftline)` });
-  const r = await pr.upsertPullRequest(pr.prBody(plan), { token, repo, base });
+  const runUrl = process.env.GITHUB_RUN_ID ? `${process.env.GITHUB_SERVER_URL || "https://github.com"}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}` : "";
+  const r = await pr.upsertPullRequest(pr.prBody(plan, { drift, runUrl }), { token, repo, base });
   console.log(`${r.opened ? "Opened" : "Updated"} pull request${b.unchanged ? " (code unchanged since the last run)" : ""}: ${r.url}`);
 }
 

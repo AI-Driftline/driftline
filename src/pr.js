@@ -6,6 +6,7 @@ import { join, relative } from "node:path";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { applyFixes } from "./fix.js";
+import { driftTable } from "./report.js";
 
 export const BRANCH = "driftline/model-updates";
 export const PR_TITLE = "Driftline: update retiring AI model IDs";
@@ -54,7 +55,9 @@ export function pushFixBranch({ repoRoot, root, changes, message, remote = "orig
 }
 
 // The pull request text: what changed, and what a rename can't fix.
-export function prBody({ changes, skipped }, { cap = 100 } = {}) {
+// With Pro, `drift` holds the prompt tests from the same run: they go in as scores only (answers stay in the job
+// summary, as with the issue, since anyone who can read the pull request would see them).
+export function prBody({ changes, skipped }, { cap = 100, drift = [], runUrl = "" } = {}) {
   const row = (c) => `| \`${c.file}:${c.line}\` | \`${c.from}\` → \`${c.to}\` | ${c.status === "retired" ? "retired" : "retires"} ${c.retires} |`;
   const out = [
     `Driftline found ${changes.length} line${changes.length === 1 ? "" : "s"} where a retiring AI model can be swapped for its replacement by a rename.`,
@@ -69,9 +72,28 @@ export function prBody({ changes, skipped }, { cap = 100 } = {}) {
     out.push(...skipped.slice(0, cap).map((s) => `- \`${s.file}:${s.line}\` ${s.id}: ${s.reason}`));
     if (skipped.length > cap) out.push(`- …and ${skipped.length - cap} more (run \`npx @aidriftline/driftline fix --dry-run\`).`);
   }
+  const tested = drift.filter((d) => d.result !== "skipped");
+  if (tested.length) {
+    const count = (r) => tested.filter((d) => d.result === r).length;
+    const [same, changed, broken, failed] = ["same", "changed", "broken", "error"].map(count);
+    const verdict = broken
+      ? `🔴 **Don't merge yet:** ${broken} prompt${broken === 1 ? "" : "s"} broke on the replacement (empty answer or invalid JSON).`
+      : changed
+      ? `🟡 **Read before you merge:** ${changed} prompt${changed === 1 ? "" : "s"} got a noticeably different answer.`
+      : failed
+      ? `⚠️ **Not fully tested:** ${failed} prompt${failed === 1 ? "" : "s"} could not be run (see the note).`
+      : "✅ **Safe to merge as far as your prompts show:** every prompt gave the same kind of answer on the replacement.";
+    out.push(
+      "", "### Your prompts on the replacement", "",
+      verdict, "",
+      `${tested.length} prompt test${tested.length === 1 ? "" : "s"} from this run: ${same} same, ${changed} changed, ${broken} broken${failed ? `, ${failed} not run` : ""}.`, "",
+      ...driftTable(drift), "",
+      runUrl ? `Both answers for every prompt are in the [job summary of this run](${runUrl}). They are left out here because anyone who can read this pull request would see them.` : "Both answers for every prompt are in the job summary of the workflow run.",
+    );
+  } else {
+    out.push("", "A rename keeps the call working, but the new model can answer differently. Test your prompts before you merge (Driftline Pro runs them on both models and puts the results in this pull request: https://aidriftline.com/#drift).");
+  }
   out.push(
-    "",
-    "A rename keeps the call working, but the new model can answer differently. Test your prompts before you merge (Driftline Pro runs them on both models and shows what changed: https://aidriftline.com/#drift).",
     "",
     "<sub>Opened by the [Driftline](https://github.com/AI-Driftline/driftline) Action. It updates this pull request on later runs and closes it when nothing is left to rename.</sub>",
   );

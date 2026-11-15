@@ -1076,3 +1076,20 @@ test("fix PR: opened as draft (or not, where drafts aren't allowed), updated, cl
   assert.match(md, /`gpt-4-0613` → `gpt-4.1`/);
   assert.match(md, /Left for you \(1\)/);
 });
+
+test("fix PR: Pro drift results go in as scores with a verdict, never the answers", async () => {
+  const { prBody } = await import("../src/pr.js");
+  const plan = { changes: [{ file: "a.py", line: 1, from: "gpt-4-0613", to: "gpt-4.1", status: "at-risk", retires: "2026-12-11" }], skipped: [] };
+  const row = (id, result, score) => ({ id, from: "gpt-4-0613", to: "gpt-4.1", result, score, note: "", before: "SECRET-BEFORE", after: "SECRET-AFTER" });
+  const broken = prBody(plan, { drift: [row("a", "same", 0.97), row("b", "broken", 0.1)], runUrl: "https://github.com/o/r/actions/runs/9" });
+  assert.match(broken, /Don't merge yet/);
+  assert.match(broken, /1 same, 0 changed, 1 broken/);
+  assert.match(broken, /\| a \| `gpt-4-0613` → `gpt-4.1` \| 0\.97 \| ✅ Same/);
+  assert.match(broken, /\(https:\/\/github\.com\/o\/r\/actions\/runs\/9\)/);
+  assert.ok(!broken.includes("SECRET"));
+  assert.match(prBody(plan, { drift: [row("a", "same", 0.97)] }), /Safe to merge as far as your prompts show/);
+  assert.match(prBody(plan, { drift: [row("a", "changed", 0.4)] }), /Read before you merge/);
+  const free = prBody(plan, { drift: [{ id: "x", from: "—", to: "—", result: "skipped" }] });
+  assert.ok(!free.includes("Your prompts on the replacement"));
+  assert.match(free, /aidriftline\.com\/#drift/);
+});

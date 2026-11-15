@@ -49,6 +49,16 @@ const MAX_ANSWER = 1500;
 const MAX_ROWS = 150;
 const clip = (s) => { s = String(s || ""); return s.length > MAX_ANSWER ? s.slice(0, MAX_ANSWER) + "\n[…cut]" : s; };
 
+// The drift results as a Markdown table (shared by the report and the fix pull request).
+export function driftTable(drift) {
+  const rows = ["| Prompt | Current → replacement | Similarity | Result | Note |", "|---|---|---|---|---|"];
+  for (const d of drift) {
+    const score = typeof d.score === "number" ? d.score.toFixed(2) : "";
+    rows.push(`| ${esc(d.id)} | ${code(d.from)} → ${code(d.to)} | ${score} | ${RESULT_LABEL[d.result] || d.result} | ${esc(d.note)} |`);
+  }
+  return rows;
+}
+
 export function renderReport({ findings, drift, registry, notices = [], answers = true, today = new Date() }) {
   const lines = ["## Driftline report", ""];
   const flagged = findings.filter((f) => ["retired", "at-risk", "deprecated"].includes(f.status));
@@ -110,11 +120,7 @@ export function renderReport({ findings, drift, registry, notices = [], answers 
   }
 
   if (drift?.length) {
-    lines.push("", "### Drift test", "", "| Prompt | Current → replacement | Similarity | Result | Note |", "|---|---|---|---|---|");
-    for (const d of drift) {
-      const score = typeof d.score === "number" ? d.score.toFixed(2) : "";
-      lines.push(`| ${esc(d.id)} | ${code(d.from)} → ${code(d.to)} | ${score} | ${RESULT_LABEL[d.result] || d.result} | ${esc(d.note)} |`);
-    }
+    lines.push("", "### Drift test", "", ...driftTable(drift));
     const details = drift.filter((d) => d.before !== undefined);
     if (details.length && !answers) {
       lines.push("", "_Answers are not included here. They are in the job summary of the workflow run._");
