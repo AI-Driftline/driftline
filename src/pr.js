@@ -134,14 +134,14 @@ export function keepTicks(next, previous = "") {
   const ticked = new Set();
   let head = "";
   for (const l of String(previous || "").split(/\r?\n/)) {
-    if (l.startsWith("#### ")) head = l;
+    if (l.startsWith("#### ")) head = (l.match(/`[^`]+`/) || [l])[0]; // the model ID, not the wording around it
     const m = l.match(/^- \[[xX]\] (`[^`]+`)/);
     if (m) ticked.add(`${head}\n${m[1]}`);
   }
   if (!ticked.size) return next;
   head = "";
   return next.split("\n").map((l) => {
-    if (l.startsWith("#### ")) head = l;
+    if (l.startsWith("#### ")) head = (l.match(/`[^`]+`/) || [l])[0]; // the model ID, not the wording around it
     const m = l.match(/^- \[ \] (`[^`]+`)/);
     return m && ticked.has(`${head}\n${m[1]}`) ? l.replace("- [ ]", "- [x]") : l;
   }).join("\n");

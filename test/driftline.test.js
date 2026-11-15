@@ -1114,5 +1114,6 @@ test("fix PR: lines left for you are grouped per model with the guide, and ticks
   const next = keepTicks(prBody(plan), ticked);
   assert.match(next, /- \[x\] `b\.py:9`/);
   assert.match(next, /- \[ \] `a\.py:4`/);
+  assert.match(keepTicks(prBody(plan), ticked.replace("shutdown date passed", "retires")), /- \[x\] `b\.py:9`/); // wording changes don't drop ticks
   assert.equal(keepTicks("- [ ] `b.py:9`", "#### other\n- [x] `b.py:9`"), "- [ ] `b.py:9`"); // a tick under another model doesn't carry over
 });
