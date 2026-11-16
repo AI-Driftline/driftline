@@ -44,6 +44,18 @@ jobs:
           summary=$(cat "$RUNNER_TEMP"/{bedrock,vertex,azure,direct}.txt | grep -E "^(Bedrock|Vertex|Azure|Groq|Mistral AI|xAI|Cohere): [0-9]+ change" | paste -sd ";" - | sed 's/;/; /g')
           git commit -am "Registry re-checked $(date -u +%F): ${summary}" -m "$(cat "$RUNNER_TEMP"/{bedrock,vertex,azure,direct}.txt)"
           git pull --rebase && git push
+      # A text copy of every provider page (tools/save-pages.mjs), committed only when a page's text changed, so
+      # git history shows what each provider changed and when. pages/ is outside registry/: no release.
+      - name: Save the provider pages
+        run: |
+          node tools/save-pages.mjs | tee "$RUNNER_TEMP/pages.txt"
+          git add pages
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          names=$(grep -E ": (changed|new) \(" "$RUNNER_TEMP/pages.txt" | cut -d: -f1 | paste -sd "," - | sed 's/,/, /g')
+          git commit -m "Provider pages changed: ${names}" -m "$(cat "$RUNNER_TEMP/pages.txt")"
+          git pull --rebase && git push
       - name: Report a page that couldn't be read
         if: steps.sync.outputs.fail == '1'
         run: exit 1
