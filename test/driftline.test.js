@@ -223,6 +223,101 @@ test("YAML parser: document marker, comments, quoted #, folded blocks", () => {
   assert.equal(p[1].expect, "json");
 });
 
+test("checks: a flipped meaning in a long answer is caught (it scored 0.98 'same' before)", () => {
+  const a = "Thanks for reaching out. I checked your order 4821 placed on March 3. Based on our policy for items returned within 30 days in original packaging, the customer is eligible for a refund. The amount will go back to the original card within 5 business days.";
+  const b = a.replace("is eligible", "is not eligible");
+  // The "not" guard: no checks written, still not "same".
+  const guarded = compare(a, b);
+  assert.equal(guarded.result, "changed");
+  assert.match(guarded.note, /says "not"/);
+  assert.equal(guarded.checked, false);
+  // With a must_not_include check it's broken, and the note names the check.
+  const checked = compare(a, b, "text", { must_not_include: ["not eligible"] });
+  assert.equal(checked.result, "broken");
+  assert.match(checked.note, /Failed check: says "not eligible"/);
+  assert.equal(checked.checked, true);
+  // Identical answers with the same "not" count stay same.
+  assert.equal(compare("It is not ready.", "It is not ready.").result, "same");
+  assert.equal(compare("It isn't ready yet, sorry about that.", "It isn\u2019t ready yet, sorry about that!").result, "same");
+});
+
+test("run: checks flow through a real run, including a model that is already retired", async () => {
+  const dir = tempRepo({
+    "a.py": 'old = "claude-3-haiku-20240307"\nnew = "claude-sonnet-4-5-20250929"\n',
+    ".driftline/prompts.yml": [
+      "prompts:",
+      "  - id: retired-miss", "    model: claude-3-haiku-20240307", "    prompt: hi", "    must_include: [refund]",
+      "  - id: retired-ok", "    model: claude-3-haiku-20240307", "    prompt: hi", "    must_include: [printer]",
+      "  - id: live", "    model: claude-sonnet-4-5-20250929", "    prompt: hi", "    must_not_include: [refund]",
+    ].join("\n"),
+  });
+  const result = await run({ root: dir, today: TODAY, licenseKey: "test-key:i", account: "acme", env: { ANTHROPIC_API_KEY: "y" }, fetchImpl: fakeProviders([]) });
+  const by = Object.fromEntries(result.drift.map((d) => [d.id, d]));
+  assert.equal(by["retired-miss"].result, "broken");
+  assert.match(by["retired-miss"].note, /Failed check: missing "refund"/);
+  assert.equal(by["retired-ok"].result, "changed");
+  assert.equal(by.live.result, "same");
+  assert.equal(by.live.checked, true);
+});
+
+test("checks: must_include is case- and space-insensitive; a check both models fail is changed, not broken", () => {
+  assert.equal(compare("Refund in 5  business days.", "REFUND in 5 business\ndays.", "text", { must_include: ["refund", "5 business days"] }).result, "same");
+  const miss = compare("Refund in 5 business days.", "Refund soon.", "text", { must_include: ["5 business days"] });
+  assert.equal(miss.result, "broken");
+  assert.match(miss.note, /missing "5 business days"/);
+  const both = compare("We can help.", "We can help!", "text", { must_include: ["refund"] });
+  assert.equal(both.result, "changed");
+  assert.match(both.note, /Current model fails this check too: missing "refund"/);
+  // Checks never make a result better.
+  assert.equal(compare("", "", "text", { must_include: ["x"] }).result, "error");
+  assert.equal(compare("abc", "", "text", { must_include: ["x"] }).result, "broken");
+});
+
+test("checks: same_fields compares named JSON fields, including nested ones", () => {
+  const before = '{"status":"approved","total":1250,"customer":{"id":7},"note":"thanks"}';
+  const ok = compare(before, '```json\n{"status":"Approved","total":1250,"customer":{"id":7},"note":"cheers"}\n```', "json", { same_fields: ["status", "total", "customer.id"] });
+  assert.equal(ok.result, "changed"); // note differs, so not identical; the named fields all match
+  assert.ok(!/Failed check/.test(ok.note));
+  const flipped = compare(before, '{"status":"rejected","total":1250,"customer":{"id":7},"note":"thanks"}', "json", { same_fields: ["status"] });
+  assert.equal(flipped.result, "broken");
+  assert.match(flipped.note, /status: approved → rejected/);
+  const gone = compare(before, '{"status":"approved","total":1250,"note":"thanks"}', "json", { same_fields: ["customer.id"] });
+  assert.equal(gone.result, "broken");
+  assert.match(gone.note, /customer\.id missing/);
+  const notInCurrent = compare('{"a":1}', '{"a":1}', "json", { same_fields: ["b"] });
+  assert.equal(notInCurrent.result, "changed");
+  assert.match(notInCurrent.note, /b missing in the current answer/);
+});
+
+test("prompt file: check lists in YAML (one-line and block) and JSON, with clear errors", () => {
+  const dir = tempRepo({
+    "p.yml": [
+      "prompts:",
+      "  - id: a",
+      "    prompt: hi",
+      '    must_include: [refund, "5 business days", \'it\'\'s fine\', "a, b"]',
+      "    must_not_include:",
+      "    - not eligible",
+      "      # a comment",
+      '    - "cannot"',
+      "  - id: b",
+      "    expect: json",
+      "    same_fields: status",
+      "    prompt: x",
+    ].join("\n"),
+    "p.json": JSON.stringify({ prompts: [{ prompt: "x", expect: "json", same_fields: ["a.b", "c"] }] }),
+    "bad1.yml": "prompts:\n  - prompt: x\n    same_fields: [a]\n",
+    "bad2.yml": "prompts:\n  - prompt: x\n    must_include: []\n",
+  });
+  const [a, b] = loadPrompts(join(dir, "p.yml"));
+  assert.deepEqual(a.must_include, ["refund", "5 business days", "it's fine", "a, b"]);
+  assert.deepEqual(a.must_not_include, ["not eligible", "cannot"]);
+  assert.deepEqual(b.same_fields, ["status"]);
+  assert.deepEqual(loadPrompts(join(dir, "p.json"))[0].same_fields, ["a.b", "c"]);
+  assert.throws(() => loadPrompts(join(dir, "bad1.yml")), /needs "expect: json"/);
+  assert.throws(() => loadPrompts(join(dir, "bad2.yml")), /empty "must_include" list/);
+});
+
 test("empty answers, CJK text and JSON after braces are scored sensibly", () => {
   assert.equal(compare("", "").result, "error");
   assert.equal(compare("ok", "").result, "broken");
@@ -1088,7 +1183,11 @@ test("fix PR: Pro drift results go in as scores with a verdict, never the answer
   assert.match(broken, /\| a \| `gpt-4-0613` → `gpt-4.1` \| 0\.97 \| ✅ Same/);
   assert.match(broken, /\(https:\/\/github\.com\/o\/r\/actions\/runs\/9\)/);
   assert.ok(!broken.includes("SECRET"));
-  assert.match(prBody(plan, { drift: [row("a", "same", 0.97)] }), /Safe to merge as far as your prompts show/);
+  assert.match(prBody(plan, { drift: [{ ...row("a", "same", 0.97), checked: true }] }), /Safe to merge as far as your prompts show/);
+  // Without checks, "same" only means similar wording: the verdict says so and points to checks.
+  const unchecked = prBody(plan, { drift: [row("a", "same", 0.97)] });
+  assert.match(unchecked, /Similar answers on every prompt/);
+  assert.ok(!unchecked.includes("Safe to merge"));
   assert.match(prBody(plan, { drift: [row("a", "changed", 0.4)] }), /Read before you merge/);
   const free = prBody(plan, { drift: [{ id: "x", from: "—", to: "—", result: "skipped" }] });
   assert.ok(!free.includes("Your prompts on the replacement"));

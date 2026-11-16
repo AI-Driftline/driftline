@@ -68,10 +68,81 @@ export function jsonSimilarity(a, b) {
   return score / keys.size;
 }
 
+// English words that flip a sentence's meaning. Word overlap barely notices one extra "not", so an answer that gains
+// or loses one can't count as the same.
+const NEGATION = /\b(?:not|no|never|cannot|none|nothing|nobody|neither|nor|without)\b|n['’]t\b/g;
+const negations = (text) => (String(text).toLowerCase().match(NEGATION) || []).length;
+
+const phrase = (s) => String(s).toLowerCase().replace(/\s+/g, " ").trim();
+
+function field(value, path) {
+  let v = value;
+  for (const k of path.split(".")) {
+    if (v === null || typeof v !== "object" || !(k in v)) return { found: false };
+    v = v[k];
+  }
+  return { found: true, value: v && typeof v === "object" ? JSON.stringify(v) : String(v).trim().toLowerCase() };
+}
+
 /**
- * Returns { score, result, note } where result is: same | changed | broken
+ * The prompt's own checks on one answer. `before` is the current model's answer, needed only for same_fields.
+ * Returns a list of failures, each { key, note }; `key` identifies the check so both models' failures can be matched.
  */
-export function compare(before, after, expect = "text") {
+export function runChecks(answer, checks = {}, { expect = "text", before } = {}) {
+  const text = phrase(answer);
+  const fails = [];
+  for (const p of checks.must_include || []) if (!text.includes(phrase(p))) fails.push({ key: `+${p}`, note: `missing "${p}"` });
+  for (const p of checks.must_not_include || []) if (text.includes(phrase(p))) fails.push({ key: `-${p}`, note: `says "${p}"` });
+  if (checks.same_fields?.length && expect === "json" && before !== undefined) {
+    const a = extractJson(before), b = extractJson(answer);
+    for (const f of checks.same_fields) {
+      const was = a.ok ? field(a.value, f) : { found: false };
+      const now = b.ok ? field(b.value, f) : { found: false };
+      if (!was.found) fails.push({ key: `=${f}`, note: `${f} missing in the current answer`, before: true });
+      else if (!now.found) fails.push({ key: `=${f}`, note: `${f} missing` });
+      else if (was.value !== now.value) fails.push({ key: `=${f}`, note: `${f}: ${clipValue(was.value)} → ${clipValue(now.value)}` });
+    }
+  }
+  return fails;
+}
+
+const clipValue = (v) => (v.length > 40 ? v.slice(0, 40) + "…" : v);
+
+export const hasChecks = (c = {}) => Boolean(c.must_include?.length || c.must_not_include?.length || c.same_fields?.length);
+
+const RANK = { same: 0, changed: 1, broken: 2 };
+const worse = (a, b) => (RANK[b] > RANK[a] ? b : a);
+const joinNotes = (...notes) => notes.filter(Boolean).join("; ");
+
+/**
+ * Returns { score, result, note, checked } where result is: same | changed | broken (or error).
+ * `checks` holds the prompt's must_include, must_not_include and same_fields. They can only make a result worse:
+ * a check the replacement fails is broken; one the current model fails too is a change to review, not drift.
+ */
+export function compare(before, after, expect = "text", checks = {}) {
+  const base = similarity(before, after, expect);
+  const checked = hasChecks(checks);
+  if (base.result === "error") return { ...base, checked };
+  let { result, note } = base;
+  if (expect !== "json" && result === "same" && negations(before) !== negations(after)) {
+    result = "changed";
+    note = joinNotes(note, "One answer says \"not\" (or no, never, cannot) where the other doesn't; check the meaning");
+  }
+  if (checked && String(after ?? "").trim()) {
+    const now = runChecks(after, checks, { expect, before });
+    const was = new Set(runChecks(before, checks, { expect }).map((f) => f.key));
+    const shared = now.filter((f) => f.before || was.has(f.key));
+    const fresh = now.filter((f) => !f.before && !was.has(f.key));
+    if (fresh.length) { result = "broken"; note = joinNotes(note, `Failed check: ${fresh.map((f) => f.note).join(", ")}`); }
+    if (shared.length) {
+      result = worse(result, "changed");
+      note = joinNotes(note, `Current model fails this check too: ${shared.map((f) => f.note).join(", ")}`);
+    }
+  }
+  return { score: base.score, result, note, checked };
+}
+
+function similarity(before, after, expect) {
   const emptyBefore = !String(before ?? "").trim(), emptyAfter = !String(after ?? "").trim();
   if (emptyBefore && emptyAfter) return { score: 0, result: "error", note: "Both models returned an empty answer" };
   if (emptyAfter) return { score: 0, result: "broken", note: "Replacement returned an empty answer" };

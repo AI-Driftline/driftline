@@ -12,7 +12,7 @@ It runs inside your own CI with your own API keys. There is no Driftline server:
 
 - **Annotations** on the exact file and line of retired or retiring models (the 50 most urgent; the rest are in the report).
 - **A report** in the job summary, and optionally a GitHub issue that updates itself on each run and closes itself once nothing is left to fix.
-- **Drift tests (Pro):** each prompt in `.driftline/prompts.yml` runs on both models. You get a similarity score per prompt, and a hard failure if a JSON answer stops parsing.
+- **Drift tests (Pro):** each prompt in `.driftline/prompts.yml` runs on both models. You get a similarity score per prompt, a hard failure if a JSON answer stops parsing, and optional [checks](#checks) for what the answer must say.
 
 Outside CI: `npx -y @aidriftline/driftline .` scans any repository once, an [MCP server](#mcp-server) lets AI coding agents look up model IDs, and every model page at [aidriftline.com/models](https://aidriftline.com/models/) has free alerts by email or to Slack, Discord or any webhook (30 days, 7 days and the day itself, plus date changes).
 
@@ -56,11 +56,30 @@ API keys are read from `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` and `GEMINI_API_KEY
 
 | Result | Meaning |
 |---|---|
-| ✅ Same | Similarity 0.90 or higher |
-| 🟡 Changed | Similarity 0.60–0.90, or the current model is already retired and the new answer needs review |
-| 🔴 Broken | Similarity below 0.60, or `expect: json` and the new answer is not valid JSON |
+| ✅ Same | Similarity 0.90 or higher, and every check passed |
+| 🟡 Changed | Similarity 0.60–0.90; one answer says "not" (or no, never, cannot) where the other doesn't; a check the current model fails too; or the current model is already retired and the new answer needs review |
+| 🔴 Broken | Similarity below 0.60; `expect: json` and the new answer is not valid JSON; or the new answer fails a check |
 
-Text is compared with word and word-pair overlap. JSON is compared field by field.
+Text is compared with word and word-pair overlap. JSON is compared field by field. Overlap measures wording, not meaning: "is eligible" and "is not eligible" share almost every word. Driftline marks an answer that gains or loses a "not" as changed (English only), and checks let you say what must stay true.
+
+## Checks
+
+Add these to any prompt to test what the answer means, not only how it's worded:
+
+```yaml
+prompts:
+  - id: refund-reply
+    prompt: ...
+    must_include: [refund, "5 business days"]   # each phrase must appear in the new answer
+    must_not_include: ["not eligible"]           # none of these may appear
+
+  - id: invoice-json
+    expect: json
+    prompt: ...
+    same_fields: [status, total, customer.id]    # these fields must keep the current model's value
+```
+
+Phrases ignore case and spacing. `same_fields` needs `expect: json`; use dots for nested fields. Lists can also be written one item per line (`- refund`). A check the new answer fails makes the prompt 🔴 broken. If the current model fails the same check, it isn't drift, so the prompt is 🟡 changed. In the fix pull request, ✅ reads "safe to merge" only when your prompts have checks; without them it says the wording stayed close.
 
 ## Run it locally
 

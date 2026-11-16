@@ -4,7 +4,7 @@ import { loadRegistry, classify, isTextModel, replacementChange, shownId } from 
 import { scanDirectory } from "./scan.js";
 import { loadPrompts } from "./prompts.js";
 import { complete, providerOf, keyFor, missingKeyMessage } from "./providers.js";
-import { compare, extractJson } from "./compare.js";
+import { compare, extractJson, runChecks, hasChecks } from "./compare.js";
 import { checkLicense } from "./license.js";
 import { renderReport } from "./report.js";
 import { migrationFor } from "./migration.js";
@@ -126,8 +126,13 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
             continue;
           }
           const jsonOk = p.expect !== "json" || extractJson(after).ok;
-          push({ id: p.id, from, to, after, before: "(current model already retired)", result: jsonOk ? "changed" : "broken",
-            note: jsonOk ? "Current model is retired; review the replacement's answer" : "Replacement did not return valid JSON" });
+          // No current answer to compare with, so same_fields can't run; the phrase checks still can.
+          const fails = jsonOk ? runChecks(after, p, { expect: p.expect }) : [];
+          push({ id: p.id, from, to, after, before: "(current model already retired)", result: jsonOk && !fails.length ? "changed" : "broken",
+            checked: hasChecks(p),
+            note: !jsonOk ? "Replacement did not return valid JSON"
+              : fails.length ? `Failed check: ${fails.map((f) => f.note).join(", ")}`
+              : "Current model is retired; review the replacement's answer" });
           continue;
         }
         let before;
@@ -139,7 +144,7 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
           push({ id: p.id, from, to, after, before: `(${e.message})`, result: "changed", note: `Current model: ${e.message}. Review the replacement's answer` });
           continue;
         }
-        push({ id: p.id, from, to, before, after, ...compare(before, after, p.expect) });
+        push({ id: p.id, from, to, before, after, ...compare(before, after, p.expect, p) });
       } catch (e) {
         push({ id: p.id, from, to, result: "error", note: e.message.slice(0, 200) });
       }

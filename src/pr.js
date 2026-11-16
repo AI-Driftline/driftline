@@ -98,12 +98,14 @@ export function prBody({ changes, skipped }, { cap = 100, drift = [], runUrl = "
     const count = (r) => tested.filter((d) => d.result === r).length;
     const [same, changed, broken, failed] = ["same", "changed", "broken", "error"].map(count);
     const verdict = broken
-      ? `🔴 **Don't merge yet:** ${broken} prompt${broken === 1 ? "" : "s"} broke on the replacement (empty answer or invalid JSON).`
+      ? `🔴 **Don't merge yet:** ${broken} prompt${broken === 1 ? "" : "s"} broke on the replacement (empty answer, invalid JSON or a failed check).`
       : changed
       ? `🟡 **Read before you merge:** ${changed} prompt${changed === 1 ? "" : "s"} got a noticeably different answer.`
       : failed
       ? `⚠️ **Not fully tested:** ${failed} prompt${failed === 1 ? "" : "s"} could not be run (see the note).`
-      : "✅ **Safe to merge as far as your prompts show:** every prompt gave the same kind of answer on the replacement.";
+      : tested.some((d) => d.checked)
+      ? "✅ **Safe to merge as far as your prompts show:** every prompt gave the same kind of answer on the replacement and passed its checks."
+      : "✅ **Similar answers on every prompt:** the wording stayed close. Similar wording can still mean something different, so add `must_include` or `same_fields` to your prompts to check the meaning too ([how](https://github.com/AI-Driftline/driftline#checks)).";
     out.push(
       "", "### Your prompts on the replacement", "",
       verdict, "",

@@ -8,8 +8,11 @@ prompts:
       Extract vendor, total and currency from this invoice:
 
       ACME GmbH, Total: 1.250,00 EUR
+    same_fields: [vendor, total, currency]   # optional: these fields must keep their value
 
   - id: ticket-summary
     model: claude-sonnet-4-5-20250929
     compare_to: claude-sonnet-5-5   # optional: defaults to the provider's recommended replacement
     prompt: "Summarise this support ticket in one sentence: the printer is jammed again."
+    must_include: [printer]         # optional: phrases the new answer must contain
+    must_not_include: [refund]      # optional: phrases it must not contain
