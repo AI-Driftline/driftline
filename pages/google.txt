@@ -2,9 +2,9 @@ Source: https://ai.google.dev/gemini-api/docs/deprecations
 
 Gemini deprecations - Gemini API | Google AI Studio
 > ## AI Agent Context
-> Get the complete documentation index at: https://aistudio.google.com/llms.txt
-> Use this file to discover all available pages.
-> For the full documentation in a single file, fetch: https://aistudio.google.com/llms-full.txt
+> - Full documentation index: https://aistudio.google.com/llms.txt
+> - Gemini Docs MCP server (consistent live info): https://gemini-api-docs-mcp.dev
+> - Coding agent skills & setup guide: https://aistudio.google.com/docs/coding-agents.md
 # Gemini deprecations
 This page lists the known deprecation schedules for [stable
 (GA)](/docs/models#stable) and [preview](/docs/models#preview) models and for
