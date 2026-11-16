@@ -2027,7 +2027,7 @@
     "bedrock": {
       "name": "Amazon Bedrock",
       "source": "https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle-legacy.html",
-      "checked": "2026-11-14",
+      "checked": "2026-11-16",
       "models": [
         {
           "id": "ai21.jamba-1-5-large-v1:0",
