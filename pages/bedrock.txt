@@ -1,0 +1,511 @@
+Source: https://docs.aws.amazon.com/bedrock/latest/userguide/model-lifecycle-legacy.html
+
+Model lifecycle (Legacy) - Amazon Bedrock
+View a markdown version of this page
+Model lifecycle (Legacy) - Amazon Bedrock
+Documentation Amazon Bedrock User Guide
+Active versions Legacy and end-of-life (EOL) models
+Model lifecycle (Legacy)
+Important
+This page applies to all models launched on Amazon Bedrock before September 7, 2026. For
+models launched on or after September 7, 2026, see Model lifecycle .
+Amazon Bedrock is continuously working to bring the latest versions of foundation
+models that have better capabilities, accuracy, and safety. As we launch new
+model versions, you can test them with the Amazon Bedrock console or API, and
+migrate your applications to benefit from the latest model versions.
+A model offered on Amazon Bedrock can be in one of these states:
+Active , Legacy , or
+End-of-Life (EOL) . You can see the status of offered models in the console
+and in the tables below. Additionally, when you make a GetFoundationModel or ListFoundationModels call, the state of the model will be shown in the
+modelLifecycle field in the response. Once a model launches on Amazon Bedrock, it
+will remain on Amazon Bedrock for at least 12 months before the EOL date.
+Note
+Model lifecycle dates on this page are specific to Amazon Bedrock and may differ from dates published by model providers (such as Anthropic or Cohere). For Amazon Bedrock usage, only the dates on this page apply.
+Active versions
+Active — The model provider is actively working
+on this version. In most cases, model providers sunset a model after newer versions
+become available. For a list of currently active models and their supported regions, see
+Regional availability . For model specific details, see Model
+cards .
+Legacy and end-of-life (EOL) models
+Legacy — We will notify you when a model
+provider moves a model to the Legacy state. A model will be in
+the Legacy state for at least 6 months before the EOL date . While you can
+continue to use a Legacy model during this period, you should plan to transition to an
+Active model before the EOL date. New customers can't use Legacy models and existing
+customers may lose access to Legacy models after 15 days of inactivity.
+For models with EOL dates after February 1, 2026:
+After a minimum of 3 months in the Legacy state, a model will enter the public extended
+access portion of the Legacy period. During this public extended access period, active
+users of a Legacy model can continue to use it until the EOL date (for a minimum of 3
+months), but you should expect higher pricing, which will be set by the model
+provider. When the model first enters the Legacy state, we will notify you of the
+provider's chosen date to transition a model to public extended access (which will be at
+least 3 months from notification) and pricing changes (if any). We will also notify you
+before any further pricing changes during the public extended access period.
+You can't create a new Provisioned Throughput for models in the Legacy state.
+EOL — After the EOL date, a model will be
+marked EOL in the console and in the following table. On, or soon after the EOL date,
+the model is no longer available for use in all AWS Regions and requests made to this
+version will fail, unless there is a private arrangement between you and the provider
+for continued access. You will need to migrate to the latest model by updating your
+application code before the EOL date. Migration will not happen automatically.
+Model lifecycle state can differ by AWS Region. The Regions column in the following tables lists only the Regions covered by a
+model's announced EOL date. A model can remain Active in other Regions, and the absence
+of a Region from a row doesn't mean the model will stay available there indefinitely. To
+check the current state for the Region you use, call ListFoundationModels or GetFoundationModel in that Region and read the modelLifecycle
+field.
+Models with a scheduled EOL date
+The following models are in the Legacy state with an announced EOL date. Migrate to an
+Active model before the EOL date.
+Model provider
+Model name
+Model ID
+Regions
+Legacy date
+EOL date
+Public extended access start date
+AI21 Labs
+Jamba 1.5 Large
+ai21.jamba-1-5-large-v1:0
+us-east-1
+May 26, 2026
+November 26, 2026
+August 26, 2026
+AI21 Labs
+Jamba 1.5 Mini
+ai21.jamba-1-5-mini-v1:0
+us-east-1
+May 26, 2026
+November 26, 2026
+August 26, 2026
+Anthropic
+Claude 3 Haiku
+anthropic.claude-3-haiku-20240307-v1:0
+ap-northeast-2, ap-south-1, ap-southeast-1
+October 10, 2026
+November 13, 2026
+October 10, 2026
+eu-central-2, sa-east-1
+October 13, 2026
+November 13, 2026
+October 13, 2026
+ca-central-1
+October 15, 2026
+November 27, 2026
+October 15, 2026
+Anthropic
+Claude 3 Sonnet
+anthropic.claude-3-sonnet-20240229-v1:0
+ap-south-1, ap-southeast-1, eu-west-2
+October 10, 2026
+November 13, 2026
+October 10, 2026
+sa-east-1
+October 13, 2026
+November 13, 2026
+October 13, 2026
+ca-central-1
+October 15, 2026
+November 27, 2026
+October 15, 2026
+Anthropic
+Claude 3.5 Sonnet
+anthropic.claude-3-5-sonnet-20240620-v1:0
+ap-northeast-2, ap-south-1, ap-southeast-1
+October 10, 2026
+November 13, 2026
+October 10, 2026
+Anthropic
+Claude 3.5 Sonnet v2
+anthropic.claude-3-5-sonnet-20241022-v2:0
+ap-northeast-2, ap-south-1, ap-southeast-1
+October 10, 2026
+November 13, 2026
+October 10, 2026
+Anthropic
+Claude 3.7 Sonnet
+anthropic.claude-3-7-sonnet-20250219-v1:0
+ap-south-1, eu-west-2
+October 10, 2026
+November 13, 2026
+October 10, 2026
+Anthropic
+Claude Sonnet 4.5
+anthropic.claude-sonnet-4-5-20250929-v1:0
+af-south-1, ap-east-2, ap-northeast-1, ap-northeast-2, ap-northeast-3, ap-south-1, ap-south-2, ap-southeast-1, ap-southeast-2, ap-southeast-3, ap-southeast-4, ap-southeast-5, ap-southeast-6, ap-southeast-7, ca-central-1, ca-west-1, eu-central-1, eu-central-2, eu-north-1, eu-south-1, eu-south-2, eu-west-1, eu-west-2, eu-west-3, il-central-1, mx-central-1, sa-east-1, us-east-1, us-east-2, us-west-1, us-west-2
+October 8, 2026
+April 8, 2027
+January 8, 2027
+us-gov-east-1, us-gov-west-1
+October 27, 2026
+April 27, 2027
+January 27, 2027
+Anthropic
+Claude Opus 4.1
+anthropic.claude-opus-4-1-20250805-v1:0
+us-east-1, us-east-2, us-west-2
+July 8, 2026
+January 8, 2027
+October 8, 2026
+DeepSeek
+DeepSeek-R1
+deepseek.r1-v1:0
+us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+DeepSeek
+DeepSeek-V3.1
+deepseek.v3-v1:0 (bedrock-runtime), deepseek.v3.1 (bedrock-mantle)
+ap-northeast-1, ap-south-1, ap-southeast-2, ap-southeast-3, eu-north-1, eu-west-2, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Google
+Gemma 3 12B IT
+google.gemma-3-12b-it
+ap-northeast-1, ap-south-1, ap-southeast-2, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Google
+Gemma 3 27B PT
+google.gemma-3-27b-it
+ap-northeast-1, ap-south-1, ap-southeast-2, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Google
+Gemma 3 4B IT
+google.gemma-3-4b-it
+ap-northeast-1, ap-south-1, ap-southeast-2, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Meta
+Llama 3 70B Instruct
+meta.llama3-70b-instruct-v1:0
+ap-south-1, ca-central-1, eu-west-2, us-east-1, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+us-gov-west-1
+November 9, 2026
+May 9, 2027
+To be announced
+Meta
+Llama 3 8B Instruct
+meta.llama3-8b-instruct-v1:0
+ap-south-1, ca-central-1, eu-west-2, us-east-1, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+us-gov-west-1
+November 9, 2026
+May 9, 2027
+To be announced
+Meta
+Llama 3.1 70B Instruct
+meta.llama3-1-70b-instruct-v1:0
+us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Meta
+Llama 3.1 8B Instruct
+meta.llama3-1-8b-instruct-v1:0
+us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Meta
+Llama 3.3 70B Instruct
+meta.llama3-3-70b-instruct-v1:0
+us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Meta
+Llama 4 Maverick 17B Instruct
+meta.llama4-maverick-17b-instruct-v1:0
+us-east-1, us-east-2, us-west-1, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Meta
+Llama 4 Scout 17B Instruct
+meta.llama4-scout-17b-instruct-v1:0
+us-east-1, us-east-2, us-west-1, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+MiniMax
+MiniMax M2
+minimax.minimax-m2
+ap-northeast-1, ap-south-1, ap-southeast-2, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+MiniMax
+MiniMax M2.1
+minimax.minimax-m2.1
+ap-northeast-1, ap-south-1, ap-southeast-2, ap-southeast-3, eu-central-1, eu-north-1, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Mistral AI
+Devstral 2 123B
+mistral.devstral-2-123b
+ap-northeast-1, ap-south-1, ap-southeast-2, ap-southeast-3, eu-central-1, eu-north-1, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Mistral AI
+Mistral 7B Instruct
+mistral.mistral-7b-instruct-v0:2
+ap-south-1, ap-southeast-2, ca-central-1, eu-west-1, eu-west-2, eu-west-3, sa-east-1, us-east-1, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Mistral AI
+Mixtral 8x7B Instruct
+mistral.mixtral-8x7b-instruct-v0:1
+ap-south-1, ap-southeast-2, ca-central-1, eu-west-1, eu-west-2, eu-west-3, sa-east-1, us-east-1, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Mistral AI
+Voxtral Mini 3B 2507
+mistral.voxtral-mini-3b-2507
+ap-northeast-1, ap-south-1, ap-southeast-2, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Mistral AI
+Voxtral Small 24B 2507
+mistral.voxtral-small-24b-2507
+ap-northeast-1, ap-south-1, ap-southeast-2, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Moonshot AI
+Kimi K2 Thinking
+moonshot.kimi-k2-thinking (bedrock-runtime), moonshotai.kimi-k2-thinking (bedrock-mantle)
+ap-northeast-1, ap-south-1, ap-southeast-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+NVIDIA
+NVIDIA Nemotron Nano 12B v2 VL BF16
+nvidia.nemotron-nano-12b-v2
+ap-northeast-1, ap-south-1, ap-southeast-2, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+NVIDIA
+NVIDIA Nemotron Nano 9B v2
+nvidia.nemotron-nano-9b-v2
+ap-northeast-1, ap-south-1, ap-southeast-2, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Qwen
+Qwen3-Coder-30B-A3B-Instruct
+qwen.qwen3-coder-30b-a3b-v1:0 (bedrock-runtime), qwen.qwen3-coder-30b-a3b-instruct (bedrock-mantle)
+ap-northeast-1, ap-south-1, ap-southeast-2, ap-southeast-3, eu-central-1, eu-north-1, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Qwen
+Qwen3 Coder 480B A35B Instruct
+qwen.qwen3-coder-480b-a35b-v1:0 (bedrock-runtime), qwen.qwen3-coder-480b-a35b-instruct (bedrock-mantle)
+ap-northeast-1, ap-south-1, ap-southeast-2, ap-southeast-3, eu-north-1, eu-west-2, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+TwelveLabs
+Marengo Embed v2.7
+twelvelabs.marengo-embed-2-7-v1:0
+ap-northeast-2, eu-west-1, us-east-1
+May 29, 2026
+November 30, 2026
+August 29, 2026
+TwelveLabs
+Marengo Embed 3.0
+twelvelabs.marengo-embed-3-0-v1:0
+ap-northeast-2
+September 22, 2026
+March 22, 2027
+—
+TwelveLabs
+Pegasus v1.2
+twelvelabs.pegasus-1-2-v1:0
+af-south-1, ap-east-2, ap-northeast-1, ap-northeast-2, ap-northeast-3, ap-south-1, ap-south-2, ap-southeast-1, ap-southeast-2, ap-southeast-3, ap-southeast-4, ap-southeast-5, ap-southeast-7, ca-central-1, ca-west-1, eu-central-1, eu-central-2, eu-north-1, eu-south-1, eu-south-2, eu-west-1, eu-west-2, eu-west-3, il-central-1, mx-central-1, sa-east-1, us-east-1, us-east-2, us-west-1, us-west-2
+September 22, 2026
+March 22, 2027
+—
+Writer
+Palmyra X4
+writer.palmyra-x4-v1:0
+us-east-1, us-east-2, us-west-1, us-west-2
+September 9, 2026
+March 9, 2027
+—
+Writer
+Palmyra X5
+writer.palmyra-x5-v1:0
+us-east-1, us-east-2, us-west-1, us-west-2
+September 21, 2026
+March 21, 2027
+—
+Z.AI
+GLM 4.7
+zai.glm-4.7
+ap-northeast-1, ap-south-1, ap-southeast-2, ap-southeast-3, eu-north-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Z.AI
+GLM 4.7 Flash
+zai.glm-4.7-flash
+ap-northeast-1, ap-south-1, ap-southeast-2, ap-southeast-3, eu-central-1, eu-north-1, eu-south-1, eu-west-1, eu-west-2, sa-east-1, us-east-1, us-east-2, us-west-2
+September 30, 2026
+March 30, 2027
+To be announced
+Models that have reached EOL
+The following models have passed their EOL date. They have been removed from the
+Regions listed, and requests to them fail. These entries are retained for reference, so
+that you can identify a model ID that no longer works and see when it reached EOL.
+Model provider
+Model name
+Model ID
+Regions
+Legacy date
+EOL date
+Public extended access start date
+Amazon
+Nova Canvas
+amazon.nova-canvas-v1:0
+ap-northeast-1, eu-west-1, us-east-1
+March 30, 2026
+September 30, 2026
+—
+Amazon
+Nova Reel
+amazon.nova-reel-v1:0
+ap-northeast-1, eu-west-1, us-east-1
+March 30, 2026
+September 30, 2026
+—
+Amazon
+Nova Reel
+amazon.nova-reel-v1:1
+us-east-1
+March 30, 2026
+September 30, 2026
+—
+Amazon
+Nova Sonic
+amazon.nova-sonic-v1:0
+ap-northeast-1, eu-north-1, us-east-1
+March 13, 2026
+September 14, 2026
+—
+Anthropic
+Claude 3 Haiku
+anthropic.claude-3-haiku-20240307-v1:0
+ap-northeast-1, ap-southeast-2, eu-central-1, eu-west-1, eu-west-2, eu-west-3, us-east-1, us-east-2, us-west-2
+March 10, 2026
+September 10, 2026
+June 10, 2026
+us-gov-east-1, us-gov-west-1
+March 10, 2026
+September 10, 2026
+June 10, 2026
+Anthropic
+Claude Sonnet 4
+anthropic.claude-sonnet-4-20250514-v1:0
+ap-northeast-1, eu-central-1, eu-north-1, eu-south-1, eu-south-2, eu-west-1, eu-west-3, us-east-1, us-east-2, us-west-1, us-west-2, ap-east-2, ap-northeast-2, ap-northeast-3, ap-south-1, ap-south-2, ap-southeast-1, ap-southeast-2, ap-southeast-3, ap-southeast-4, ap-southeast-5, ap-southeast-7, il-central-1
+April 14, 2026
+October 14, 2026
+July 14, 2026
+Cohere
+Command R
+cohere.command-r-v1:0
+us-east-1, us-west-2
+February 19, 2026
+August 19, 2026
+May 19, 2026
+Cohere
+Command R+
+cohere.command-r-plus-v1:0
+us-east-1, us-west-2
+February 19, 2026
+August 19, 2026
+May 19, 2026
+Meta
+Llama 3.1 405B Instruct
+meta.llama3-1-405b-instruct-v1:0
+us-east-2, us-west-2
+January 7, 2026
+July 7, 2026
+April 7, 2026
+Meta
+Llama 3.2 11B Instruct
+meta.llama3-2-11b-instruct-v1:0
+us-east-1, us-east-2, us-west-2
+January 7, 2026
+July 7, 2026
+April 7, 2026
+Meta
+Llama 3.2 1B Instruct
+meta.llama3-2-1b-instruct-v1:0
+eu-central-1, eu-west-1, eu-west-3, us-east-1, us-east-2, us-west-2
+January 7, 2026
+July 7, 2026
+April 7, 2026
+Meta
+Llama 3.2 3B Instruct
+meta.llama3-2-3b-instruct-v1:0
+eu-central-1, eu-west-1, eu-west-3, us-east-1, us-east-2, us-west-2
+January 7, 2026
+July 7, 2026
+April 7, 2026
+Meta
+Llama 3.2 90B Instruct
+meta.llama3-2-90b-instruct-v1:0
+us-east-1, us-east-2, us-west-2
+January 7, 2026
+July 7, 2026
+April 7, 2026
+The public extended access date indicates when a Legacy model enters the public
+extended access portion of the Legacy period. During this phase, pricing may increase
+as set by the model provider. The model remains available until its EOL date.
+Customized Models and Lifecycle Behavior
+When a foundation model transitions to the Legacy state, customization capabilities
+become restricted. If you previously fine-tuned or customized the model before it
+entered the Legacy state, you may:
+Create a new custom model deployment for on-demand inference.
+Continue using any existing on-demand deployments or any existing
+Provisioned Throughput (PT) endpoints, provided they were created before the model
+entered Legacy state.
+However, after the model is in Legacy state, you cannot create new fine-tuning jobs on
+that model. You cannot create new Provisioned Throughput (PT) endpoints. New customers
+cannot start using the legacy model and existing customers may lose access after 15 days
+of inactivity.
+Because Legacy models are scheduled for retirement, customers are strongly encouraged
+to begin transitioning workloads and customized deployments to an Active model as soon
+as the Legacy announcement is made, and complete migration before the model's
+End-of-Life (EOL) date.
+Javascript is disabled or is unavailable in your browser.
+To use the Amazon Web Services Documentation, Javascript must be enabled. Please refer to your browser's Help pages for instructions.
+Document Conventions
+Model lifecycle
+Request access to models
+Did this page help you? - Yes
+Thanks for letting us know we're doing a good job!
+If you've got a moment, please tell us what we did right so we can do more of it.
+Did this page help you? - No
+Thanks for letting us know this page needs work. We're sorry we let you down.
+If you've got a moment, please tell us how we can make the documentation better.

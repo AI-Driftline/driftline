@@ -1,0 +1,721 @@
+Source: https://developers.openai.com/api/docs/deprecations
+
+Overview
+As we launch safer and more capable models, we regularly retire older models. Software relying on OpenAI models may need occasional updates to keep working. Impacted customers will always be notified by email and in our documentation.
+Each model has one of three lifecycle states.
+Active. You can use the model through the API. OpenAI hasn’t announced its retirement.
+Deprecated. OpenAI has announced the model’s retirement. You can still use it until its shutdown date.
+Shutdown. The model no longer accepts requests through the standard API.
+For deprecation notice periods and help migrating to a replacement model, see the deprecation policy and migration guidance below.
+See feature and endpoint deprecations for other upcoming API shutdowns.
+Upcoming deprecations
+Shutdown date
+Affected model
+Status
+Recommended replacement
+Notice date
+Dec 1, 2026
+gpt-image-1-mini
+Deprecated
+gpt-image-2.6-sunburst or gpt-image-2.6-flare
+Jun 2, 2026
+Dec 1, 2026
+gpt-image-1.5 , gpt-image-1.5-2025-12-16
+Deprecated
+gpt-image-2.6-sunburst or gpt-image-2.6-flare
+Jun 2, 2026
+Dec 1, 2026
+chatgpt-image-latest
+Deprecated
+gpt-image-2.6-sunburst or gpt-image-2.6-flare
+Jun 2, 2026
+Dec 11, 2026
+gpt-5 , gpt-5-2025-08-07
+Deprecated
+gpt-6.1-sol
+Jun 11, 2026
+Dec 11, 2026
+gpt-5-mini , gpt-5-mini-2025-08-07
+Deprecated
+gpt-6.1-terra
+Jun 11, 2026
+Dec 11, 2026
+gpt-5-nano , gpt-5-nano-2025-08-07
+Deprecated
+gpt-6-luna
+Jun 11, 2026
+Dec 11, 2026
+gpt-5-pro , gpt-5-pro-2025-10-06
+Deprecated
+gpt-6.1-sol ( reasoning.mode: pro ) in the Responses API
+Jun 11, 2026
+Dec 11, 2026
+o3 , o3-2025-04-16
+Deprecated
+gpt-6.1-sol
+Jun 11, 2026
+Dec 11, 2026
+o3-pro , o3-pro-2025-06-10
+Deprecated
+gpt-6.1-sol ( reasoning.mode: pro ) in the Responses API
+Jun 11, 2026
+Jan 6, 2027
+tts-1
+Deprecated
+gpt-realtime-2.1-mini
+Oct 1, 2026
+Jan 6, 2027
+tts-1-hd
+Deprecated
+gpt-realtime-2.1-mini
+Oct 1, 2026
+Jan 6, 2027
+gpt-4o-mini-tts , gpt-4o-mini-tts-2025-03-20 , gpt-4o-mini-tts-2025-12-15
+Deprecated
+gpt-realtime-2.1-mini
+Oct 1, 2026
+Jan 14, 2027
+GPT-4o ( gpt-4o-2024-08-06 , gpt-4o-2024-11-20 )
+Deprecated
+gpt-6-luna
+Oct 14, 2026
+Jan 14, 2027
+GPT-4o mini ( gpt-4o-mini-2024-07-18 )
+Deprecated
+gpt-6-luna
+Oct 14, 2026
+Jan 14, 2027
+GPT-4.1 ( gpt-4.1-2025-04-14 )
+Deprecated
+gpt-6-luna
+Oct 14, 2026
+Jan 14, 2027
+GPT-4.1 mini ( gpt-4.1-mini-2025-04-14 )
+Deprecated
+gpt-6-luna
+Oct 14, 2026
+Jan 20, 2027
+gpt-realtime , gpt-realtime-2025-08-28
+Deprecated
+gpt-realtime-2.1
+Jul 20, 2026
+Jan 20, 2027
+gpt-audio , gpt-audio-2025-08-28
+Deprecated
+gpt-audio-1.5
+Jul 20, 2026
+Jan 20, 2027
+gpt-4o-audio
+Deprecated
+gpt-audio-1.5
+Jul 20, 2026
+Jan 20, 2027
+gpt-4o-realtime
+Deprecated
+gpt-realtime-2.1
+Jul 20, 2026
+Jan 20, 2027
+gpt-realtime-mini , gpt-realtime-mini-2025-12-15
+Deprecated
+gpt-realtime-2.1-mini
+Jul 20, 2026
+Jan 20, 2027
+gpt-audio-mini , gpt-audio-mini-2025-12-15
+Deprecated
+gpt-audio-1.5
+Jul 20, 2026
+Jan 20, 2027
+gpt-4o-mini-realtime
+Deprecated
+gpt-realtime-2.1-mini
+Jul 20, 2026
+Jan 20, 2027
+gpt-4o-mini-audio
+Deprecated
+gpt-audio-1.5
+Jul 20, 2026
+Jan 20, 2027
+gpt-4o-mini-transcribe-2025-03-20
+Deprecated
+gpt-4o-mini-transcribe-2025-12-15
+Jul 20, 2026
+Feb 1, 2027
+gpt-5.5-cyber-preview
+Deprecated
+The most capable cyber model available to you.
+Nov 5, 2026
+Feb 10, 2027
+gpt-image-2 , gpt-image-2-2026-04-21
+Deprecated
+gpt-image-2.6-sunburst or gpt-image-2.6-flare
+Nov 10, 2026
+Feb 26, 2027
+whisper-1
+Deprecated
+gpt-live-transcribe or gpt-transcribe
+Aug 26, 2026
+Feb 26, 2027
+gpt-4o-transcribe
+Deprecated
+gpt-live-transcribe or gpt-transcribe
+Aug 26, 2026
+Feb 26, 2027
+gpt-4o-mini-transcribe , gpt-4o-mini-transcribe-2025-12-15
+Deprecated
+gpt-live-transcribe or gpt-transcribe
+Aug 26, 2026
+Feb 26, 2027
+gpt-4o-transcribe-diarize
+Deprecated
+gpt-live-transcribe or gpt-transcribe
+Aug 26, 2026
+Apr 1, 2027
+gpt-5.3-codex
+Deprecated
+gpt-6-sol
+Oct 1, 2026
+Apr 1, 2027
+gpt-5.4-nano , gpt-5.4-nano-2026-03-17
+Deprecated
+gpt-6-luna
+Oct 1, 2026
+Apr 1, 2027
+gpt-5.1 , gpt-5.1-2025-11-13
+Deprecated
+gpt-6-sol
+Oct 1, 2026
+Fine-tuned versions of the models listed above follow the same shutdown schedule as their underlying base models.
+For speech migrations, see the Realtime API guide and the transcription guide .
+Feature and endpoint deprecations
+Shutdown date
+Affected feature or endpoint
+Status
+Recommended replacement
+Notice date
+Nov 30, 2026
+/v1/prompts and reusable prompt objects
+Deprecated
+Move prompt content into your application code. Migration guide
+Jun 3, 2026
+Nov 30, 2026
+Evals dashboard, API, and graders for eval workflows
+Read-only
+Migrate to Promptfoo . For fine-tuning graders, see the fine-tuning timeline .
+Jun 3, 2026
+Nov 30, 2026
+Agent Builder
+Deprecated
+Agents SDK or ChatGPT Workspace Agents. Migration guide . ChatKit remains available.
+Jun 3, 2026
+Jan 6, 2027
+Self-serve fine-tuning job creation
+Restricted access
+See the fine-tuning timeline .
+May 7, 2026
+Feb 26, 2027
+/v1/audio/translations
+Deprecated
+/v1/realtime/translations
+Aug 26, 2026
+Model deprecation notice periods
+We provide advance notice before retiring models so customers have time to plan and migrate. When we announce a model deprecation, we notify customers who are actively using the model by email and document the deprecation on this page.
+Unless safety or compliance concerns require a faster timeline, we provide the following minimum notice periods before model retirement:
+Generally available models: At least 6 months.
+Specialized variants of generally available models and image generation models: At least 3 months. Examples include chat variants such as gpt-5.1-chat-latest , Codex variants such as gpt-5.3-codex , and deep research variants such as o3-deep-research .
+Preview models: Preview models, identified by preview in the model name, may be retired with much shorter notice, such as 2 weeks. Examples include computer-use-preview and gpt-4o-audio-preview . We don’t recommend using preview models for business-critical production workloads unless you can migrate on short notice.
+These notice periods give customers time to evaluate recommended replacement models, test application behavior, and complete migrations before a model is no longer available. In some cases, developers may be able to provision dedicated capacity for continued access after a model’s shutdown date. To explore this option, contact our sales team .
+Best practices
+Check the documentation regularly for model deprecation updates.
+To monitor model shutdowns programmatically , call the List models endpoint ( GET /v1/models ) and check each model’s optional shutdown_date field. The field is also available from the Retrieve a model endpoint .
+Migration guidance
+In Codex, invoke the OpenAI Docs skill with $openai-docs and ask it to migrate your project to the recommended replacement.
+See the GPT-6 migration guide .
+Run representative requests against both models. Compare outputs, latency, and cost before switching production traffic to the replacement.
+Update to OpenAI’s self-serve fine-tuning
+On May 7th, 2026, we notified developers using OpenAI’s self-serve fine-tuning platform of updates to availability.
+Inference on fine-tuned models will continue to be available until the base models are deprecated.
+Date
+Update
+May 7, 2026
+Creating fine-tuning jobs or training is not available to organizations that have not previously run fine-tuning.
+July 2, 2026
+Creating fine-tuning jobs is no longer available to organizations that have not run inference on a fine-tuned model in the past 60 days.
+Jan 6, 2027
+Active existing customers will no longer be able to create new fine-tuning jobs on this date. Inference on fine-tuned models will be disabled only when the underlying base model is deprecated.
+Shutdown date
+Affected model or feature
+Listed replacement
+Notice date
+Oct 23, 2026
+gpt-3.5-turbo-0125 , gpt-3.5-turbo , gpt-3.5-turbo-completions
+gpt-5.6-terra
+Apr 22, 2026
+Oct 23, 2026
+gpt-4-0613 , gpt-4 , gpt-4-0613-completions , gpt-4-completions
+gpt-5.6-sol
+Apr 22, 2026
+Oct 23, 2026
+gpt-4-1106-preview
+gpt-5.6-sol
+Apr 22, 2026
+Oct 23, 2026
+gpt-4-turbo , gpt-4-turbo-2024-04-09 , gpt-4-turbo-completions
+gpt-5.6-sol
+Apr 22, 2026
+Oct 23, 2026
+gpt-4.1-nano , gpt-4.1-nano-2025-04-14
+gpt-5.6-luna
+Apr 22, 2026
+Oct 23, 2026
+gpt-4o-2024-05-13
+gpt-5.6-sol
+Apr 22, 2026
+Oct 23, 2026
+gpt-image-1
+gpt-image-2.5-sunburst or gpt-image-2.5-flare
+Apr 22, 2026
+Oct 23, 2026
+o1-2024-12-17 , o1
+gpt-5.6-sol
+Apr 22, 2026
+Oct 23, 2026
+o1-pro-2025-03-19 , o1-pro
+gpt-5.6-sol ( reasoning.mode: pro )
+Apr 22, 2026
+Oct 23, 2026
+o3-mini-2025-01-31 , o3-mini
+gpt-5.6-sol
+Apr 22, 2026
+Oct 23, 2026
+ft-o4-mini-2025-04-16
+gpt-5.6-terra
+Apr 22, 2026
+Oct 23, 2026
+o4-mini-2025-04-16 , o4-mini
+gpt-5.6-terra
+Apr 22, 2026
+Oct 1, 2026
+gpt-5.4-cyber
+The most capable cyber model available to you.
+Sep 11, 2026
+Sep 28, 2026
+gpt-3.5-turbo-instruct
+gpt-5.6-terra
+Sep 26, 2025
+Sep 28, 2026
+babbage-002
+gpt-5.6-terra
+Sep 26, 2025
+Sep 28, 2026
+davinci-002
+gpt-5.6-terra
+Sep 26, 2025
+Sep 28, 2026
+gpt-3.5-turbo-1106
+gpt-5.6-terra
+Sep 26, 2025
+Sep 24, 2026
+Videos API
+No one-to-one replacement
+Mar 24, 2026
+Sep 24, 2026
+sora-2
+No one-to-one replacement
+Mar 24, 2026
+Sep 24, 2026
+sora-2-pro
+No one-to-one replacement
+Mar 24, 2026
+Sep 24, 2026
+sora-2-2025-10-06
+No one-to-one replacement
+Mar 24, 2026
+Sep 24, 2026
+sora-2-2025-12-08
+No one-to-one replacement
+Mar 24, 2026
+Sep 24, 2026
+sora-2-pro-2025-10-06
+No one-to-one replacement
+Mar 24, 2026
+Aug 26, 2026
+Assistants API
+Responses API and Conversations API ( migration guide )
+Aug 26, 2025
+Aug 10, 2026
+gpt-5.2-chat-latest
+gpt-5.6-sol
+May 8, 2026
+Aug 10, 2026
+gpt-5.3-chat-latest
+gpt-5.6-sol
+May 8, 2026
+Jul 23, 2026
+computer-use-preview-2025-03-11 , computer-use-preview
+gpt-5.6-terra
+Apr 22, 2026
+Jul 23, 2026
+gpt-4o-mini-search-preview-2025-03-11
+gpt-5.6-terra
+Apr 22, 2026
+Jul 23, 2026
+gpt-4o-search-preview-2025-03-11
+gpt-5.6-terra
+Apr 22, 2026
+Jul 23, 2026
+gpt-5-chat-latest
+gpt-5.6-sol
+Apr 22, 2026
+Jul 23, 2026
+gpt-5-codex
+gpt-5.6-sol
+Apr 22, 2026
+Jul 23, 2026
+gpt-5.1-chat-latest
+gpt-5.6-sol
+Apr 22, 2026
+Jul 23, 2026
+gpt-5.1-codex
+gpt-5.6-sol
+Apr 22, 2026
+Jul 23, 2026
+gpt-5.1-codex-max
+gpt-5.6-sol
+Apr 22, 2026
+Jul 23, 2026
+gpt-5.1-codex-mini
+gpt-5.6-terra
+Apr 22, 2026
+Jul 23, 2026
+gpt-audio-mini-2025-10-06
+gpt-audio-1.5
+Apr 22, 2026
+Jul 23, 2026
+gpt-realtime-mini-2025-10-06
+gpt-realtime-2.1-mini
+Apr 22, 2026
+Jul 23, 2026
+o3-deep-research-2025-06-26 , o3-deep-research
+gpt-5.6-sol
+Apr 22, 2026
+Jul 23, 2026
+o4-mini-deep-research-2025-06-26 , o4-mini-deep-research
+gpt-5.6-sol
+Apr 22, 2026
+Jul 23, 2026
+gpt-5.2-codex
+gpt-5.6-sol
+Apr 22, 2026
+May 12, 2026
+dall-e-2
+gpt-image-2 , gpt-image-1 , or gpt-image-1-mini
+Nov 14, 2025
+May 12, 2026
+dall-e-3
+gpt-image-2 , gpt-image-1 , or gpt-image-1-mini
+Nov 14, 2025
+May 12, 2026
+OpenAI-Beta: realtime=v1
+Realtime API migration guide
+Sep 15, 2025
+May 7, 2026
+gpt-4o-realtime-preview
+gpt-realtime-1.5
+Sep 15, 2025
+May 7, 2026
+gpt-4o-realtime-preview-2025-06-03
+gpt-realtime-1.5
+Sep 15, 2025
+May 7, 2026
+gpt-4o-realtime-preview-2024-12-17
+gpt-realtime-1.5
+Sep 15, 2025
+May 7, 2026
+gpt-4o-mini-realtime-preview
+gpt-realtime-mini
+Sep 15, 2025
+May 7, 2026
+gpt-4o-audio-preview
+gpt-audio-1.5
+Sep 15, 2025
+May 7, 2026
+gpt-4o-mini-audio-preview
+gpt-audio-mini
+Sep 15, 2025
+Mar 26, 2026
+gpt-4-0314
+gpt-5 , or gpt-4.1 for latency-sensitive tasks that don’t require reasoning
+Sep 26, 2025
+Mar 26, 2026
+gpt-4-0125-preview (including gpt-4-turbo-preview and gpt-4-turbo-preview-completions , which point to this snapshot)
+gpt-5 , or gpt-4.1 for latency-sensitive tasks that don’t require reasoning
+Sep 26, 2025
+Feb 17, 2026
+chatgpt-4o-latest
+gpt-5.1-chat-latest
+Nov 18, 2025
+Feb 12, 2026
+codex-mini-latest
+gpt-5-codex-mini
+Nov 17, 2025
+Oct 27, 2025
+text-moderation-007
+omni-moderation
+Apr 28, 2025
+Oct 27, 2025
+text-moderation-stable
+omni-moderation
+Apr 28, 2025
+Oct 27, 2025
+text-moderation-latest
+omni-moderation
+Apr 28, 2025
+Oct 27, 2025
+o1-mini
+o4-mini
+Apr 28, 2025
+Oct 10, 2025
+gpt-4o-realtime-preview-2024-10-01
+gpt-realtime-1.5
+Jun 10, 2025
+Oct 10, 2025
+gpt-4o-audio-preview-2024-10-01
+gpt-audio-1.5
+Jun 10, 2025
+Jul 28, 2025
+o1-preview
+o3
+Apr 28, 2025
+Jul 14, 2025
+gpt-4.5-preview
+gpt-4.1
+Apr 14, 2025
+Jun 6, 2025
+gpt-4-32k Historical price $60.00 / 1M input tokens + $120 / 1M output tokens
+gpt-4o
+Jun 6, 2024
+Jun 6, 2025
+gpt-4-32k-0613 Historical price $60.00 / 1M input tokens + $120 / 1M output tokens
+gpt-4o
+Jun 6, 2024
+Jun 6, 2025
+gpt-4-32k-0314 Historical price $60.00 / 1M input tokens + $120 / 1M output tokens
+gpt-4o
+Jun 13, 2023
+Dec 18, 2024
+OpenAI-Beta: assistants=v1
+OpenAI-Beta: assistants=v2 ( migration guide )
+Oct 2, 2024
+Dec 6, 2024
+gpt-4-vision-preview Historical price $10.00 / 1M input tokens + $30 / 1M output tokens
+gpt-4o
+Jun 6, 2024
+Dec 6, 2024
+gpt-4-1106-vision-preview Historical price $10.00 / 1M input tokens + $30 / 1M output tokens
+gpt-4o
+Jun 6, 2024
+Oct 28, 2024
+New fine-tuning training on babbage-002
+gpt-4o-mini
+Aug 29, 2024
+Oct 28, 2024
+New fine-tuning training on davinci-002
+gpt-4o-mini
+Aug 29, 2024
+Sep 13, 2024
+gpt-3.5-turbo-0613 Historical price $1.50 / 1M input tokens + $2.00 / 1M output tokens
+gpt-3.5-turbo
+Nov 6, 2023
+Sep 13, 2024
+gpt-3.5-turbo-16k-0613 Historical price $3.00 / 1M input tokens + $4.00 / 1M output tokens
+gpt-3.5-turbo
+Nov 6, 2023
+Sep 13, 2024
+gpt-3.5-turbo-0301 Historical price $15.00 / 1M input tokens + $20.00 / 1M output tokens
+gpt-3.5-turbo
+Jun 13, 2023
+Jun 13, 2024 Earliest estimate
+gpt-4-0314 Historical price $30.00 / 1M input tokens + $60.00 / 1M output tokens
+gpt-4o
+Jun 13, 2023
+Jan 4, 2024
+/v1/fine-tunes
+/v1/fine_tuning/jobs
+Aug 22, 2023
+Jan 4, 2024
+text-ada-001 Historical price $0.40 / 1M tokens
+gpt-3.5-turbo-instruct
+Jul 6, 2023
+Jan 4, 2024
+text-babbage-001 Historical price $0.50 / 1M tokens
+gpt-3.5-turbo-instruct
+Jul 6, 2023
+Jan 4, 2024
+text-curie-001 Historical price $2.00 / 1M tokens
+gpt-3.5-turbo-instruct
+Jul 6, 2023
+Jan 4, 2024
+text-davinci-001 Historical price $20.00 / 1M tokens
+gpt-3.5-turbo-instruct
+Jul 6, 2023
+Jan 4, 2024
+text-davinci-002 Historical price $20.00 / 1M tokens
+gpt-3.5-turbo-instruct
+Jul 6, 2023
+Jan 4, 2024
+text-davinci-003 Historical price $20.00 / 1M tokens
+gpt-3.5-turbo-instruct
+Jul 6, 2023
+Jan 4, 2024
+ada Historical price $0.40 / 1M tokens
+babbage-002
+Jul 6, 2023
+Jan 4, 2024
+babbage Historical price $0.50 / 1M tokens
+babbage-002
+Jul 6, 2023
+Jan 4, 2024
+curie Historical price $2.00 / 1M tokens
+davinci-002
+Jul 6, 2023
+Jan 4, 2024
+davinci Historical price $20.00 / 1M tokens
+davinci-002
+Jul 6, 2023
+Jan 4, 2024
+code-davinci-002 (base GPT models)
+gpt-3.5-turbo-instruct
+Jul 6, 2023
+Jan 4, 2024
+text-davinci-edit-001
+gpt-4o
+Jul 6, 2023
+Jan 4, 2024
+code-davinci-edit-001
+gpt-4o
+Jul 6, 2023
+Jan 4, 2024
+/v1/edits
+/v1/chat/completions
+Jul 6, 2023
+Jan 4, 2024
+Fine-tuning on ada Training price $0.40 / 1M tokens. Usage price $1.60 / 1M tokens
+babbage-002
+Jul 6, 2023
+Jan 4, 2024
+Fine-tuning on babbage Training price $0.60 / 1M tokens. Usage price $2.40 / 1M tokens
+babbage-002
+Jul 6, 2023
+Jan 4, 2024
+Fine-tuning on curie Training price $3.00 / 1M tokens. Usage price $12.00 / 1M tokens
+davinci-002
+Jul 6, 2023
+Jan 4, 2024
+Fine-tuning on davinci Training price $30.00 / 1M tokens. Usage price $120.00 / 1K tokens
+davinci-002 , gpt-3.5-turbo , gpt-4o
+Jul 6, 2023
+Jan 4, 2024
+text-similarity-ada-001 Historical price $4.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+text-search-ada-doc-001 Historical price $4.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+text-search-ada-query-001 Historical price $4.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+code-search-ada-code-001 Historical price $4.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+code-search-ada-text-001 Historical price $4.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+text-similarity-babbage-001 Historical price $5.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+text-search-babbage-doc-001 Historical price $5.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+text-search-babbage-query-001 Historical price $5.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+code-search-babbage-code-001 Historical price $5.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+code-search-babbage-text-001 Historical price $5.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+text-similarity-curie-001 Historical price $20.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+text-search-curie-doc-001 Historical price $20.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+text-search-curie-query-001 Historical price $20.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+text-similarity-davinci-001 Historical price $200.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+text-search-davinci-doc-001 Historical price $200.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Jan 4, 2024
+text-search-davinci-query-001 Historical price $200.00 / 1M tokens
+text-embedding-3-small
+Jul 6, 2023
+Mar 23, 2023
+code-davinci-002 (Codex models)
+gpt-4o
+Mar 20, 2023
+Mar 23, 2023
+code-davinci-001
+gpt-4o
+Mar 20, 2023
+Mar 23, 2023
+code-cushman-002
+gpt-4o
+Mar 20, 2023
+Mar 23, 2023
+code-cushman-001
+gpt-4o
+Mar 20, 2023
+Dec 3, 2022
+/v1/engines
+/v1/models
+Jun 3, 2022
+Dec 3, 2022
+/v1/search
+View transition guide
+Jun 3, 2022
+Dec 3, 2022
+/v1/classifications
+View transition guide
+Jun 3, 2022
+Dec 3, 2022
+/v1/answers
+View transition guide
+Jun 3, 2022
+Historical notes
+Fine-tuned versions of the legacy GPT models shut down in October 2026 followed the same shutdown schedule as their underlying base models.
+The codex-mini-latest shutdown also ended support for the legacy local shell tool. For new integrations, use the shell tool .
+The Assistants API notice followed the release of the Responses API in March 2025 . We first announced plans to retire the Assistants API v1 beta when we released v2 in April 2024 .
+The October 2024 shutdown for fine-tuning training on babbage-002 and davinci-002 applied to creating new fine-tuned models. Existing fine-tuned models were unaffected by that change.
+The June 6, 2024 notice reconfirmed the retirement of gpt-4-32k-0314 . Starting June 17, 2024, access to the GPT-4-32K and Vision Preview models and the GPT-3.5 Turbo snapshots announced in November 2023 was limited to existing users. Existing fine-tuned models from those GPT-3.5 Turbo snapshots were unaffected by that shutdown.
+The legacy fine-tunes endpoint shutdown also removed access to models trained with that endpoint. Developers had to train new models through the updated fine-tuning API .
+The July 2023 announcement covered older GPT-3 and GPT-3.5 models served through the completions endpoint and first-generation text embedding models. See the pricing page for current model pricing.
+The June 2023 announcement gave an earliest retirement date of June 13, 2024 for the original chat models. Starting January 10, 2024, access was limited to existing users. See the March 2026 shutdown notice for the final shutdown date of gpt-4-0314 .
