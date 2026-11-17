@@ -35,7 +35,8 @@ const SHAPES = {
   anthropic: /\bclaude-[a-z0-9][\w.-]*[a-z0-9]\b/g,
   google: /\b(?:gemini|imagen|veo|lyria|text-embedding|embedding)-[\w.-]*[a-z0-9]\b/g,
 };
-const NOT_ID = /-(models|deprecated-models|preview-models)$|^gemini-\d(\.\d)?$|-guide$|^gpt-oss$/;
+// Web addresses and file names in the page text (https://gemini-api-docs-mcp.dev, …-guide.md) are not models.
+const NOT_ID = /-(models|deprecated-models|preview-models)$|^gemini-\d(\.\d)?$|-guide$|^gpt-oss$|\.(dev|com|io|ai|app|org|net|sh|md|txt|html?)$/;
 
 const text = (html) => html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ")
   .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&rsquo;|&#x27;/g, "'")
