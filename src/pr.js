@@ -96,20 +96,25 @@ export function prBody({ changes, skipped }, { cap = 100, drift = [], runUrl = "
   const tested = drift.filter((d) => d.result !== "skipped");
   if (tested.length) {
     const count = (r) => tested.filter((d) => d.result === r).length;
-    const [same, changed, broken, failed] = ["same", "changed", "broken", "error"].map(count);
+    const only = tested.filter((d) => d.only && d.result === "changed").length;
+    const [same, changedAll, broken, failed] = ["same", "changed", "broken", "error"].map(count);
+    const changed = changedAll - only;
+    const onlyText = only ? `${only} prompt${only === 1 ? "" : "s"} ran on the replacement only (current model retired or not available to your API key)` : "";
     const verdict = broken
       ? `🔴 **Don't merge yet:** ${broken} prompt${broken === 1 ? "" : "s"} broke on the replacement (empty answer, invalid JSON or a failed check).`
       : changed
-      ? `🟡 **Read before you merge:** ${changed} prompt${changed === 1 ? "" : "s"} got a noticeably different answer.`
+      ? `🟡 **Read before you merge:** ${changed} prompt${changed === 1 ? "" : "s"} got a noticeably different answer.${only ? ` ${onlyText.charAt(0).toUpperCase()}${onlyText.slice(1)}.` : ""}`
       : failed
       ? `⚠️ **Not fully tested:** ${failed} prompt${failed === 1 ? "" : "s"} could not be run (see the note).`
+      : only
+      ? `🔵 **Read the new model's answers:** ${onlyText}, so there was no old answer to compare with.${tested.filter((d) => d.only).every((d) => d.checked) ? " They passed your checks." : " Add checks to these prompts to test the meaning too ([how](https://github.com/AI-Driftline/driftline#checks))."}`
       : tested.some((d) => d.checked)
       ? "✅ **Safe to merge as far as your prompts show:** every prompt gave the same kind of answer on the replacement and passed its checks."
       : "✅ **Similar answers on every prompt:** the wording stayed close. Similar wording can still mean something different, so add `must_include` or `same_fields` to your prompts to check the meaning too ([how](https://github.com/AI-Driftline/driftline#checks)).";
     out.push(
       "", "### Your prompts on the replacement", "",
       verdict, "",
-      `${tested.length} prompt test${tested.length === 1 ? "" : "s"} from this run: ${same} same, ${changed} changed, ${broken} broken${failed ? `, ${failed} not run` : ""}.`, "",
+      `${tested.length} prompt test${tested.length === 1 ? "" : "s"} from this run: ${same} same, ${changed} changed, ${broken} broken${only ? `, ${only} new model only` : ""}${failed ? `, ${failed} not run` : ""}.`, "",
       ...driftTable(drift), "",
       runUrl ? `Both answers for every prompt are in the [job summary of this run](${runUrl}). They are left out here because anyone who can read this pull request would see them.` : "Both answers for every prompt are in the job summary of the workflow run.",
     );

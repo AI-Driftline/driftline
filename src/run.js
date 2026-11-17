@@ -110,7 +110,8 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
         mig && !mig.drop_in && mig.change !== "settings" ? `Beyond the model name: ${mig.note}` : "",
         chg ? `The provider changed this replacement on ${chg.on} (before: ${chg.was}); drift results from earlier runs compared against ${chg.was}.` : "",
       ].filter(Boolean).join(" ");
-      const push = (row) => out.push(caveat ? { ...row, note: [row.note, caveat].filter(Boolean).join(" ") } : row);
+      // The caveat is kept apart too, so a table can show one that repeats on many rows just once.
+      const push = (row) => out.push(caveat ? { ...row, note: [row.note, caveat].filter(Boolean).join(" "), caveat } : row);
       if (!to) {
         push({ id: p.id, from, to: "—", result: "skipped", note: "No known replacement; set compare_to" });
         continue;
@@ -129,10 +130,15 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
           if (!after.trim()) return push({ id: p.id, from, to, after, before, result: "broken", note: "Replacement returned an empty answer" });
           const jsonOk = p.expect !== "json" || extractJson(after).ok;
           const fails = jsonOk ? runChecks(after, p, { expect: p.expect }) : [];
-          push({ id: p.id, from, to, after, before, result: jsonOk && !fails.length ? "changed" : "broken", checked: hasChecks(p),
-            note: !jsonOk ? `Replacement did not return valid JSON. ${reason}`
-              : fails.length ? `Failed check: ${fails.map((f) => f.note).join(", ")}. ${reason}`
-              : `${reason}; review the replacement's answer` });
+          // `only`: there was no current answer to compare with. Still "changed" for the counts (a person should read it),
+          // but tables label it as its own case instead of a "Changed" without a score.
+          // Only phrase checks can run on one answer, so only they count as "checked" here.
+          const phraseChecks = hasChecks({ must_include: p.must_include, must_not_include: p.must_not_include });
+          push({ id: p.id, from, to, after, before, result: jsonOk && !fails.length ? "changed" : "broken", only: true, checked: phraseChecks,
+            note: !jsonOk ? `Replacement did not return valid JSON. ${reason}.`
+              : fails.length ? `Failed check: ${fails.map((f) => f.note).join(", ")}. ${reason}.`
+              : [`${reason}.`, p.expect === "json" ? "The answer is valid JSON." : "",
+                  p.same_fields?.length ? "same_fields needs the current answer, so it was not checked." : ""].filter(Boolean).join(" ") });
         };
         if (status.status === "retired") {
           afterOnly("(current model already retired)", "Current model is retired");
@@ -151,7 +157,7 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
           // current model: providers block new accounts from models that are about to go (Google: "no longer available
           // to new users"). Test the replacement anyway, as for a retired model.
           if (UNAVAILABLE.test(e.message)) {
-            afterOnly(`(current model not available: ${e.message.slice(0, 160)})`, "Current model not available to this API key, so only the replacement was tested");
+            afterOnly(`(current model not available: ${e.message.slice(0, 160)})`, "Current model not available to this API key");
             continue;
           }
           throw e;

@@ -274,7 +274,9 @@ test("run: a current model this key can't use still gets its replacement tested"
     fetchImpl: refuse(404, "This model gpt-4 is no longer available to new users.") });
   const by = Object.fromEntries(r.drift.map((d) => [d.id, d]));
   assert.equal(by.plain.result, "changed");
-  assert.match(by.plain.note, /not available to this API key.*review the replacement/);
+  assert.match(by.plain.note, /not available to this API key/);
+  assert.equal(by.plain.only, true);
+  assert.equal(by.plain.checked, false);
   assert.match(by.plain.before, /^\(current model not available: HTTP 404/);
   assert.equal(by.plain.after, "Hello there");
   assert.equal(by.checked.result, "broken");
@@ -1300,4 +1302,19 @@ test("fix PR: in a monorepo the pull request names files from the repository roo
   assert.match(md, /- \[ \] `services\/api\/llm\.py:3`/);
   assert.equal(fromRepoRoot(plan, ""), plan);
   assert.equal(plan.changes[0].file, "llm.py"); // the plan used for the edit keeps its own paths
+});
+
+test("drift table: replacement-only rows get their own label, and a caveat shared by rows is shown once", async () => {
+  const { driftTable } = await import("../src/report.js");
+  const cav = "Beyond the model name: Gemini 3 changes the request.";
+  const rows = driftTable([
+    { id: "a", from: "gemini-2.5-flash", to: "gemini-3.5-flash-lite", result: "changed", only: true, checked: true, note: `Current model not available to this API key. ${cav}`, caveat: cav },
+    { id: "b", from: "gemini-2.5-flash", to: "gemini-3.5-flash-lite", result: "changed", only: true, checked: false, note: `Current model not available to this API key. ${cav}`, caveat: cav },
+    { id: "c", from: "gpt-4o-mini", to: "gpt-6-luna", result: "changed", score: 0.66, note: "" },
+  ]).join("\n");
+  assert.match(rows, /\| a \|.*\| — \| 🔵 New model only · checks passed \| Current model not available to this API key\. \[1\] \|/);
+  assert.match(rows, /\| b \|.*\| 🔵 New model only \|/);
+  assert.match(rows, /\| c \|.*\| 0\.66 \| 🟡 Changed \|/);
+  assert.equal(rows.split(cav).length - 1, 1);
+  assert.match(rows, /\n1\. Beyond the model name/);
 });

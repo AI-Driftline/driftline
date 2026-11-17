@@ -50,12 +50,24 @@ const MAX_ROWS = 150;
 const clip = (s) => { s = String(s || ""); return s.length > MAX_ANSWER ? s.slice(0, MAX_ANSWER) + "\n[…cut]" : s; };
 
 // The drift results as a Markdown table (shared by the report and the fix pull request).
+// Replacement tested alone (current model retired or refused): nothing to compare, so no score and its own label.
+const resultLabel = (d) => d.only && d.result === "changed"
+  ? (d.checked ? "🔵 New model only · checks passed" : "🔵 New model only")
+  : RESULT_LABEL[d.result] || d.result;
+
 export function driftTable(drift) {
   const rows = ["| Prompt | Current → replacement | Similarity | Result | Note |", "|---|---|---|---|---|"];
+  // A caveat shared by several rows (e.g. "Gemini 3 changes the request…") is shown once under the table.
+  const seen = new Map();
+  for (const d of drift) if (d.caveat) seen.set(d.caveat, (seen.get(d.caveat) || 0) + 1);
+  const shared = [...seen].filter(([, n]) => n > 1).map(([c]) => c);
   for (const d of drift) {
-    const score = typeof d.score === "number" ? d.score.toFixed(2) : "";
-    rows.push(`| ${esc(d.id)} | ${code(d.from)} → ${code(d.to)} | ${score} | ${RESULT_LABEL[d.result] || d.result} | ${esc(d.note)} |`);
+    const score = typeof d.score === "number" ? d.score.toFixed(2) : d.only ? "—" : "";
+    const i = shared.indexOf(d.caveat);
+    const note = i < 0 ? d.note : [String(d.note || "").replace(d.caveat, "").trim(), `[${i + 1}]`].filter(Boolean).join(" ");
+    rows.push(`| ${esc(d.id)} | ${code(d.from)} → ${code(d.to)} | ${score} | ${resultLabel(d)} | ${esc(note)} |`);
   }
+  if (shared.length) rows.push("", ...shared.map((c, i) => `${i + 1}. ${esc(c)}`));
   return rows;
 }
 
