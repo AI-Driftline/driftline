@@ -73,7 +73,7 @@ if (cmd === "-h" || cmd === "--help" || cmd === "help") {
   const r = await activate(arg, account);
   if (!r.ok) { console.error(r.reason); process.exitCode = 1; }
   else {
-    console.log(`Activated for GitHub account "${account}"${r.limit ? ` (${r.used} of ${r.limit} used)` : ""}.\n`);
+    console.log(`Activated for GitHub account "${account}"${r.limit ? ` (one key works on up to ${r.limit} GitHub accounts or organizations)` : ""}.\n`);
     console.log("Save this as a repository or organization secret named DRIFTLINE_LICENSE_KEY:\n");
     console.log(`  ${r.code}\n`);
   }

@@ -10,7 +10,9 @@ import { checkLicense, LICENSE } from "../src/license.js";
 
 // Most tests use fake keys without store/product data; the real check is tested on its own below.
 const REAL_LICENSE = { ...LICENSE };
-Object.assign(LICENSE, { storeId: null, productIds: [] });
+Object.assign(LICENSE, { benefitId: null });
+// A valid Polar reply for the code "k:i" activated for github:acme.
+const POLAR_OK = { status: "granted", benefit_id: null, activation: { id: "i", label: "github:acme" } };
 import { run } from "../src/run.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -106,20 +108,20 @@ test("JSON comparison: fenced JSON parses, broken JSON is broken", () => {
 });
 
 // ---------- license ----------
-const fakeLicense = (body) => async () => ({ json: async () => body });
+const fakeLicense = (body, status = 200) => async () => ({ status, json: async () => body });
 
 test("license: valid, invalid, missing", async () => {
-  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense({ valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" } }), account: "acme" })).ok, true);
-  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense({ valid: false, error: "license_key not found." }), account: "acme" })).ok, false);
+  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense(POLAR_OK), account: "acme" })).ok, true);
+  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense({ error: "ResourceNotFound", detail: "License key not found" }, 404), account: "acme" })).ok, false);
   assert.equal((await checkLicense("", {})).ok, false);
-  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense({ valid: true, license_key: { status: "expired" } }), account: "acme" })).ok, false);
+  assert.equal((await checkLicense("k:i", { fetchImpl: fakeLicense({ ...POLAR_OK, status: "revoked" }), account: "acme" })).ok, false);
 });
 
 // ---------- end to end with mocked providers ----------
 function fakeProviders(calls) {
   return async (url, opts) => {
     calls.push(url);
-    if (url.includes("lemonsqueezy")) return { ok: true, json: async () => ({ valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" } }) };
+    if (url.includes("api.polar.sh")) return { ok: true, status: 200, json: async () => POLAR_OK };
     const body = JSON.parse(opts.body);
     const reply = (text, shape) => ({ ok: true, status: 200, text: async () => JSON.stringify(shape(text)) });
     if (url.includes("openai")) {
@@ -194,8 +196,8 @@ const tempRepo = (files) => {
   }
   return dir;
 };
-const licensed = (answer) => async (url) => url.includes("lemonsqueezy")
-  ? { status: 200, json: async () => ({ valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" } }) }
+const licensed = (answer) => async (url) => url.includes("api.polar.sh")
+  ? { status: 200, json: async () => POLAR_OK }
   : { ok: true, status: 200, text: async () => JSON.stringify(url.includes("anthropic") ? { content: [{ type: "text", text: answer }] } : { output_text: answer }) };
 
 test("cloud-platform spellings: Vertex maps to provider IDs, Bedrock keeps its own IDs", () => {
@@ -330,10 +332,10 @@ test("provider routing for embedding models", () => {
   assert.equal(providerOf("text-embedding-004"), "google");
 });
 
-// Real license codes are "<key uuid>:<instance uuid>".
-const REAL_CODE = "38b1460a-5104-4067-a91d-77b872934d51:f90ec370-fd83-46a5-8bbd-44a241e78665";
+// Real license codes are "DRIFTLINE-<uuid>:<activation uuid>".
+const REAL_CODE = "DRIFTLINE-38B1460A-5104-4067-A91D-77B872934D51:f90ec370-fd83-46a5-8bbd-44a241e78665";
 
-test("license: a Lemon Squeezy outage does not lock out paying users", async () => {
+test("license: a license server outage does not lock out paying users", async () => {
   const r = await checkLicense(REAL_CODE, { fetchImpl: async () => ({ status: 503, json: async () => { throw new Error("html"); } }), account: "acme" });
   assert.equal(r.ok, true);
   const offline = await checkLicense(REAL_CODE.toUpperCase(), { fetchImpl: async () => { throw new TypeError("fetch failed"); }, account: "acme" });
@@ -341,7 +343,7 @@ test("license: a Lemon Squeezy outage does not lock out paying users", async () 
 });
 
 test("license: without a known GitHub account, a valid code does not unlock Pro", async () => {
-  const fetchImpl = async () => reply(200, { valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" }, meta: {} });
+  const fetchImpl = async () => reply(200, POLAR_OK);
   for (const account of [undefined, "", "  ", "globex"]) {
     assert.equal((await checkLicense(REAL_CODE, { fetchImpl, account })).ok, false, `account ${JSON.stringify(account)}`);
   }
@@ -350,7 +352,7 @@ test("license: without a known GitHub account, a valid code does not unlock Pro"
   assert.equal((await checkLicense(REAL_CODE, { fetchImpl: offline })).ok, false, "no outage pass without an account either");
 });
 
-test("license: blocking Lemon Squeezy with a made-up code unlocks nothing", async () => {
+test("license: blocking the license server with a made-up code unlocks nothing", async () => {
   const blocked = async () => { throw new TypeError("fetch failed"); };
   const down = async () => ({ status: 503, json: async () => ({}) });
   const busy = async () => ({ status: 429, json: async () => ({}) });
@@ -386,7 +388,7 @@ test("run: prompts without a model cost two calls each, on the soonest-retiring 
     ".driftline/prompts.yml": "prompts:\n" + Array.from({ length: 5 }, (_, i) => `  - id: p${i}\n    prompt: hi ${i}\n`).join(""),
   });
   let calls = 0;
-  const fetchImpl = async (url, opts) => { if (!url.includes("lemonsqueezy")) calls++; return licensed("hi")(url, opts); };
+  const fetchImpl = async (url, opts) => { if (!url.includes("api.polar.sh")) calls++; return licensed("hi")(url, opts); };
   const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl, env: { OPENAI_API_KEY: "x", ANTHROPIC_API_KEY: "y" } });
   assert.equal(calls, 10);
   assert.ok(r.drift.every((d) => d.from === "gpt-4"));
@@ -415,11 +417,12 @@ import { upsertIssue } from "../src/github.js";
 retry.delayMs = 0;
 const reply = (status, body) => ({ ok: status < 400, status, headers: { get: () => null }, text: async () => JSON.stringify(body), json: async () => body });
 
-test("license: new (inactive) keys work; expired and disabled don't; odd replies don't crash", async () => {
+test("license: granted keys work; anything else doesn't; odd replies don't crash", async () => {
   const lic = (body, status = 200) => checkLicense("k:i", { fetchImpl: async () => reply(status, body), account: "acme" });
-  assert.equal((await lic({ valid: true, license_key: { status: "inactive" }, instance: { id: "i", name: "github:acme" } })).ok, true);
-  assert.equal((await lic({ valid: true, license_key: { status: "expired" } })).ok, false);
-  assert.equal((await lic({ valid: true, license_key: { status: "disabled" } })).ok, false);
+  assert.equal((await lic(POLAR_OK)).ok, true);
+  assert.equal((await lic({ ...POLAR_OK, status: "revoked" })).ok, false);
+  assert.match((await lic({ error: "ResourceNotFound", detail: "Not found" }, 404)).reason, /not active/);
+  assert.equal((await lic({ detail: [{ msg: "bad" }] }, 422)).ok, false);
   assert.equal((await lic(null)).ok, false);                       // unreadable reply: no crash, not unlocked
   const html = await checkLicense("k:i", { fetchImpl: async () => ({ status: 403, json: async () => { throw new Error("html"); } }), account: "acme" });
   assert.equal(html.ok, false);                                      // a WAF/HTML error page is not a bypass
@@ -447,7 +450,7 @@ test("o1 next to other model IDs counts; inference-profile ARNs resolve", () => 
 test("a current model's empty answer keeps the replacement's answer", async () => {
   const dir = tempRepo({ "a.py": 'm = "gpt-4"\n', ".driftline/prompts.yml": "prompts:\n  - id: a\n    prompt: hi\n" });
   const fetchImpl = async (url, opts) => {
-    if (url.includes("lemonsqueezy")) return reply(200, { valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" } });
+    if (url.includes("api.polar.sh")) return reply(200, POLAR_OK);
     const model = JSON.parse(opts.body).model;
     return reply(200, model === "gpt-4" ? { output_text: "" } : { output_text: "hello" });
   };
@@ -528,25 +531,27 @@ import { activate, deactivate, parseCode, instanceName } from "../src/license.js
 
 test("activate prints a license code; the limit gives a clear way out", async () => {
   const sent = [];
-  const ok = await activate(" KEY-1 ", "Acme", { fetchImpl: async (url, opts) => {
-    sent.push([url, String(opts.body)]);
-    return reply(200, { activated: true, instance: { id: "inst-9", name: "github:acme" }, license_key: { activation_usage: 1, activation_limit: 3 }, meta: {} });
+  const ok = await activate(" DRIFTLINE-1 ", "Acme", { fetchImpl: async (url, opts) => {
+    sent.push([url, JSON.parse(opts.body)]);
+    return reply(200, { id: "act-9", label: "github:acme", license_key: { status: "granted", benefit_id: null, limit_activations: 3 } });
   } });
-  assert.deepEqual([ok.ok, ok.code, ok.used, ok.limit], [true, "KEY-1:inst-9", 1, 3]);
-  assert.match(sent[0][0], /\/activate$/);
-  assert.match(sent[0][1], /instance_name=github%3Aacme/);
-  const full = await activate("KEY-1", "acme", { fetchImpl: async () => reply(400, { activated: false, error: "This license key has reached the activation limit." }) });
+  assert.deepEqual([ok.ok, ok.code, ok.limit], [true, "DRIFTLINE-1:act-9", 3]);
+  assert.match(sent[0][0], /api\.polar\.sh\/v1\/customer-portal\/license-keys\/activate$/);
+  assert.deepEqual([sent[0][1].key, sent[0][1].label, sent[0][1].organization_id], ["DRIFTLINE-1", "github:acme", LICENSE.organizationId]);
+  const full = await activate("DRIFTLINE-1", "acme", { fetchImpl: async () => reply(403, { error: "NotPermitted", detail: "License key activation limit already reached" }) });
   assert.equal(full.ok, false);
   assert.match(full.reason, /3 GitHub accounts.*deactivate/);
-  assert.equal((await activate("KEY-1", "", {})).ok, false); // account unknown: ask for --account
+  assert.match((await activate("nope", "acme", { fetchImpl: async () => reply(404, { error: "ResourceNotFound", detail: "Not found" }) })).reason, /No such license key/);
+  assert.equal((await activate("DRIFTLINE-1", "", {})).ok, false); // account unknown: ask for --account
+  assert.match((await activate("DRIFTLINE-1", "acme", { fetchImpl: async () => { throw new TypeError("fetch failed"); } })).reason, /Could not reach/);
 });
 
 test("license code: must be activated, and for the account the workflow runs in", async () => {
-  assert.deepEqual(parseCode("a-b-c:inst-1"), { key: "a-b-c", instanceId: "inst-1" });
+  assert.deepEqual(parseCode("DRIFTLINE-a-b:inst-1"), { key: "DRIFTLINE-a-b", instanceId: "inst-1" });
   assert.equal(instanceName(" Acme "), "github:acme");
-  const valid = (name) => async (url, opts) => {
-    assert.match(String(opts.body), /instance_id=inst-1/);
-    return reply(200, { valid: true, license_key: { status: "active" }, instance: name ? { id: "inst-1", name } : null, meta: {} });
+  const valid = (label) => async (url, opts) => {
+    assert.equal(JSON.parse(opts.body).activation_id, "inst-1");
+    return reply(200, { ...POLAR_OK, activation: label ? { id: "inst-1", label } : null });
   };
   assert.match((await checkLicense("plain-key", { fetchImpl: valid("github:acme"), account: "acme" })).reason, /not activated yet/);
   assert.equal((await checkLicense("k:inst-1", { fetchImpl: valid("github:acme"), account: "Acme" })).ok, true);
@@ -556,25 +561,26 @@ test("license code: must be activated, and for the account the workflow runs in"
   assert.match((await checkLicense("k:inst-1", { fetchImpl: valid(null), account: "acme" })).reason, /activation was removed/);
 });
 
-test("refunded or lapsed key: says Pro has ended, not \"activate again\"", async () => {
-  // Lemon Squeezy deletes activations on expiry/refund; the code check then only says "instance_id not found".
-  const ls = (keyStatus) => async (url, opts) => String(opts.body).includes("instance_id")
-    ? reply(404, { valid: false, error: "instance_id not found.", license_key: null, instance: null, meta: null })
-    : reply(400, { valid: false, error: "This license key is expired.", license_key: { status: keyStatus }, meta: {} });
-  for (const status of ["expired", "disabled"]) {
-    const r = await checkLicense("k:inst-1", { fetchImpl: ls(status), account: "acme" });
-    assert.equal(r.ok, false);
-    assert.match(r.reason, new RegExp(`Pro has ended.*${status}`));
-    assert.doesNotMatch(r.reason, /activate/);
-  }
-  // Key still active: the slot was freed with deactivate, so activating again is the right advice.
-  assert.match((await checkLicense("k:inst-1", { fetchImpl: ls("active"), account: "acme" })).reason, /instance_id not found.*activate/);
-  const expired = await activate("k", "acme", { fetchImpl: async () => reply(400, { activated: false, error: "This license key is expired.", license_key: { status: "expired" } }) });
-  assert.match(expired.reason, /Pro has ended/);
+test("refunded or lapsed key: says Pro is not active, not \"activate again\"", async () => {
+  // Polar answers 404 for a revoked/expired key and for a removed activation; asking about the key alone tells them apart.
+  const polar = (keyGranted) => async (url, opts) => JSON.parse(opts.body).activation_id
+    ? reply(404, { error: "ResourceNotFound", detail: "License key not found" })
+    : keyGranted ? reply(200, { ...POLAR_OK, activation: null }) : reply(404, { error: "ResourceNotFound", detail: "License key not found" });
+  const ended = await checkLicense("k:inst-1", { fetchImpl: polar(false), account: "acme" });
+  assert.equal(ended.ok, false);
+  assert.match(ended.reason, /not active.*Renew/);
+  assert.doesNotMatch(ended.reason, /npx .* activate/);
+  // Key still granted: the activation was freed, so activating again is the right advice.
+  assert.match((await checkLicense("k:inst-1", { fetchImpl: polar(true), account: "acme" })).reason, /activation was removed.*activate/);
+  const revoked = await activate("k", "acme", { fetchImpl: async () => reply(403, { error: "NotPermitted", detail: "License key is revoked" }) });
+  assert.match(revoked.reason, /not active/);
 });
 
 test("deactivate frees a slot", async () => {
-  assert.equal((await deactivate("k:inst-1", { fetchImpl: async () => reply(200, { deactivated: true }) })).ok, true);
+  let body;
+  assert.equal((await deactivate("k:inst-1", { fetchImpl: async (url, opts) => { body = JSON.parse(opts.body); return { status: 204, json: async () => null }; } })).ok, true);
+  assert.deepEqual([body.key, body.activation_id, body.organization_id], ["k", "inst-1", LICENSE.organizationId]);
+  assert.match((await deactivate("k:inst-1", { fetchImpl: async () => reply(404, { error: "ResourceNotFound", detail: "x" }) })).reason, /no such activation/);
   assert.equal((await deactivate("k", {})).ok, false); // a bare key is not a license code
 });
 
@@ -582,7 +588,7 @@ test("run: a code copied to another company runs the scan but not the drift test
   const dir = tempRepo({ "a.py": 'm = "gpt-4"\n', ".driftline/prompts.yml": "prompts:\n  - id: a\n    prompt: hi\n" });
   let aiCalls = 0;
   const fetchImpl = async (url) => {
-    if (url.includes("lemonsqueezy")) return reply(200, { valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" } });
+    if (url.includes("api.polar.sh")) return reply(200, POLAR_OK);
     aiCalls++; return reply(200, { output_text: "hi" });
   };
   const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "globex", fetchImpl, env: { OPENAI_API_KEY: "x" } });
@@ -591,19 +597,18 @@ test("run: a code copied to another company runs the scan but not the drift test
   assert.ok(r.notices.some((n) => n.includes('activated for "acme"')));
 });
 
-test("only keys from Driftline's store and product unlock Pro", async () => {
+test("only keys for Driftline's Pro benefit unlock Pro", async () => {
   Object.assign(LICENSE, REAL_LICENSE);
   try {
-    const key = (meta) => checkLicense("k:i", { account: "acme", fetchImpl: async () =>
-      reply(200, { valid: true, license_key: { status: "active" }, instance: { id: "i", name: "github:acme" }, meta }) });
-    assert.equal((await key({ store_id: 494524, product_id: 1432580 })).ok, true);
-    assert.equal((await key({ store_id: "494524", product_id: "1432580" })).ok, true);    // strings from the API are fine
-    assert.match((await key({ store_id: 999, product_id: 1432580 })).reason, /different product/);   // someone else's store
-    assert.match((await key({ store_id: 494524, product_id: 555 })).reason, /different product/);    // another product of ours
-    assert.match((await key({ store_id: 494524, product_id: 1428709 })).reason, /different product/);  // test-mode product
-    assert.match((await key({})).reason, /different product/);
+    const sent = [];
+    const key = (benefit_id) => checkLicense("k:i", { account: "acme", fetchImpl: async (url, opts) => {
+      sent.push(JSON.parse(opts.body)); return reply(200, { ...POLAR_OK, benefit_id }); } });
+    assert.equal((await key(REAL_LICENSE.benefitId)).ok, true);
+    assert.deepEqual([sent[0].organization_id, sent[0].benefit_id], [REAL_LICENSE.organizationId, REAL_LICENSE.benefitId]); // Polar checks it too
+    assert.match((await key("00000000-0000-4000-8000-000000000000")).reason, /different product/);
+    assert.match((await key(undefined)).reason, /different product/);
   } finally {
-    Object.assign(LICENSE, { storeId: null, productIds: [] });
+    Object.assign(LICENSE, { benefitId: null });
   }
 });
 
@@ -732,7 +737,7 @@ test("registry: gpt-5/o3 replacements follow OpenAI's 13 Nov 2026 page; pro mode
 test("run: drift test on a pro model runs the replacement in pro mode, as the provider says", async () => {
   const dir = tempRepo({ "a.py": 'm = "o3-pro"\n', ".driftline/prompts.yml": "prompts:\n  - id: p\n    prompt: hi\n" });
   const bodies = [];
-  const fetchImpl = async (url, opts) => { if (!url.includes("lemonsqueezy")) bodies.push(JSON.parse(opts.body)); return licensed("hi")(url, opts); };
+  const fetchImpl = async (url, opts) => { if (!url.includes("api.polar.sh")) bodies.push(JSON.parse(opts.body)); return licensed("hi")(url, opts); };
   const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl, env: { OPENAI_API_KEY: "x" } });
   const d = r.drift.find((x) => x.id === "p");
   assert.equal(d.to, "gpt-6.1-sol");
@@ -751,7 +756,7 @@ test("run: drift test on a pro model runs the replacement in pro mode, as the pr
 
 test("report and drift notes say when a replacement is more than a rename", async () => {
   const dir = tempRepo({ "a.py": 'm = "gemini-2.0-flash"\nt = "tts-1"\ng = "gpt-4"\n', ".driftline/prompts.yml": "prompts:\n  - id: p\n    model: gemini-2.0-flash\n    prompt: hi\n" });
-  const fetchImpl = async (url, opts) => url.includes("lemonsqueezy") ? licensed("hi")(url, opts)
+  const fetchImpl = async (url, opts) => url.includes("api.polar.sh") ? licensed("hi")(url, opts)
     : { ok: true, status: 200, text: async () => JSON.stringify({ candidates: [{ content: { parts: [{ text: "hi" }] } }] }) };
   const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", fetchImpl, env: { GEMINI_API_KEY: "x", GOOGLE_API_KEY: "x" } });
   assert.match(r.markdown, /\| Change needed \|/);
