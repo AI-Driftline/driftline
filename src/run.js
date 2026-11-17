@@ -13,6 +13,9 @@ const MAX_PROMPTS = 20;
 const oneLine = (s) => String(s).replace(/[\r\n]+/g, " ");
 const FLAGGED = new Set(["retired", "at-risk", "deprecated"]);
 
+// A provider refusing the current model itself (not the key, the network or a rate limit).
+const UNAVAILABLE = /^HTTP 404:|^HTTP 400:.*\bmodel\b.*(not found|no longer|does not exist|deprecated|decommission|not supported|retired)/i;
+
 export async function run({
   root = ".",
   repoRoot = root,      // the repository root: prompt file and report paths are relative to it
@@ -120,29 +123,38 @@ async function runDrift({ prompts, findings, registry, env, fetchImpl, today, wa
       log(oneLine(`Drift test ${p.id}: ${from} → ${to}`));
       try {
         const after = await complete({ model: to, prompt: p.prompt, system: p.system, reasoningMode: proMode, env, fetchImpl });
-        if (status.status === "retired") {
-          if (!after.trim()) {
-            push({ id: p.id, from, to, after, before: "(current model already retired)", result: "broken", note: "Replacement returned an empty answer" });
-            continue;
-          }
+        // Only the replacement's answer can be judged (current model retired, or this key can't use it): JSON and the
+        // phrase checks still run on it; same_fields needs the current answer, so it can't.
+        const afterOnly = (before, reason) => {
+          if (!after.trim()) return push({ id: p.id, from, to, after, before, result: "broken", note: "Replacement returned an empty answer" });
           const jsonOk = p.expect !== "json" || extractJson(after).ok;
-          // No current answer to compare with, so same_fields can't run; the phrase checks still can.
           const fails = jsonOk ? runChecks(after, p, { expect: p.expect }) : [];
-          push({ id: p.id, from, to, after, before: "(current model already retired)", result: jsonOk && !fails.length ? "changed" : "broken",
-            checked: hasChecks(p),
-            note: !jsonOk ? "Replacement did not return valid JSON"
-              : fails.length ? `Failed check: ${fails.map((f) => f.note).join(", ")}`
-              : "Current model is retired; review the replacement's answer" });
+          push({ id: p.id, from, to, after, before, result: jsonOk && !fails.length ? "changed" : "broken", checked: hasChecks(p),
+            note: !jsonOk ? `Replacement did not return valid JSON. ${reason}`
+              : fails.length ? `Failed check: ${fails.map((f) => f.note).join(", ")}. ${reason}`
+              : `${reason}; review the replacement's answer` });
+        };
+        if (status.status === "retired") {
+          afterOnly("(current model already retired)", "Current model is retired");
           continue;
         }
         let before;
         try {
           before = await complete({ model: from, prompt: p.prompt, system: p.system, env, fetchImpl });
         } catch (e) {
-          if (!/^(Empty answer|Answer cut off)/.test(e.message)) throw e;
-          // The current model gave nothing usable; the replacement's answer is still worth showing.
-          push({ id: p.id, from, to, after, before: `(${e.message})`, result: "changed", note: `Current model: ${e.message}. Review the replacement's answer` });
-          continue;
+          if (/^(Empty answer|Answer cut off)/.test(e.message)) {
+            // The current model gave nothing usable; the replacement's answer is still worth showing.
+            push({ id: p.id, from, to, after, before: `(${e.message})`, result: "changed", note: `Current model: ${e.message}. Review the replacement's answer` });
+            continue;
+          }
+          // The same key just reached the replacement, so a 404 (or a 400 about the model) means this key can't use the
+          // current model: providers block new accounts from models that are about to go (Google: "no longer available
+          // to new users"). Test the replacement anyway, as for a retired model.
+          if (UNAVAILABLE.test(e.message)) {
+            afterOnly(`(current model not available: ${e.message.slice(0, 160)})`, "Current model not available to this API key, so only the replacement was tested");
+            continue;
+          }
+          throw e;
         }
         push({ id: p.id, from, to, before, after, ...compare(before, after, p.expect, p) });
       } catch (e) {

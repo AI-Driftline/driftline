@@ -262,6 +262,32 @@ test("run: checks flow through a real run, including a model that is already ret
   assert.equal(by.live.checked, true);
 });
 
+test("run: a current model this key can't use still gets its replacement tested", async () => {
+  const dir = tempRepo({ "a.py": 'm = "gpt-4"\n', ".driftline/prompts.yml": [
+    "prompts:", "  - id: plain", "    prompt: hi", "  - id: checked", "    prompt: hi", "    must_include: [refund]",
+  ].join("\n") });
+  const refuse = (status, message) => async (url, opts) => {
+    if (url.includes("api.polar.sh")) return reply(200, POLAR_OK);
+    return JSON.parse(opts.body).model === "gpt-4" ? reply(status, { error: { message } }) : reply(200, { output_text: "Hello there" });
+  };
+  const r = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", env: { OPENAI_API_KEY: "x" },
+    fetchImpl: refuse(404, "This model gpt-4 is no longer available to new users.") });
+  const by = Object.fromEntries(r.drift.map((d) => [d.id, d]));
+  assert.equal(by.plain.result, "changed");
+  assert.match(by.plain.note, /not available to this API key.*review the replacement/);
+  assert.match(by.plain.before, /^\(current model not available: HTTP 404/);
+  assert.equal(by.plain.after, "Hello there");
+  assert.equal(by.checked.result, "broken");
+  assert.match(by.checked.note, /Failed check: missing "refund"\. Current model not available/);
+  // A 400 that names the model counts too; a bad key or a rate limit is still an error, never skipped quietly.
+  const r400 = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", env: { OPENAI_API_KEY: "x" },
+    fetchImpl: refuse(400, "The model `gpt-4` has been deprecated.") });
+  assert.equal(r400.drift[0].result, "changed");
+  const r401 = await run({ root: dir, today: TODAY, registry, licenseKey: "k:i", account: "acme", env: { OPENAI_API_KEY: "x" },
+    fetchImpl: refuse(401, "Incorrect API key provided.") });
+  assert.equal(r401.drift[0].result, "error");
+});
+
 test("checks: must_include is case- and space-insensitive; a check both models fail is changed, not broken", () => {
   assert.equal(compare("Refund in 5  business days.", "REFUND in 5 business\ndays.", "text", { must_include: ["refund", "5 business days"] }).result, "same");
   const miss = compare("Refund in 5 business days.", "Refund soon.", "text", { must_include: ["5 business days"] });

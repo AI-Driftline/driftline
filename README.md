@@ -57,7 +57,7 @@ API keys are read from `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` and `GEMINI_API_KEY
 | Result | Meaning |
 |---|---|
 | ✅ Same | Similarity 0.90 or higher, and every check passed |
-| 🟡 Changed | Similarity 0.60–0.90; one answer says "not" (or no, never, cannot) where the other doesn't; a check the current model fails too; or the current model is already retired and the new answer needs review |
+| 🟡 Changed | Similarity 0.60–0.90; one answer says "not" (or no, never, cannot) where the other doesn't; a check the current model fails too; or the current model is already retired (or your API key can no longer use it) and the new answer needs review |
 | 🔴 Broken | Similarity below 0.60; `expect: json` and the new answer is not valid JSON; or the new answer fails a check |
 
 Text is compared with word and word-pair overlap. JSON is compared field by field. Overlap measures wording, not meaning: "is eligible" and "is not eligible" share almost every word. Driftline marks an answer that gains or loses a "not" as changed (English only), and checks let you say what must stay true.
