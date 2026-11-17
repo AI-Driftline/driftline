@@ -1,4 +1,4 @@
-# Ships every change to the registry or the code: tests → version + tag v0.x.y → npm → move v0 → MCP Registry → check.
+# Ships every change to the registry, the code or the MCP listing (server.json): tests → version + tag v0.x.y → npm → move v0 → MCP Registry → check.
 # npm, the v0 tag and the MCP Registry always end on the same version: a release that stops halfway is finished by the
 # next run (or by running this by hand) before any new version starts, and the last step fails if they disagree.
 # Runs on its own when main changes (the daily registry robot pushes there), or by hand from the Actions tab.
@@ -9,7 +9,7 @@ name: release
 on:
   push:
     branches: [main]
-    paths: ["registry/**", "src/**", "action.yml"]
+    paths: ["registry/**", "src/**", "action.yml", "server.json"]
   workflow_dispatch:
     inputs:
       bump:
@@ -58,7 +58,7 @@ jobs:
           fi
           # A daily re-check that only moves the "checked" date is not worth a release.
           models() { node -e "const r=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(JSON.stringify(r.models))"; }
-          if git diff --quiet "$last" HEAD -- src action.yml && \
+          if git diff --quiet "$last" HEAD -- src action.yml server.json && \
              [ "$(git show "${last}:registry/models.json" | models)" = "$(git show HEAD:registry/models.json | models)" ]; then
             echo "Nothing to release since $last (only the checked date or docs changed)." >> "$GITHUB_STEP_SUMMARY"
             exit 0
@@ -115,5 +115,10 @@ jobs:
             mcpok=$(curl -fsS "https://registry.modelcontextprotocol.io/v0/servers?search=io.github.AI-Driftline/driftline&limit=100" | grep -cE "\"version\": *\"${v#v}\"" || true)
             [ "${mcpok:-0}" != 0 ] && break; sleep 20
           done
-          echo "npm latest: $npmv · @v0 at $v: $v0ok · MCP Registry has ${v#v}: $([ "${mcpok:-0}" != 0 ] && echo yes || echo no)" | tee -a "$GITHUB_STEP_SUMMARY"
-          [ "$npmv" = "${v#v}" ] && [ "$v0ok" = yes ] && [ "${mcpok:-0}" != 0 ]
+          # The listing must also show server.json's current description (directories copy it from the registry).
+          want=$(node -p "require('./server.json').description")
+          got=$(curl -fsS "https://registry.modelcontextprotocol.io/v0/servers?search=io.github.AI-Driftline/driftline&limit=100" \
+            | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{const s=(JSON.parse(d).servers||[]).map(x=>x.server||x).find(x=>x.version==='${v#v}');console.log(s?s.description:'')})" || true)
+          descok=$([ "$got" = "$want" ] && echo yes || echo no)
+          echo "npm latest: $npmv · @v0 at $v: $v0ok · MCP Registry has ${v#v}: $([ "${mcpok:-0}" != 0 ] && echo yes || echo no) · registry description current: $descok" | tee -a "$GITHUB_STEP_SUMMARY"
+          [ "$npmv" = "${v#v}" ] && [ "$v0ok" = yes ] && [ "${mcpok:-0}" != 0 ] && [ "$descok" = yes ]
