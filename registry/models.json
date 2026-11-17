@@ -40,7 +40,8 @@
       "retires": "2026-12-01",
       "qualifier": "exact",
       "replacement": "gemini-3.8-flash",
-      "routes": true
+      "routes": true,
+      "note": "Google already limits API access to accounts that used gemini-2.5-pro before; new API keys are refused. After the switch, routed calls are billed at Gemini 3.8 Flash rates."
     },
     {
       "id": "gemini-2.5-flash",
@@ -48,7 +49,8 @@
       "retires": "2026-12-01",
       "qualifier": "exact",
       "replacement": "gemini-3.5-flash-lite",
-      "routes": true
+      "routes": true,
+      "note": "Google already limits API access to accounts that used gemini-2.5-flash before; new API keys are refused. After the switch, routed calls are billed at Gemini 3.5 Flash-Lite rates."
     },
     {
       "id": "gemini-omni-1.1-flash",

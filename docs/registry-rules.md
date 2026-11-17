@@ -34,7 +34,7 @@ DeepSeek has no deprecation page; it announces changes in its news: https://api-
 
 ## Entry fields
 
-`id`, `provider` (openai | anthropic | google), `retires` (YYYY-MM-DD), `qualifier`, optional `replacement`, optional `replacement_alt`, optional `replacement_note`, optional `previous_replacement` + `replacement_changed` (see below), `kind` (omit for text; else audio | image | video | embedding | moderation | agent), `announced` (date of the notice, when the page gives one), `routes: true` (see below).
+`id`, `provider` (openai | anthropic | google), `retires` (YYYY-MM-DD), `qualifier`, optional `replacement`, optional `replacement_alt`, optional `replacement_note`, optional `previous_replacement` + `replacement_changed` (see below), optional `note` (see below), `kind` (omit for text; else audio | image | video | embedding | moderation | agent), `announced` (date of the notice, when the page gives one), `routes: true` (see below).
 
 ## Qualifiers
 
@@ -47,6 +47,7 @@ DeepSeek has no deprecation page; it announces changes in its news: https://api-
 
 - New model ID with a date on a page → add it. Use the exact ID spelling from the page. One entry per ID; a row listing an alias and a snapshot ("gpt-image-2 | gpt-image-2-2026-04-21") gives two entries.
 - Changed date or replacement → update the entry.
+- `note`: one or two plain sentences for a fact on the page that changes what users can do now, beyond the date and replacement: access already limited ("limited to existing users who have actively used it"), or routed calls billed at the replacement's rates. Stay close to the page's wording, never guess, and remove the note when the page no longer says it. Don't put instructions for calling the replacement here; those go in `replacement_note`.
 - Changed replacement → also set `previous_replacement` to the old value and `replacement_changed` to today's date (the day the change was seen). If it changes again, overwrite both. Reports, alerts and the outreach list use these to tell people the advice changed.
 - Replacement written as "X or Y" → `replacement` = X, `replacement_alt` = Y (both are shown to users). Three or more options: X, then explain the rest in `note`.
 - Replacement with an extra instruction, e.g. "gpt-6.1-sol (reasoning.mode: pro) in the Responses API" → `replacement` = the model ID only (`gpt-6.1-sol`), `replacement_note` = the rest in plain words (`reasoning.mode: pro, in the Responses API`). Keep the note when the replacement changes, if the page still gives it.

@@ -43,7 +43,7 @@ function describe(rawId, reg, today) {
     id: shownId(rawId), ...(id !== rawId && !/^[a-z]+:/.test(rawId) ? { normalized: shownId(id) } : {}),
     status: c.status, ...(m ? {
       provider: m.provider, retires: m.retires, qualifier: m.qualifier, days_left: c.days,
-      replacement: m.replacement || null, ...(m.replacement_alt ? { replacement_alt: m.replacement_alt } : {}), ...(m.replacement_note ? { replacement_note: m.replacement_note } : {}),
+      replacement: m.replacement || null, ...(m.replacement_alt ? { replacement_alt: m.replacement_alt } : {}), ...(m.replacement_note ? { replacement_note: m.replacement_note } : {}), ...(m.note ? { note: m.note } : {}),
       ...(m.previous_replacement ? { previous_replacement: m.previous_replacement, replacement_changed: m.replacement_changed } : {}), routes: !!m.routes, ...(m.aliasOf ? { alias_of: m.aliasOf } : {}), page: m.platform === "bedrock" ? `https://aidriftline.com/models/bedrock/${m.id.replace(/:/g, "-")}/` : m.platform === "vertex" ? `https://aidriftline.com/models/vertex/${m.id.replace(/[:@]/g, "-")}/` : m.platform === "azure" ? `https://aidriftline.com/models/azure/${m.id.replace(/[:@\s/]/g, "-")}/` : /^(groq|mistral|xai|cohere|deepseek)$/.test(m.platform || "") ? `https://aidriftline.com/models/${m.platform}/${m.id.replace(/[/:@\s]/g, "-")}/` : m.platform ? m.platform_source : page(m.aliasOf || m.id),
     } : {}),
     ...(m && migrationFor(m) ? { migration: migrationFor(m) } : {}),
@@ -70,6 +70,7 @@ const MODEL_RESULT = {
     replacement_changed: { type: "string", description: "YYYY-MM-DD: when the change was seen on the provider's page" },
     migration: { type: "object", description: "Whether moving to the replacement is just a new model name (drop_in true) or needs more: change = rename | settings | params | api | re-embed | choose, with a note and the provider's guide", properties: { change: { type: "string" }, drop_in: { type: "boolean" }, note: { type: "string" }, guide: { type: ["string", "null"] } } },
     replacement_note: { type: "string", description: "Extra instruction the provider gives with the replacement (e.g. a setting or API to use). Without it, switching the model name alone is not enough" },
+    note: { type: "string", description: "A fact from the provider's page beyond date and replacement, e.g. access already limited to existing users, or routed calls billed at the replacement's rates" },
     routes: { type: "boolean", description: "true: after the date the provider answers with the replacement model instead of failing" },
     alias_of: { type: "string" }, page: { type: "string", description: "aidriftline.com page with the source for this date" },
     advice: { type: "string", description: "One plain sentence to pass on to the user" },
