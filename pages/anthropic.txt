@@ -9,10 +9,12 @@ Legacy: The model will no longer receive updates and might be deprecated in the 
 Deprecated: The model is still functional but no longer recommended. Anthropic provides a recommended replacement and assigns a retirement date.
 Retired: The model is no longer available for use. Requests to retired models fail.
 The dates on this page apply to Anthropic-operated platforms: the Claude API, Claude Platform on AWS , Claude Models on Google Cloud (Anthropic managed) , and Microsoft Foundry . Partner-operated platforms, Claude Models on Google Cloud (Google managed) and Amazon Bedrock, set their own retirement schedules, so a model’s lifecycle status and dates can differ. See the Amazon Bedrock ( bedrock-mantle ) , Amazon Bedrock ( bedrock-runtime ) , and Claude Models on Google Cloud (Google managed) model tables.
+Claude Code uses the Claude API, including when you sign in with a Claude plan, so this page’s dates apply. If Claude Code is set up for another platform or for a gateway, the dates are those of the platform that serves its requests.
 Migrating to replacements
-Once a model is deprecated, migrate all usage to a suitable replacement before the retirement date. Requests to models past the retirement date will fail.
+Once a model is deprecated, migrate all usage to a suitable replacement before the retirement date. Once the model is retired, requests to it fail.
 To help measure the performance of replacement models on your tasks, consider thorough testing of your applications with the new models well before the retirement date.
 For specific instructions on migrating to the latest Claude models, see Migration guides .
+If you use Claude Code, update it first, because a newer model can need a newer version of Claude Code. Then, check which model you’re using , even if you set no model or use a Claude Code alias such as sonnet . If that model is deprecated or retired, set its recommended replacement as your model. Also, change the old model everywhere you set a model , including subagent definitions, and ask your administrator to change any model they set.
 Notifications
 Anthropic notifies customers with active deployments for models with upcoming retirements, providing at least 60 days’ notice before model retirement for publicly released models.
 Auditing model usage
@@ -35,37 +37,39 @@ At some point, Anthropic hopes to make past models publicly available again. In 
 Model status
 Current and recently retired models are listed in the following table with their status:
 API model name | Current state | Deprecated | Tentative retirement date
-| Active | N/A | Not sooner than November 9, 2027
-| Active | N/A | Not sooner than November 9, 2027
-| Active | N/A | Not sooner than September 1, 2027
-| Active | N/A | Not sooner than September 1, 2027
-| Active | N/A | Not sooner than June 9, 2027
-| Active | N/A | Not sooner than June 9, 2027
-| Deprecated | June 9, 2026 | To be announced
-| Active | N/A | Not sooner than September 22, 2027
-| Active | N/A | Not sooner than July 24, 2027
-| Active | N/A | Not sooner than May 28, 2027
-| Active | N/A | Not sooner than April 16, 2027
-| Active | N/A | Not sooner than February 5, 2027
-| Active | N/A | Not sooner than November 24, 2026
-| Retired | June 5, 2026 | August 5, 2026
-| Retired | April 14, 2026 | June 15, 2026
-| Active | N/A | Not sooner than September 28, 2027
-| Active | N/A | Not sooner than June 30, 2027
-| Active | N/A | Not sooner than February 17, 2027
-| Deprecated | September 30, 2026 | November 30, 2026
-| Retired | April 14, 2026 | June 15, 2026
-| Retired | October 28, 2025 | February 19, 2026
-| Active | N/A | Not sooner than October 7, 2027
-| Active | N/A | Not sooner than October 15, 2026
-| Retired | December 19, 2025 | February 19, 2026
-| Retired | February 19, 2026 | April 20, 2026
+claude-fable-5-2 | Active | N/A | Not sooner than November 9, 2027
+claude-mythos-5-2 | Active | N/A | Not sooner than November 9, 2027
+claude-fable-5-1 | Active | N/A | Not sooner than September 1, 2027
+claude-mythos-5-1 | Active | N/A | Not sooner than September 1, 2027
+claude-fable-5 | Active | N/A | Not sooner than June 9, 2027
+claude-mythos-5 | Active | N/A | Not sooner than June 9, 2027
+claude-mythos-preview | Deprecated | June 9, 2026 | To be announced
+claude-opus-5-5 | Active | N/A | Not sooner than September 22, 2027
+claude-opus-5 | Active | N/A | Not sooner than July 24, 2027
+claude-opus-4-8 | Active | N/A | Not sooner than May 28, 2027
+claude-opus-4-7 | Active | N/A | Not sooner than April 16, 2027
+claude-opus-4-6 | Active | N/A | Not sooner than February 5, 2027
+claude-opus-4-5-20251101 | Active | N/A | Not sooner than November 24, 2026
+claude-opus-4-1-20250805 | Retired | June 5, 2026 | August 5, 2026
+claude-opus-4-20250514 | Retired | April 14, 2026 | June 15, 2026
+claude-sonnet-5-5 | Active | N/A | Not sooner than September 28, 2027
+claude-sonnet-5 | Active | N/A | Not sooner than June 30, 2027
+claude-sonnet-4-6 | Active | N/A | Not sooner than February 17, 2027
+claude-sonnet-4-5-20250929 | Deprecated | September 30, 2026 | November 30, 2026
+claude-sonnet-4-20250514 | Retired | April 14, 2026 | June 15, 2026
+claude-3-7-sonnet-20250219 | Retired | October 28, 2025 | February 19, 2026
+claude-haiku-5-5 | Active | N/A | Not sooner than October 7, 2027
+claude-haiku-4-5-20251001 | Active | N/A | Not sooner than October 15, 2026
+claude-3-5-haiku-20241022 | Retired | December 19, 2025 | February 19, 2026
+claude-3-haiku-20240307 | Retired | February 19, 2026 | April 20, 2026
 Deprecation history
 All deprecations are listed in the following sections, with the most recent announcements first.
 2026-09-30: Claude Sonnet 4.5 model
 On September 30, 2026, Anthropic notified developers using Claude Sonnet 4.5 of its upcoming retirement on the Claude API.
 Retirement date | Deprecated model | Recommended replacement
 November 30, 2026 | claude-sonnet-4-5-20250929 | claude-sonnet-5-5
+This retirement includes claude-sonnet-4-5 , the same model’s ID without a date.
+If you use Claude Code, see Overview for which dates apply and Migrating to replacements for what to change. Once this model is retired, Claude Code on the Claude API shows an error that begins There's an issue with the selected model . If you set a fallback model chain , Claude Code switches to the next model in the chain instead. It tries Claude Sonnet 4.5 again on your next message.
 2026-06-05: Claude Opus 4.1 model
 On June 5, 2026, Anthropic notified developers using Claude Opus 4.1 of its upcoming retirement on the Claude API.
 Retirement date | Deprecated model | Recommended replacement
