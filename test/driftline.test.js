@@ -582,6 +582,7 @@ test("license code: must be activated, and for the account the workflow runs in"
     return reply(200, { ...POLAR_OK, activation: label ? { id: "inst-1", label } : null });
   };
   assert.match((await checkLicense("plain-key", { fetchImpl: valid("github:acme"), account: "acme" })).reason, /not activated yet/);
+  assert.match((await checkLicense("DRIFTLINE-123e4567-e89b-12d3-a456-426614174000", { fetchImpl: valid("github:acme"), account: "acme" })).reason, /plain license key/);
   assert.equal((await checkLicense("k:inst-1", { fetchImpl: valid("github:acme"), account: "Acme" })).ok, true);
   const other = await checkLicense("k:inst-1", { fetchImpl: valid("github:acme"), account: "globex" });
   assert.equal(other.ok, false);

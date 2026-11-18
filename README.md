@@ -26,7 +26,7 @@ Outside CI: `npx -y @aidriftline/driftline .` scans any repository once, an [MCP
    npx @aidriftline/driftline activate <your-license-key>
    ```
 
-   It prints a license code. Save that code as the secret `DRIFTLINE_LICENSE_KEY`. A key works on up to 3 GitHub accounts or organizations; `npx @aidriftline/driftline deactivate <code>` frees one.
+   It prints a license code (your key, a colon, then an id). Save that code as the secret `DRIFTLINE_LICENSE_KEY`: the code it prints, not the plain key. A key works on up to 3 GitHub accounts or organizations; `npx @aidriftline/driftline deactivate <code>` frees one.
 
 ## Inputs
 

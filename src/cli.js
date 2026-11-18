@@ -74,7 +74,7 @@ if (cmd === "-h" || cmd === "--help" || cmd === "help") {
   if (!r.ok) { console.error(r.reason); process.exitCode = 1; }
   else {
     console.log(`Activated for GitHub account "${account}"${r.limit ? ` (one key works on up to ${r.limit} GitHub accounts or organizations)` : ""}.\n`);
-    console.log("Save this as a repository or organization secret named DRIFTLINE_LICENSE_KEY:\n");
+    console.log("Save this code (not the plain key) as a repository or organization secret named DRIFTLINE_LICENSE_KEY:\n");
     console.log(`  ${r.code}\n`);
   }
 } else if (cmd === "deactivate") {

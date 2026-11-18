@@ -12,6 +12,7 @@ export const LICENSE = { organizationId: "dc2cfa68-903e-4bea-8982-36c017a1ab70",
 
 const API = "https://api.polar.sh/v1/customer-portal/license-keys";
 const ACTIVATE_HELP = "Run `npx @aidriftline/driftline activate <your-license-key>` once for this GitHub account and save the code it prints as DRIFTLINE_LICENSE_KEY.";
+const PLAIN_KEY = "DRIFTLINE_LICENSE_KEY holds the plain license key. Save the full code that `activate` printed instead (your key, a colon, then an id). If you have not activated this GitHub account yet, run `npx @aidriftline/driftline activate <your-license-key>` once.";
 const NOT_ACTIVE = "This license key is not active: the subscription ended or was refunded, or it is not a Driftline Pro key. The scan still runs; drift tests are off. Renew at https://aidriftline.com.";
 
 export const instanceName = (account) => `github:${String(account).trim().toLowerCase()}`;
@@ -47,7 +48,7 @@ const withBenefit = () => (LICENSE.benefitId ? { benefit_id: LICENSE.benefitId }
 export async function checkLicense(code, { fetchImpl = fetch, account = "" } = {}) {
   if (!code) return { ok: false, reason: "No license key. The scan ran; drift tests need Driftline Pro." };
   const { key, instanceId } = parseCode(code);
-  if (!instanceId) return { ok: false, reason: `This license key is not activated yet. ${ACTIVATE_HELP}` };
+  if (!instanceId) return { ok: false, reason: KEY.test(key) ? PLAIN_KEY : `This license key is not activated yet. ${ACTIVATE_HELP}` };
   if (!String(account).trim()) return { ok: false, reason: "Could not tell which GitHub account this runs in, so drift tests were skipped. Run inside a repository whose origin is on GitHub." };
 
   // Do not punish paying users for a network blip: allow the run and say so. Only for codes shaped
