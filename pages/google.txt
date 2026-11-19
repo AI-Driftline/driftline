@@ -604,6 +604,18 @@ automatically routing API requests to
 * October 22, 2026
 * `gemini-omni-1.2-flash`
 {% /table %}
+## Genie models {% id="genie-models" %}
+{% table %}
+* Model
+* Release date
+* Shutdown date
+* Recommended replacement
+---
+* [`models/genie-4`](/docs/models/genie-4)
+* November 19, 2026
+* No shutdown date announced
+*
+{% /table %}
 ## Lyria models {% id="lyria-models" %}
 {% table %}
 * Model
