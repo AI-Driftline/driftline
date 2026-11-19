@@ -212,6 +212,11 @@ Self-serve fine-tuning job creation
 Restricted access
 See the fine-tuning timeline .
 May 7, 2026
+Jan 11, 2027
+GPT-5.2, GPT-5.4, and GPT-5.4 mini with EU data residency and service_tier: fast or priority
+Deprecated
+The same models with EU data residency and Standard processing ( service_tier: default ), or the GPT-6.2 model family .
+Nov 18, 2026
 Feb 26, 2027
 /v1/audio/translations
 Deprecated

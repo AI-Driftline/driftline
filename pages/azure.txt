@@ -19,7 +19,7 @@ Replacement
 codex-mini
 2025-05-16
 Deprecated
-2026-11-15
+2026-11-17
 —
 gpt-4.1
 2025-04-14
@@ -59,7 +59,7 @@ Deprecated
 gpt-4o-mini-transcribe
 2025-03-20
 GA
-2026-10-15
+2027-01-20
 —
 gpt-4o-mini-transcribe
 2025-12-15
@@ -69,7 +69,7 @@ GA
 gpt-4o-mini-tts
 2025-03-20
 Preview
-2026-10-15
+2027-01-20
 —
 gpt-4o-mini-tts
 2025-12-15
@@ -79,7 +79,7 @@ GA
 gpt-4o-transcribe
 2025-03-20
 GA
-2026-10-15
+2027-02-26
 —
 gpt-4o-transcribe-diarize
 2025-10-15
@@ -91,16 +91,6 @@ gpt-5
 GA
 2027-02-09
 —
-gpt-5-chat
-2025-08-07
-Retired
-2026-06-29
-gpt-chat-latest
-gpt-5-chat
-2025-10-03
-Retired
-2026-05-13
-gpt-chat-latest
 gpt-5-codex
 2025-09-15
 GA
@@ -126,11 +116,6 @@ gpt-5.1
 GA
 2027-07-13
 —
-gpt-5.1-chat
-2025-11-13
-Retired
-2026-06-29
-gpt-chat-latest
 gpt-5.1-codex
 2025-11-13
 GA
@@ -151,26 +136,11 @@ gpt-5.2
 GA
 2027-06-08
 —
-gpt-5.2-chat
-2025-12-11
-Retired
-2026-05-13
-gpt-chat-latest
-gpt-5.2-chat
-2026-02-10
-Retired
-2026-06-29
-gpt-chat-latest
 gpt-5.2-codex
 2026-01-14
 GA
 2027-07-13
 —
-gpt-5.3-chat
-2026-03-03
-Retired
-2026-06-29
-gpt-chat-latest
 gpt-5.3-codex
 2026-02-24
 GA
@@ -216,6 +186,31 @@ gpt-5.6-terra
 GA
 2028-01-11
 —
+gpt-6-astra
+2026-09-03
+GA
+2028-01-11
+—
+gpt-6-luna
+2026-09-22
+GA
+2028-03-11
+—
+gpt-6-sol
+2026-09-22
+GA
+2028-03-11
+—
+gpt-6.1-sol
+2026-09-29
+GA
+2028-03-11
+—
+gpt-6.1-terra
+2026-10-26
+GA
+2027-10-26
+—
 gpt-audio
 2025-08-28
 GA
@@ -259,12 +254,12 @@ Preview
 gpt-chat-latest
 2026-10-07
 Preview
-2027-05-18
+2027-02-02
 —
 gpt-image-1
 2025-04-15
 Preview
-2026-10-23
+2026-10-28
 —
 gpt-image-1-mini
 2025-10-06
@@ -274,7 +269,7 @@ GA
 gpt-image-1.5
 2025-12-16
 GA
-2026-12-16
+2027-06-16
 —
 gpt-image-2
 2026-04-21
@@ -290,6 +285,16 @@ gpt-image-2.5-sunburst
 2026-09-09
 GA
 2027-09-09
+—
+gpt-live-1
+2026-09-10
+GA
+2027-09-10
+—
+gpt-live-transcribe
+2026-07-28
+GA
+2028-02-01
 —
 gpt-realtime
 2025-08-28
@@ -309,12 +314,12 @@ gpt-realtime-2.1
 gpt-realtime-2.1
 2026-07-07
 GA
-2027-06-25
+2027-07-31
 —
 gpt-realtime-2.1-mini
 2026-07-07
 GA
-2027-06-25
+2027-07-31
 —
 gpt-realtime-mini
 2025-10-06
@@ -326,61 +331,56 @@ gpt-realtime-mini
 GA
 2027-06-15
 —
-gpt-realtime-mini
-2025-10-06
+gpt-realtime-translate
+2026-05-06
 GA
-2026-09-21
+2027-11-09
 —
-gpt-realtime-mini
-2025-12-15
+gpt-realtime-whisper
+2026-05-06
 GA
-2026-12-15
+2027-11-09
+—
+gpt-transcribe
+2026-07-28
+GA
+2028-02-01
 —
 o1
 2024-12-17
 Deprecated
 2026-11-19
-gpt-5.6-sol
+gpt-5.6-sol 4
 o1-pro
 2025-03-19
 Deprecated
 2026-11-19
-gpt-5.6-sol
+gpt-5.6-sol 4
 o3
 2025-04-16
 Deprecated
 2026-11-19
-gpt-5.6-sol
+gpt-5.6-sol 4
 o3-deep-research
 2025-06-26
 Deprecated
 2026-11-19
-gpt-5.6-sol
+gpt-5.6-sol 4
 o3-mini
 2025-01-31
 Deprecated
 2026-11-19
-gpt-5.6-terra
+gpt-5.6-terra 4
 o3-pro
 2025-06-10
 Deprecated
 2026-11-19
-gpt-5.6-sol
+gpt-5.6-sol 4
 o4-mini
 2025-04-16
 Deprecated
 2026-11-19
-gpt-5.6-terra
-sora-2
-2025-10-06
-Preview
-2026-07-15
-sora-2 (2025-12-08)
-sora-2
-2025-12-08
-Preview
-2026-10-15
-—
+gpt-5.6-terra 4
 text-embedding-3-large
 1
 GA
@@ -419,6 +419,12 @@ GA
 2 All active customer-facing base-model inference offers for gpt-4o version 2024-05-13 in Azure public cloud retire on January 14, 2027, in all applicable regions. These offers include Global Standard, Data Zone Standard, Regional Provisioned, Global Provisioned, Data Zone Provisioned, and Global Batch. Regional Standard deployments retired on March 31, 2026; that date is unchanged.
 Global Standard and Data Zone Standard deployments of gpt-4o version 2024-05-13 automatically upgrade to gpt-5.1 version 2025-11-13 at retirement. Provisioned deployments aren't automatically upgraded; create replacement deployments and move your traffic before retirement.
 3 April 14, 2027 applies to all active customer-facing base-model inference offers in all applicable regions in Azure public cloud for gpt-4o versions 2024-08-06 and 2024-11-20, gpt-4o-mini version 2024-07-18, and gpt-4.1-mini version 2025-04-14. Already-retired Regional Standard deployments remain retired. For fine-tuning training and deployment retirement dates, see the separate schedules below.
+4 The listed replacement applies where gpt-5.6-sol or gpt-5.6-terra is available for your deployment type and region. These models aren't offered for Batch or Regional Standard deployments, and gpt-5.6-sol has limited Global Provisioned coverage. If the listed replacement isn't available, consider these starting points. They aren't tested equivalents, so evaluate them with your workload before you migrate:
+Global Batch and US Data Zone Batch : gpt-5.4 (2026-03-05) or gpt-5.4-mini (2026-03-17).
+EU Data Zone Batch : gpt-4.1 or gpt-4.1-mini (2025-04-14).
+Regional Standard : gpt-5.1 (2025-11-13), where available.
+Global Provisioned and Regional Provisioned : Check availability for your region.
+For current availability, see Standard , Provisioned , and Batch region availability.
 Fine-tuned models
 Fine-tuned models retire in two phases: training and deployment .
 Unless explicitly stated, training retires no earlier than the base model retirement date.
@@ -437,7 +443,7 @@ No earlier than 2027-04-14 1
 gpt-4.1-nano
 2025-04-14
 No earlier than 2027-04-14 1
-2027-10-14
+2028-04-13
 gpt-4o
 2024-08-06
 No earlier than 2027-04-01 1
@@ -483,6 +489,16 @@ Version
 Lifecycle
 Retirement date
 Replacement
+Cohere-Embed-V5-Fast
+1
+Preview
+2027-01-23
+—
+Cohere-Embed-V5-Pro
+1
+Preview
+2027-01-23
+—
 Cohere-parse-v5
 1
 Preview
@@ -491,13 +507,23 @@ Preview
 Cohere-rerank-v4.0-fast
 1
 GA
-2027-09-13
+2027-09-14
 Cohere-rerank-v5-fast
 Cohere-rerank-v4.0-pro
 1
 GA
-2027-09-13
+2027-09-14
 Cohere-rerank-v5-pro
+Cohere-rerank-v5-fast
+1
+Preview
+2027-02-12
+—
+Cohere-rerank-v5-pro
+1
+Preview
+2027-02-12
+—
 cohere-command-a
 1
 GA
@@ -520,30 +546,10 @@ Version
 Lifecycle
 Retirement date
 Replacement
-DeepSeek-R1
-1
-Retired
-2026-08-13
-DeepSeek-V4-Pro
-DeepSeek-R1-0528
-1
-Retired
-2026-07-13
-DeepSeek-V4-Pro
-DeepSeek-V3-0324
-1
-Retired
-2026-07-13
-DeepSeek-V4-Flash
-DeepSeek-V3.1
-1
-Retired
-2026-07-13
-DeepSeek-V4-Flash
 DeepSeek-V3.2
 1
 GA
-2027-11-01
+2027-11-02
 DeepSeek-V4.1-Flash
 DeepSeek-V3.2-Speciale
 1
@@ -553,7 +559,7 @@ DeepSeek-V4-Pro
 DeepSeek-V4-Flash
 2026-04-23
 GA
-2028-02-20
+2028-02-22
 DeepSeek-V4-Flash-0731
 DeepSeek-V4-Flash-0731
 2026-07-31
@@ -563,7 +569,22 @@ Preview
 DeepSeek-V4-Pro
 2026-04-23
 GA
-2028-02-20
+2028-02-22
+—
+DeepSeek-V4-Pro-0813
+2026-08-13
+Preview
+2026-12-15
+—
+DeepSeek-V4.1-Flash
+2026-09-10
+Preview
+2026-12-15
+—
+DeepSeek-V4.1-Flash-1017
+2026-10-17
+Preview
+2027-03-06
 —
 Meta
 Model
@@ -605,33 +626,53 @@ GA
 MAI-Image-2.5-Pro
 2026-06-19
 Preview
-2026-10-01
+2026-11-24
 —
 MAI-Image-2.5-Flash
 2026-06-02
 Preview
-2026-10-01
+2026-11-24
 —
 MAI-Image-2.5
 2026-06-02
 Preview
-2026-10-01
+2026-11-24
+—
+MAI-Image-2.6
+2026-07-31
+GA
+2027-05-01
+—
+MAI-Image-2.6-Flash
+2026-07-31
+GA
+2027-05-01
 —
 MAI-Image-2e
 2026-04-09
 Retired
-2026-08-15
+2026-08-28
 MAI-Image-2.5-Flash
-MAI-Image-2
-2026-02-20
-Retired
-2026-08-15
-MAI-Image-2.5
+MAI-Thinking-1
+2026-06-01
+Preview
+2027-03-02
+—
 MAI-Transcribe-1
 2026-01-23
 Preview
 2026-09-15
 MAI-Transcribe-1.5
+MAI-Transcribe-2-Streaming
+2026-08-06
+Preview
+2026-12-04
+—
+Microsoft-Decision-1
+1
+Preview
+2027-02-04
+—
 Mistral AI
 Model
 Version
@@ -648,16 +689,16 @@ mistral-large-4-latest
 Preview
 —
 —
-mistral-document-ai-2505
-1
-Retired
-2026-07-20
-mistral-document-ai-2512, mistral-ocr-4-0
 mistral-document-ai-2512
 1
 GA
 2027-02-15
 mistral-ocr-4-0
+mistral-ocr-4-0
+1
+GA
+2027-10-01
+—
 mistral-document-ai-2512 enters the Legacy stage on November 6, 2026, and the Deprecated stage on December 15, 2026.
 MoonshotAI
 Model
@@ -697,16 +738,6 @@ Version
 Lifecycle
 Retirement date
 Replacement
-grok-3
-1
-Retired
-2026-05-01
-grok-4
-grok-3-mini
-1
-Retired
-2026-05-01
-grok-4-1-fast-reasoning
 grok-4
 1
 GA
@@ -732,16 +763,21 @@ grok-4-20-reasoning
 Preview
 2027-04-06
 —
-grok-4-fast-non-reasoning
+grok-4.3
 1
-Retired
-2026-05-01
-grok-4-1-fast-non-reasoning
-grok-4-fast-reasoning
+Preview
+2027-05-12
+—
+grok-4.6
 1
-Retired
-2026-05-01
-grok-4-1-fast-reasoning
+Preview
+2027-08-24
+—
+grok-4.7
+1
+GA
+2027-10-05
+—
 grok-code-fast-1
 1
 GA
@@ -818,11 +854,6 @@ claude-opus-4-5
 GA
 2027-02-22
 claude-opus-5-5
-claude-opus-4-1
-—
-Retired
-2026-08-05
-claude-opus-5
 claude-haiku-4-5
 1
 GA
@@ -836,17 +867,17 @@ claude-haiku-5-5
 claude-fable-5-1
 1
 Preview
-2027-12-05
+2027-12-07
 —
 claude-fable-5
 1
 Preview
-2027-12-05
+2027-12-07
 —
 claude-mythos-5-1
 1
 Preview
-2027-09-01
+2027-12-07
 —
 claude-mythos-preview (gated research preview)
 —
@@ -859,21 +890,6 @@ Version
 Lifecycle
 Retirement date
 Replacement
-Cohere-command-r-08-2024
-1
-Retired
-2026-05-12
-—
-Cohere-command-r-plus-08-2024
-1
-Retired
-2026-05-12
-—
-Cohere-rerank-v3.5
-1
-Retired
-2026-05-14
-Cohere-rerank-v4.0-pro, Cohere-rerank-v4.0-fast
 Cohere-embed-v3-english
 1
 GA
@@ -895,16 +911,6 @@ Version
 Lifecycle
 Retirement date
 Replacement
-Llama-3.2-11B-Vision-Instruct
-—
-Retired
-2026-06-13
-—
-Llama-3.2-90B-Vision-Instruct
-—
-Retired
-2026-06-13
-—
 Llama-3.3-70B-Instruct
 —
 GA
@@ -919,21 +925,6 @@ Llama-4-Scout-17B-16E-Instruct
 —
 GA
 2027-01-31
-—
-Meta-Llama-3.1-405B-Instruct
-—
-Retired
-2026-06-13
-—
-Meta-Llama-3.1-8B
-—
-Retired
-2026-06-13
-—
-Meta-Llama-3.1-8B-Instruct
-—
-Retired
-2026-06-13
 —
 Microsoft
 Model
@@ -987,6 +978,11 @@ mistral-medium-2505
 GA
 2026-12-09
 mistral-medium-3-5
+mistral-medium-3-5
+1
+Preview
+2027-10-01
+—
 mistral-small-2503
 1
 Deprecated
@@ -1015,27 +1011,6 @@ tsuzumi-7b
 Legacy
 2026-08-31
 tsuzumi2
-StabilityAI
-Model
-Version
-Lifecycle
-Retirement date
-Replacement
-Stable-Diffusion-3.5-Large
-1
-Retired
-2026-07-31
-—
-Stable-Image-Core
-1
-Retired
-2026-07-31
-—
-Stable-Image-Ultra
-1
-Retired
-2026-07-31
-—
 Related content
 Retired Foundry Models
 Microsoft Foundry Models lifecycle and support policy
@@ -1046,4 +1021,4 @@ Need help with this topic?
 Want to try using Ask Learn to clarify or guide you through this topic?
 Additional resources
 Last updated on
-2026-09-23
+2026-11-18
