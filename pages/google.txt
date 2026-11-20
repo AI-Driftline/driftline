@@ -611,7 +611,7 @@ automatically routing API requests to
 * Shutdown date
 * Recommended replacement
 ---
-* [`models/genie-4`](/docs/models/genie-4)
+* [`genie-4`](/docs/models/genie-4)
 * November 19, 2026
 * No shutdown date announced
 *
