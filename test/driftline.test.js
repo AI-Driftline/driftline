@@ -1043,6 +1043,22 @@ test("Azure page parser reads the per-maker tables and skips fine-tuned ones", a
     ["claude-mythos-preview", "anthropic", "2027-04-02", null, 1], ["gpt-4o", "openai", "2027-01-14", "gpt-5.1", 2]]);
 });
 
+test("Azure: models taken off the page after their date stay, marked retired; future ones still drop", async () => {
+  const { carryRetired, diffAzure } = await import("../tools/azure.mjs");
+  const old = [
+    { id: "gpt-5-chat", versions: [{ version: "2025-08-07", lifecycle: "Retired", retires: "2026-06-29" }], retires: "2026-06-29" },
+    { id: "sora-2", versions: [{ version: "2025-12-08", lifecycle: "Preview", retires: "2026-10-15" }], retires: "2026-10-15" },
+    { id: "renamed-x", versions: [{ version: "1", lifecycle: "GA", retires: "2027-05-01" }], retires: "2027-05-01" },
+    { id: "o3", versions: [{ version: "1", lifecycle: "GA", retires: "2026-11-19" }], retires: "2026-11-19" }];
+  const page = [old[3]];
+  const now = carryRetired(old, page, "2026-11-21");
+  assert.deepEqual(now.map((m) => [m.id, m.off_page || null, m.versions[0].lifecycle]),
+    [["gpt-5-chat", "2026-11-21", "Retired"], ["o3", null, "GA"], ["sora-2", "2026-11-21", "Retired"]]);
+  assert.deepEqual(diffAzure(old, now).sort(), ["gone from page, kept as retired: gpt-5-chat", "gone from page, kept as retired: sora-2", "gone from page: renamed-x"]);
+  // Next run: already kept, nothing to report, off_page date unchanged.
+  assert.deepEqual(diffAzure(now, carryRetired(now, page, "2026-12-01")), []);
+});
+
 // More providers' own pages (Groq, Mistral, xAI, Cohere, DeepSeek). Ambiguous IDs need the provider's signs in the file.
 const DIRECT = { models: Array(0), checked: "2026-11-14", sources: {}, platforms: {
   groq: { name: "Groq", direct: true, source: "https://x/groq", models: [

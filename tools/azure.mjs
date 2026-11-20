@@ -5,9 +5,12 @@
 //   node tools/azure.mjs                 print what the page says now (JSON)
 //   node tools/azure.mjs --write [path]  update platforms.azure in registry/models.json; prints the changes
 //   node tools/azure.mjs --check [path]  exit 1 if the registry differs from the page
+//   node tools/azure.mjs --write --accept  write even past the "too much at once" guard (after a human checked it)
 //
 // The page has one table per model maker: Model | Version | Lifecycle | Retirement date | Replacement. Only fixed
 // dates are kept ("No earlier than …" is not a date). Fine-tuned models (training/deployment dates) are left out.
+// Models Microsoft takes off the page after their date stay in the registry, marked Retired with off_page (the date
+// they were last seen gone): code still calling them on Azure is broken, and that is the warning most worth giving.
 // Safety: refuses to write when the page yields too few models or too much changes at once (layout changed?).
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -61,11 +64,20 @@ export async function fetchAzure(fetchImpl = fetch) {
   return out;
 }
 
+// Old entries no longer on the page whose every version's date has passed: kept, marked Retired.
+export function carryRetired(old = [], now = [], today = new Date().toISOString().slice(0, 10)) {
+  const n = new Set(now.map((m) => m.id));
+  const kept = old.filter((m) => !n.has(m.id) && m.versions?.length && m.versions.every((v) => v.retires <= today))
+    .map((m) => ({ ...m, versions: m.versions.map((v) => ({ ...v, lifecycle: "Retired" })), off_page: m.off_page || today }));
+  return [...now, ...kept].sort((a, b) => a.id.localeCompare(b.id));
+}
+
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export function diffAzure(old = [], now = []) {
   const o = new Map(old.map((m) => [m.id, m])), n = new Map(now.map((m) => [m.id, m]));
   const changes = [];
   for (const m of now) if (!o.has(m.id)) changes.push(`new: ${m.id} (${m.versions.map((v) => `${v.version || "-"} ${v.retires}`).join(", ")})`);
+    else if (m.off_page && !o.get(m.id).off_page) changes.push(`gone from page, kept as retired: ${m.id}`);
     else if (!same(o.get(m.id), m)) changes.push(`changed: ${m.id} (${o.get(m.id).versions.map((v) => `${v.version || "-"} ${v.retires}`).join(", ")} → ${m.versions.map((v) => `${v.version || "-"} ${v.retires}`).join(", ")})`);
   for (const m of old) if (!n.has(m.id)) changes.push(`gone from page: ${m.id}`);
   return changes;
@@ -73,17 +85,19 @@ export function diffAzure(old = [], now = []) {
 
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (isMain) {
-  const [mode, pathArg] = process.argv.slice(2);
+  const args = process.argv.slice(2), accept = args.includes("--accept");
+  const [mode, pathArg] = args.filter((a) => a !== "--accept");
   const path = pathArg || join(dirname(fileURLToPath(import.meta.url)), "..", "registry", "models.json");
-  const now = await fetchAzure();
-  if (!mode) { console.log(JSON.stringify(now, null, 2)); process.exit(0); }
+  const page = await fetchAzure();
+  if (!mode) { console.log(JSON.stringify(page, null, 2)); process.exit(0); }
   const reg = JSON.parse(readFileSync(path, "utf8"));
   const old = reg.platforms?.azure?.models || [];
+  const now = carryRetired(old, page);
   const changes = diffAzure(old, now);
   if (mode === "--check") { console.log(changes.length ? changes.join("\n") : "Azure: matches the page"); process.exit(changes.length ? 1 : 0); }
   if (mode === "--write") {
-    if (now.length < 40) { console.error(`Azure: page parsed to only ${now.length} models; not writing (page layout changed?)`); process.exit(2); }
-    if (old.length && changes.length > 15) { console.error(`Azure: ${changes.length} changes at once; not writing, needs a look:\n${changes.join("\n")}`); process.exit(2); }
+    if (page.length < 40) { console.error(`Azure: page parsed to only ${page.length} models; not writing (page layout changed?)`); process.exit(2); }
+    if (old.length && changes.length > 15 && !accept) { console.error(`Azure: ${changes.length} changes at once; not writing, needs a look:\n${changes.join("\n")}`); process.exit(2); }
     if (!changes.length) { console.log("Azure: no changes"); process.exit(0); }
     const today = new Date().toISOString().slice(0, 10);
     reg.platforms = { ...(reg.platforms || {}), azure: { name: "Azure", source: AZURE_PAGE, checked: today, models: now } };
