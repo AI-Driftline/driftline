@@ -154,11 +154,11 @@ No retirement date announced
 gemini-3.7-flash
 August 13, 2026
 January 28, 2027
-gemini-3.8-flash
+gemini-4-hydrogen
 gemini-3.6-flash
 July 21, 2026
-November 19, 2026
-gemini-3.8-flash
+January 28, 2027
+gemini-4-hydrogen
 gemini-nano-banana-2.1
 October 6, 2026
 No retirement date announced
