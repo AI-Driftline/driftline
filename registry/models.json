@@ -3452,7 +3452,7 @@
         "partner": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deprecations/partner-models",
         "open": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deprecations/open-models"
       },
-      "checked": "2026-11-15",
+      "checked": "2026-11-21",
       "models": [
         {
           "id": "chat-bison",
@@ -3689,9 +3689,9 @@
           "id": "gemini-3.6-flash",
           "maker": "google",
           "kind": "text",
-          "retires": "2026-11-19",
+          "retires": "2027-01-28",
           "released": "2026-07-21",
-          "replacement": "gemini-3.8-flash",
+          "replacement": "gemini-4-hydrogen",
           "page": "gemini"
         },
         {
@@ -3700,7 +3700,7 @@
           "kind": "text",
           "retires": "2027-01-28",
           "released": "2026-08-13",
-          "replacement": "gemini-3.8-flash",
+          "replacement": "gemini-4-hydrogen",
           "page": "gemini"
         },
         {
