@@ -90,9 +90,13 @@ export function buildRegistry(data) {
         // Azure uses OpenAI's (and other makers') model names, with its own date per model version. Entries live under
         // "azure:<id>" (earliest version: the one to plan for when the code doesn't say) and "azure:<id>@<version>".
         const current = (v) => /^(ga|preview|generally available)$/i.test(v?.lifecycle || "");
+        // A newer version of the same model (sora-2 2025-10-06 → sora-2 2025-12-08) is not a rename: the name in the
+        // code stays, only the Azure deployment changes. So it is left out as a replacement.
+        const other = (r) => (r && r !== pm.id ? { replacement: r } : {});
         const mk = (v, extra = {}) => ({ ...e, retires: v.retires, qualifier: current(v) ? "scheduled" : "exact", lifecycle: v.lifecycle,
-          ...(v.replacement ? { replacement: v.replacement } : {}), ...extra });
-        const base = mk(pm.versions?.[0] || pm, { replacement: pm.replacement });
+          ...other(v.replacement), ...extra });
+        if (e.replacement === pm.id) delete e.replacement;
+        const base = mk(pm.versions?.[0] || pm, { replacement: e.replacement });
         if (!base.replacement) delete base.replacement;
         lookup.set(`azure:${pm.id}`, base);
         for (const v of pm.versions || []) if (v.version) lookup.set(`azure:${pm.id}@${v.version}`, mk(v, { version: v.version }));

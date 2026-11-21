@@ -1043,6 +1043,20 @@ test("Azure page parser reads the per-maker tables and skips fine-tuned ones", a
     ["claude-mythos-preview", "anthropic", "2027-04-02", null, 1], ["gpt-4o", "openai", "2027-01-14", "gpt-5.1", 2]]);
 });
 
+test("Azure: a newer version of the same model is not a rename (sora-2 → sora-2)", async () => {
+  const { parseAzure } = await import("../tools/azure.mjs");
+  const { buildRegistry } = await import("../src/registry.js");
+  const page = parseAzure(`<h3>Azure OpenAI</h3><table><tr><th>Model</th><th>Version</th><th>Lifecycle</th><th>Retirement date</th><th>Replacement</th></tr>
+    <tr><td>sora-2</td><td>2025-10-06</td><td>Retired</td><td>2026-07-15</td><td>sora-2 (2025-12-08)</td></tr>
+    <tr><td>sora-2</td><td>2025-12-08</td><td>Retired</td><td>2026-10-15</td><td></td></tr></table>`);
+  assert.equal(page[0].replacement, undefined); // the version keeps its note, the model gets no replacement
+  assert.equal(page[0].versions[0].replacement, "sora-2");
+  // Older registry data with the self-replacement stored is cleaned when read.
+  const reg = buildRegistry({ models: [], checked: "2026-11-21", sources: {}, platforms: { azure: { name: "Azure", source: "https://x/azure",
+    models: [{ ...page[0], replacement: "sora-2" }] } } });
+  for (const k of ["azure:sora-2", "azure:sora-2@2025-10-06", "azure:sora-2@2025-12-08"]) assert.equal(reg.byId.get(k).replacement, undefined, k);
+});
+
 test("Azure: models taken off the page after their date stay, marked retired; future ones still drop", async () => {
   const { carryRetired, diffAzure } = await import("../tools/azure.mjs");
   const old = [

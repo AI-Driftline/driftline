@@ -51,7 +51,9 @@ export function parseAzure(html) {
     e.versions.sort((a, b) => a.retires.localeCompare(b.retires) || a.version.localeCompare(b.version));
     // Without a known version in the code, the earliest version's date is the one to plan for.
     e.retires = e.versions[0].retires;
-    if (e.versions[0].replacement) e.replacement = e.versions[0].replacement;
+    // "sora-2 version 2025-10-06 → sora-2 version 2025-12-08" is a new deployment, not a new name in the code:
+    // only a different model counts as the model's replacement.
+    if (e.versions[0].replacement && e.versions[0].replacement !== e.id) e.replacement = e.versions[0].replacement;
     out.push(e);
   }
   return out.sort((a, b) => a.id.localeCompare(b.id));
