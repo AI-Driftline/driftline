@@ -4065,7 +4065,7 @@
     "azure": {
       "name": "Azure",
       "source": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
-      "checked": "2026-11-20",
+      "checked": "2026-11-24",
       "models": [
         {
           "id": "claude-fable-5",
@@ -5954,6 +5954,20 @@
           "retires": "2027-04-16"
         },
         {
+          "id": "kimi-k3.1-pro",
+          "name": "Kimi-K3.1-Pro",
+          "maker": "moonshot",
+          "kind": "text",
+          "versions": [
+            {
+              "version": "2026-11-04",
+              "lifecycle": "GA",
+              "retires": "2027-11-04"
+            }
+          ],
+          "retires": "2027-11-04"
+        },
+        {
           "id": "llama-3.2-11b-vision-instruct",
           "name": "Llama-3.2-11B-Vision-Instruct",
           "maker": "meta",
@@ -5992,10 +6006,10 @@
             {
               "version": "—",
               "lifecycle": "GA",
-              "retires": "2027-01-31"
+              "retires": "2027-02-03"
             }
           ],
-          "retires": "2027-01-31"
+          "retires": "2027-02-03"
         },
         {
           "id": "llama-4-maverick-17b-128e-instruct-fp8",
@@ -6006,10 +6020,10 @@
             {
               "version": "—",
               "lifecycle": "GA",
-              "retires": "2026-11-19"
+              "retires": "2027-02-03"
             }
           ],
-          "retires": "2026-11-19"
+          "retires": "2027-02-03"
         },
         {
           "id": "llama-4-scout-17b-16e-instruct",
@@ -6020,10 +6034,10 @@
             {
               "version": "—",
               "lifecycle": "GA",
-              "retires": "2027-01-31"
+              "retires": "2027-02-03"
             }
           ],
-          "retires": "2027-01-31"
+          "retires": "2027-02-03"
         },
         {
           "id": "mai-image-2",
