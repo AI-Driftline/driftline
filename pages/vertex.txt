@@ -301,4 +301,4 @@ Resource
 Deployment and endpoint locations
 Learn about deployment and endpoint locations for models in Agent Platform.
 Except as otherwise noted, the content of this page is licensed under the Creative Commons Attribution 4.0 License , and code samples are licensed under the Apache 2.0 License . For details, see the Google Developers Site Policies . Java is a registered trademark of Oracle and/or its affiliates.
-Last updated 2026-11-23 UTC.
+Last updated 2026-11-24 UTC.
