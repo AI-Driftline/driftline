@@ -3504,7 +3504,7 @@
         "partner": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deprecations/partner-models",
         "open": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/deprecations/open-models"
       },
-      "checked": "2026-11-22",
+      "checked": "2026-11-24",
       "models": [
         {
           "id": "chat-bison",
@@ -3566,6 +3566,15 @@
           "kind": "text",
           "deprecated": "2025-06-30",
           "retires": "2025-08-01",
+          "page": "partner"
+        },
+        {
+          "id": "claude-opus-4-5",
+          "maker": "anthropic",
+          "name": "Google Cloud",
+          "kind": "text",
+          "deprecated": "2026-11-23",
+          "retires": "2027-01-22",
           "page": "partner"
         },
         {
