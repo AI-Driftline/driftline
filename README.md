@@ -2,6 +2,8 @@
 
 See how your prompts change **before** an AI model is retired.
 
+[![AI-Driftline/driftline MCP server](https://glama.ai/mcp/servers/AI-Driftline/driftline/badges/score.svg)](https://glama.ai/mcp/servers/AI-Driftline/driftline)
+
 ![Driftline flags retired and retiring models on the exact line of a pull request, then lists them in the job summary](docs/demo.gif)
 
 Driftline is a GitHub Action. It finds the model IDs in your code (OpenAI, Anthropic, Google, Mistral, xAI, Cohere, DeepSeek, Groq, and Amazon Bedrock, Vertex AI and Azure), checks them against the providers' published retirement dates, and runs your real prompts on both the current and the replacement model so you can see what changes before you switch.
