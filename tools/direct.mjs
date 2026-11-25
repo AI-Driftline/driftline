@@ -7,7 +7,8 @@
 //
 // Sources and shapes:
 //   Groq     console.groq.com/docs/deprecations   one table per announcement: model | shutdown date (MM/DD/YY) | replacement ID
-//   Mistral  docs.mistral.ai/models.md            "Deprecated and retired models" table; replacement named by product, mapped to its API name
+//   Mistral  docs.mistral.ai/models (HTML)        the page's embedded model data, "Deprecated & retired models" list:
+//                                                 API IDs, status, deprecation and retirement dates, replacement (models.md is gone since Nov 2026)
 //   xAI      docs.x.ai/llms.txt → migration guides  "# … Retirement on <date>" + table: retired slug | redirect target (calls are redirected)
 //   Cohere   docs.cohere.com/docs/deprecations.md  "Effective <date>, the following models will be retired:" + bullet list of IDs
 // Each provider is written on its own; one that fails to read (or reads too few models) is skipped and reported, the rest still update.
@@ -17,7 +18,7 @@ import { dirname, join } from "node:path";
 
 export const SOURCES = {
   groq: { name: "Groq", page: "https://console.groq.com/docs/deprecations", min: 10 },
-  mistral: { name: "Mistral AI", page: "https://docs.mistral.ai/models", md: "https://docs.mistral.ai/models.md", min: 5 },
+  mistral: { name: "Mistral AI", page: "https://docs.mistral.ai/models", min: 5 },
   xai: { name: "xAI", page: "https://docs.x.ai/developers/models", index: "https://docs.x.ai/llms.txt", min: 3 },
   cohere: { name: "Cohere", page: "https://docs.cohere.com/docs/deprecations", md: "https://docs.cohere.com/docs/deprecations.md", min: 5 },
 };
@@ -52,26 +53,58 @@ const groqMaker = (id) => /^(meta-llama\/|llama)/.test(id) ? "meta" : /^qwen/.te
   : /^moonshotai\//.test(id) ? "moonshot" : /^(gemma|google\/)/.test(id) ? "google" : /^deepseek/.test(id) ? "deepseek" : /^mistral|^mixtral/.test(id) ? "mistral"
   : /^playai/.test(id) ? "playai" : /^groq\/|^compound/.test(id) ? "groq" : "other";
 
-// Mistral: markdown tables. Every table maps product name → API name; the deprecated one adds dates and a replacement name.
-export function parseMistral(md) {
-  const names = new Map();
-  for (const m of md.matchAll(/^\|\s*\[([^\]]+)\]\([^)]*\)\s*\|\s*`([^`]+)`/gm)) if (!names.has(m[1].trim())) names.set(m[1].trim(), m[2].trim());
+// Mistral: the models page is a Next.js page; its data travels in self.__next_f.push([1,"…"]) strings. Every section
+// (featured, generalist, …, "Deprecated & retired models") holds a {"models":[…]} list, and a deprecated model can sit in
+// any of them, so all lists are read. Each model has its API IDs (modelIds, first one = the dated name), status,
+// deprecatedAt, retiredAt and replacedBy. When the named replacement is itself retired (status Retired), its own
+// replacement is followed.
+// Models without an API ID (some open-weight ones) are skipped.
+function mistralModels(html) {
+  const all = [...html.matchAll(/self\.__next_f\.push\(\[1,"((?:[^"\\]|\\.)*)"\]\)/g)].map((m) => JSON.parse(`"${m[1]}"`)).join("");
+  const found = [];
+  for (let k = all.indexOf('{"models":['); k >= 0; k = all.indexOf('{"models":[', k + 1)) {
+    const from = k + '{"models":'.length;
+    let depth = 0, inStr = false;
+    for (let j = from; j < all.length; j++) {
+      const c = all[j];
+      if (inStr) { if (c === "\\") j++; else if (c === '"') inStr = false; continue; }
+      if (c === '"') inStr = true; else if (c === "[") depth++;
+      else if (c === "]" && !--depth) { try { found.push(...JSON.parse(all.slice(from, j + 1))); } catch {} break; }
+    }
+  }
+  return found;
+}
+export function parseMistral(html) {
+  const apiId = (m) => m?.modelIds?.find((x) => !/-latest$/.test(x))?.toLowerCase();
+  const day = (s) => String(s || "").match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+  // Some models appear only nested in another one (its replacedBy or relatedModels), with their full record: walk those too.
+  const byId = new Map(), seen = new Set();
+  const walk = (m) => {
+    if (!m || typeof m !== "object" || seen.has(m)) return;
+    seen.add(m);
+    const id = apiId(m);
+    if (id) { // the same model can appear several times, nested copies with fewer fields (replacedBy as a bare
+      // number): keep every field found, a full record over a reference
+      const had = byId.get(id) || {};
+      byId.set(id, Object.fromEntries([...new Set([...Object.keys(had), ...Object.keys(m)])].map((k) => [k, had[k] != null && (typeof had[k] === "object" || typeof m[k] !== "object") ? had[k] : m[k] ?? had[k]])));
+    }
+    walk(m.replacedBy);
+    for (const r of m.relatedModels || []) walk(r);
+  };
+  for (const m of mistralModels(html)) walk(m);
+  const replacementOf = (m) => {
+    let r = m.replacedBy;
+    for (let hops = 0; r && hops < 5; hops++) { const full = byId.get(apiId(r)); if (full?.status !== "Retired" || !full.replacedBy) break; r = full.replacedBy; }
+    return r;
+  };
   const out = [];
-  const sec = md.split(/^## /m).find((s) => /^Deprecated and retired models/i.test(s)) || "";
-  const head = (sec.match(/^\|\s*Model\s*\|.*$/m)?.[0] || "").split("|").slice(1, -1).map((h) => h.trim().toLowerCase());
-  const col = (n) => head.indexOf(n);
-  const [ca, cs, cd, cr, cx] = [col("api name"), col("status"), col("deprecation"), col("retirement"), col("replacement")];
-  for (const line of sec.split("\n")) {
-    if (!/^\|\s*\[/.test(line)) continue;
-    const c = line.split("|").slice(1, -1).map((x) => x.trim());
-    const id = c[ca]?.replace(/`/g, "").trim().toLowerCase();
-    const retires = c[cr]?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0];
-    if (!id || !retires) continue;
-    const replName = c[cx]?.match(/\[([^\]]+)\]/)?.[1]?.trim();
-    const replacement = replName ? names.get(replName) : null;
-    out.push({ id, name: c[0].match(/\[([^\]]+)\]/)?.[1] || id, maker: /^zai-/.test(id) ? "zai" : /^deepseek/.test(id) ? "deepseek" : "mistral", kind: kindOf(id),
-      ...(c[cs] ? { lifecycle: c[cs] } : {}), ...(c[cd]?.match(/^\d{4}-\d{2}-\d{2}$/) ? { deprecated: c[cd] } : {}), retires,
-      ...(replacement ? { replacement } : replName ? { replacement_note: `Mistral recommends ${replName}` } : {}) });
+  for (const [id, m] of byId) {
+    const retires = day(m.retiredAt);
+    if (!retires) continue;
+    const r = replacementOf(m), replacement = apiId(r);
+    out.push({ id, name: m.name || id, maker: /^zai-/.test(id) ? "zai" : /^deepseek/.test(id) ? "deepseek" : "mistral", kind: kindOf(id),
+      ...(m.status ? { lifecycle: m.status } : {}), ...(day(m.deprecatedAt) ? { deprecated: day(m.deprecatedAt) } : {}), retires,
+      ...(replacement ? { replacement } : r?.name ? { replacement_note: `Mistral recommends ${r.name}` } : {}) });
   }
   return byIdOnce(out);
 }
@@ -124,7 +157,7 @@ export function parseCohere(md) {
 const get = async (u, fetchImpl) => { const r = await fetchImpl(u, { headers: { "user-agent": "driftline-registry-check", "accept-language": "en-US,en;q=0.9" } }); if (!r.ok) throw new Error(`${u}: HTTP ${r.status}`); return r.text(); };
 export async function fetchProvider(name, fetchImpl = fetch) {
   if (name === "groq") return parseGroq(await get(SOURCES.groq.page, fetchImpl));
-  if (name === "mistral") return parseMistral(await get(SOURCES.mistral.md, fetchImpl));
+  if (name === "mistral") return parseMistral(await get(SOURCES.mistral.page, fetchImpl));
   if (name === "cohere") return parseCohere(await get(SOURCES.cohere.md, fetchImpl));
   if (name === "xai") {
     const out = [];
@@ -156,6 +189,11 @@ if (isMain) {
     try { now = await fetchProvider(key); } catch (e) { console.error(`${src.name}: couldn't read the page (${e.message})`); failed++; continue; }
     if (!mode) { console.log(JSON.stringify({ [key]: now }, null, 2)); continue; }
     const old = reg.platforms?.[key]?.models || [];
+    // A model taken off the page before its retirement date keeps its entry until that date (a provider tidying its
+    // docs doesn't cancel an announced date); off_page records when the page stopped listing it.
+    const listed = new Set(now.map((m) => m.id));
+    for (const m of old) if (!listed.has(m.id) && m.retires > today) now.push({ ...m, off_page: m.off_page || today });
+    now.sort((a, b) => a.id.localeCompare(b.id));
     const changes = diffModels(old, now);
     if (mode === "--check") { console.log(changes.length ? `${src.name}:\n${changes.join("\n")}` : `${src.name}: matches the page`); if (changes.length) failed++; continue; }
     if (now.length < src.min) { console.error(`${src.name}: page parsed to only ${now.length} models; not writing (page layout changed?)`); failed++; continue; }

@@ -1103,13 +1103,24 @@ test("provider IDs: distinctive ones anywhere, ambiguous ones only with the prov
   assert.equal(validRegistry({ ...DIRECT, models: Array(50).fill({ id: "o3", provider: "openai", retires: "2026-12-11" }) }), true); // older versions still read the list
 });
 
-test("provider page parsers: Groq tables, Mistral markdown, xAI guides, Cohere notes", async () => {
+test("provider page parsers: Groq tables, Mistral page data, xAI guides, Cohere notes", async () => {
   const { parseGroq, parseMistral, parseXaiGuide, parseCohere } = await import("../tools/direct.mjs");
   assert.deepEqual(parseGroq(`<table><tr><th>Deprecated Model</th><th>Shutdown Date</th><th>Recommended Replacement Model ID</th></tr>
     <tr><td>llama-3.3-70b-versatile</td><td>08/16/26</td><td>openai/gpt-oss-120b or qwen/qwen3.6-27b</td></tr></table>`).map((m) => [m.id, m.retires, m.replacement, m.replacement_alt]),
     [["llama-3.3-70b-versatile", "2026-08-16", "openai/gpt-oss-120b", "qwen/qwen3.6-27b"]]);
-  const md = `| Model | API name | Status |\n| --- | --- | --- |\n| [Mistral Large 4](/models/x) | \`mistral-large-4\` | GA |\n\n## Deprecated and retired models\n\n| Model | API name | Status | Context | Summary | Deprecation | Retirement | Replacement |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| [Mistral Large 3](/models/y) | \`mistral-large-2512\` | Deprecated | 256k | x | 2026-10-31 | 2027-04-30 | [Mistral Large 4](/models/x) |\n`;
-  assert.deepEqual(parseMistral(md).map((m) => [m.id, m.retires, m.replacement]), [["mistral-large-2512", "2027-04-30", "mistral-large-4"]]);
+  // Mistral's Next.js page: model lists inside self.__next_f.push strings; Large 3 only nested (relatedModels, replacedBy
+  // once as a bare reference); Codestral 25.01 names a retired replacement, whose own replacement is followed.
+  const large4 = { modelIds: ["mistral-large-4", "mistral-large-latest"], name: "Mistral Large 4", status: "GA", retiredAt: null };
+  const cs2405 = { modelIds: ["codestral-2405"], name: "Codestral 24.05", status: "Retired", deprecatedAt: "2024-12-02T00:00:00.000Z", retiredAt: "2025-06-16T00:00:00.000Z", replacedBy: { modelIds: ["codestral-2508"], name: "Codestral" } };
+  const lists = [{ models: [{ ...large4, relatedModels: [{ modelIds: ["mistral-large-2512"], name: "Mistral Large 3", status: "Deprecated", replacedBy: 100 }] }] },
+    { models: [{ modelIds: ["mistral-large-2512"], name: "Mistral Large 3", status: "Deprecated", deprecatedAt: "2026-10-31T00:00:00.000Z", retiredAt: "2027-04-30T00:00:00.000Z", replacedBy: large4 },
+      { modelIds: ["codestral-2501"], name: "Codestral 25.01", status: "Retired", deprecatedAt: "2025-11-06T00:00:00.000Z", retiredAt: "2025-11-30T00:00:00.000Z", replacedBy: cs2405 },
+      { modelIds: [], name: "Mistral 7B 0.1", status: "Retired", retiredAt: "2025-03-30T00:00:00.000Z" }] }];
+  const push = (x) => `<script>self.__next_f.push([1,${JSON.stringify(x)}])</script>`;
+  const page = push('3:["$","div",null,{"children":"Older models that have been deprecated or retired."}]\n') + push(`4:${JSON.stringify(lists)}\n`);
+  assert.deepEqual(parseMistral(page).map((m) => [m.id, m.lifecycle, m.deprecated, m.retires, m.replacement]),
+    [["codestral-2405", "Retired", "2024-12-02", "2025-06-16", "codestral-2508"], ["codestral-2501", "Retired", "2025-11-06", "2025-11-30", "codestral-2508"],
+     ["mistral-large-2512", "Deprecated", "2026-10-31", "2027-04-30", "mistral-large-4"]]);
   const g = parseXaiGuide("# Grok Model Retirement on May 15, 2026\n\n| Model being retired | Redirect target |\n|---|---|\n| `grok-3` | `grok-4.3` with `none` reasoning effort |\n");
   assert.deepEqual(g.map((m) => [m.id, m.retires, m.routes, m.replacement, m.replacement_note]), [["grok-3", "2026-05-15", true, "grok-4.3", "reasoning_effort: none"]]);
   const c = parseCohere("### 2025-09-15: Old models\n\nEffective September 15, 2025, the following deprecations will roll out.\n\nDeprecated Models:\n\n* `command-r-03-2024`  (and the alias `command-r`)\n* `summarize` (endpoint)\n\nFor command model replacements, we recommend you use `command-r-08-2024` or `command-a-03-2025`.\n");
