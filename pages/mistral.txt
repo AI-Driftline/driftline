@@ -79,6 +79,7 @@ Mistral Embed
 Mistral Large 1.0
 Mistral Large 2.0
 Mistral Large 2.1
+Mistral Large 3
 Mistral Large 4
 Mistral Medium 1.0
 Mistral Medium 3
@@ -87,6 +88,7 @@ Mistral Medium 3.5
 Mistral Moderation
 Mistral Moderation 2
 Mistral NeMo
+Mistral Next
 Mistral Saba
 Mistral Small 1.0
 Mistral Small 2.0
@@ -111,6 +113,7 @@ Timestral 1.0 209M
 Timestral 1.0 28M
 Timestral 1.0 5M
 Voxtral Mini
+Voxtral Mini TTS 3
 Voxtral Mini Transcribe
 Voxtral Mini Transcribe 2
 Voxtral Mini Transcribe 3
@@ -118,6 +121,7 @@ Voxtral Mini Transcribe Realtime
 Voxtral Mini Transcribe Realtime 3
 Voxtral Small
 Voxtral Small Transcribe 3
+Voxtral TTS
 Models
 A list of all our available models, helping you explore their capabilities, performance, trade-offs, and more.
 Featured models
@@ -145,6 +149,23 @@ API
 Deprecation
 Retirement
 Alternative
+Mistral Next
+|
+-
+-
+-
+Mistral Large 3
+Mathstral 7B
+| 0.1
+-
+-
+-
+Mistral Small 4
+Mistral Large 3
+| 25.12 | mistral-large-2512
+06/09/2026
+05/03/2027
+Mistral Large 4
 Voxtral Mini Transcribe 2
 | 26.02 | voxtral-mini-2602 voxtral-mini-latest
 06/09/2026
@@ -155,6 +176,11 @@ Voxtral Mini Transcribe Realtime
 06/09/2026
 05/03/2027
 Voxtral Mini Transcribe Realtime 3
+Voxtral TTS
+| 26.03 | voxtral-mini-tts-2603
+06/09/2026
+05/03/2027
+Voxtral Mini TTS 3
 Mistral Medium 3.5
 | 26.04 | mistral-medium-3-5 mistral-medium-latest
 06/09/2026
