@@ -207,7 +207,7 @@ Agent Builder
 Deprecated
 Agents SDK or ChatGPT Workspace Agents. Migration guide . ChatKit remains available.
 Jun 3, 2026
-Jan 6, 2027
+Dec 15, 2026
 Self-serve fine-tuning job creation
 Restricted access
 See the fine-tuning timeline .
@@ -237,16 +237,16 @@ In Codex, invoke the OpenAI Docs skill with $openai-docs and ask it to migrate y
 See the GPT-6 migration guide .
 Run representative requests against both models. Compare outputs, latency, and cost before switching production traffic to the replacement.
 Update to OpenAI’s self-serve fine-tuning
-On May 7th, 2026, we notified developers using OpenAI’s self-serve fine-tuning platform of updates to availability.
-Inference on fine-tuned models will continue to be available until the base models are deprecated.
+We previously announced January 6, 2027, as the cutoff for creating new self-serve fine-tuning jobs. We’re moving that cutoff up to December 15, 2026 .
+You can continue to run inference on each existing fine-tuned model until OpenAI retires its underlying base model.
 Date
 Update
 May 7, 2026
-Creating fine-tuning jobs or training is not available to organizations that have not previously run fine-tuning.
+Organizations that have never run a fine-tuning job can no longer create one.
 July 2, 2026
-Creating fine-tuning jobs is no longer available to organizations that have not run inference on a fine-tuned model in the past 60 days.
-Jan 6, 2027
-Active existing customers will no longer be able to create new fine-tuning jobs on this date. Inference on fine-tuned models will be disabled only when the underlying base model is deprecated.
+Organizations that haven’t run inference on a fine-tuned model in the past 60 days can no longer create training jobs.
+Dec 15, 2026
+Starting on this date, no organization can create new self-serve fine-tuning jobs.
 Shutdown date
 Affected model or feature
 Listed replacement
