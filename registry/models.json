@@ -7032,11 +7032,11 @@
       "name": "Mistral AI",
       "direct": true,
       "source": "https://docs.mistral.ai/models",
-      "checked": "2026-11-14",
+      "checked": "2026-11-25",
       "models": [
         {
           "id": "codestral-2405",
-          "name": "Codestral",
+          "name": "Codestral 24.05",
           "maker": "mistral",
           "kind": "text",
           "lifecycle": "Retired",
@@ -7046,7 +7046,7 @@
         },
         {
           "id": "codestral-2501",
-          "name": "Codestral",
+          "name": "Codestral 25.01",
           "maker": "mistral",
           "kind": "text",
           "lifecycle": "Retired",
@@ -7181,6 +7181,16 @@
           "lifecycle": "Retired",
           "deprecated": "2025-10-31",
           "retires": "2025-11-30",
+          "replacement": "mistral-small-2603"
+        },
+        {
+          "id": "magistral-small-2509",
+          "name": "Magistral Small 1.2",
+          "maker": "mistral",
+          "kind": "text",
+          "lifecycle": "Deprecated",
+          "deprecated": "2026-04-30",
+          "retires": "2026-07-31",
           "replacement": "mistral-small-2603"
         },
         {
@@ -7395,7 +7405,7 @@
         },
         {
           "id": "open-mistral-7b",
-          "name": "Mistral 7B",
+          "name": "Mistral 7B 0.3",
           "maker": "mistral",
           "kind": "text",
           "lifecycle": "Retired",
@@ -7405,7 +7415,7 @@
         },
         {
           "id": "open-mistral-nemo-2407",
-          "name": "Mistral Nemo 12B",
+          "name": "Mistral NeMo",
           "maker": "mistral",
           "kind": "text",
           "lifecycle": "Deprecated",
@@ -7491,11 +7501,12 @@
           "lifecycle": "Deprecated",
           "deprecated": "2026-10-31",
           "retires": "2027-04-30",
-          "replacement": "voxtral-mini-tts-3-0"
+          "replacement": "voxtral-mini-tts-3-0",
+          "off_page": "2026-11-25"
         },
         {
           "id": "zai-glm-5-2",
-          "name": "Z.ai GLM 5.2",
+          "name": "GLM 5.2",
           "maker": "zai",
           "kind": "text",
           "lifecycle": "Deprecated",
