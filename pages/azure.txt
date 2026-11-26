@@ -746,7 +746,7 @@ Replacement
 grok-4
 1
 GA
-2027-01-31
+2027-02-03
 —
 grok-4-1-fast-non-reasoning
 1
@@ -786,7 +786,7 @@ GA
 grok-code-fast-1
 1
 GA
-2027-01-31
+2027-02-03
 —
 Foundry Models from partners and community
 This section lists the retirement lifecycle for Foundry Models sold by partners via Azure Marketplace.
