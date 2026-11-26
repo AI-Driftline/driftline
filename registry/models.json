@@ -4074,7 +4074,7 @@
     "azure": {
       "name": "Azure",
       "source": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
-      "checked": "2026-11-24",
+      "checked": "2026-11-26",
       "models": [
         {
           "id": "claude-fable-5",
@@ -5769,10 +5769,10 @@
             {
               "version": "1",
               "lifecycle": "GA",
-              "retires": "2027-01-31"
+              "retires": "2027-02-03"
             }
           ],
-          "retires": "2027-01-31"
+          "retires": "2027-02-03"
         },
         {
           "id": "grok-4-1-fast-non-reasoning",
@@ -5915,10 +5915,10 @@
             {
               "version": "1",
               "lifecycle": "GA",
-              "retires": "2027-01-31"
+              "retires": "2027-02-03"
             }
           ],
-          "retires": "2027-01-31"
+          "retires": "2027-02-03"
         },
         {
           "id": "kimi-k2.5",
