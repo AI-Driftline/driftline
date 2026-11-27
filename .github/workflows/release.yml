@@ -122,3 +122,19 @@ jobs:
           descok=$([ "$got" = "$want" ] && echo yes || echo no)
           echo "npm latest: $npmv · @v0 at $v: $v0ok · MCP Registry has ${v#v}: $([ "${mcpok:-0}" != 0 ] && echo yes || echo no) · registry description current: $descok" | tee -a "$GITHUB_STEP_SUMMARY"
           [ "$npmv" = "${v#v}" ] && [ "$v0ok" = yes ] && [ "${mcpok:-0}" != 0 ] && [ "$descok" = yes ]
+      # 6) A GitHub release for the version, so the repo's Releases page shows what's current (it showed v0.1.4 until
+      #    27 Nov 2026). Last on purpose: if it fails, npm, @v0 and the MCP Registry are already done. Notes = commit
+      #    subjects since the previous version, without the release commits and the "no changes" re-checks.
+      - name: GitHub release
+        if: steps.bump.outputs.released
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v=${{ steps.bump.outputs.released }}
+          if gh release view "$v" >/dev/null 2>&1; then echo "GitHub release $v exists"; exit 0; fi
+          prev=$(git tag --list 'v0.*.*' | sort -V | grep -B1 -x "$v" | head -1)
+          { echo "Changes since ${prev}:"; echo
+            git log "${prev}..${v}" --format='- %s' | grep -vE '^- Release v|: no changes$' || echo "- Registry update"
+            echo; echo "Use it: \`uses: AI-Driftline/driftline@v0\` · \`npx -y @aidriftline/driftline .\` · npm @aidriftline/driftline@${v#v}"
+          } > notes.md
+          gh release create "$v" --title "Driftline $v" --notes-file notes.md --latest --verify-tag
