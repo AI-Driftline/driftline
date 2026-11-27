@@ -92,9 +92,11 @@ export function parseMistral(html) {
     for (const r of m.relatedModels || []) walk(r);
   };
   for (const m of mistralModels(html)) walk(m);
+  // Mistral has written its status words both ways ("Retired", "retired" since 25 Nov 2026): keep one spelling.
+  const status = (v) => (v == null ? v : /^ga$/i.test(v) ? "GA" : String(v).charAt(0).toUpperCase() + String(v).slice(1).toLowerCase());
   const replacementOf = (m) => {
     let r = m.replacedBy;
-    for (let hops = 0; r && hops < 5; hops++) { const full = byId.get(apiId(r)); if (full?.status !== "Retired" || !full.replacedBy) break; r = full.replacedBy; }
+    for (let hops = 0; r && hops < 5; hops++) { const full = byId.get(apiId(r)); if (status(full?.status) !== "Retired" || !full.replacedBy) break; r = full.replacedBy; }
     return r;
   };
   const out = [];
@@ -103,7 +105,7 @@ export function parseMistral(html) {
     if (!retires) continue;
     const r = replacementOf(m), replacement = apiId(r);
     out.push({ id, name: m.name || id, maker: /^zai-/.test(id) ? "zai" : /^deepseek/.test(id) ? "deepseek" : "mistral", kind: kindOf(id),
-      ...(m.status ? { lifecycle: m.status } : {}), ...(day(m.deprecatedAt) ? { deprecated: day(m.deprecatedAt) } : {}), retires,
+      ...(m.status ? { lifecycle: status(m.status) } : {}), ...(day(m.deprecatedAt) ? { deprecated: day(m.deprecatedAt) } : {}), retires,
       ...(replacement ? { replacement } : r?.name ? { replacement_note: `Mistral recommends ${r.name}` } : {}) });
   }
   return byIdOnce(out);

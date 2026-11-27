@@ -1121,6 +1121,10 @@ test("provider page parsers: Groq tables, Mistral page data, xAI guides, Cohere 
   assert.deepEqual(parseMistral(page).map((m) => [m.id, m.lifecycle, m.deprecated, m.retires, m.replacement]),
     [["codestral-2405", "Retired", "2024-12-02", "2025-06-16", "codestral-2508"], ["codestral-2501", "Retired", "2025-11-06", "2025-11-30", "codestral-2508"],
      ["mistral-large-2512", "Deprecated", "2026-10-31", "2027-04-30", "mistral-large-4"]]);
+  // Since 25 Nov 2026 Mistral writes status words in lowercase: same result (chain still followed, spelling kept).
+  const lower = JSON.parse(JSON.stringify(lists).replace(/"status":"(\w+)"/g, (_, w) => `"status":"${w.toLowerCase()}"`));
+  const pageLower = push('3:["$","div",null,{"children":"Older models that have been deprecated or retired."}]\n') + push(`4:${JSON.stringify(lower)}\n`);
+  assert.deepEqual(parseMistral(pageLower), parseMistral(page));
   const g = parseXaiGuide("# Grok Model Retirement on May 15, 2026\n\n| Model being retired | Redirect target |\n|---|---|\n| `grok-3` | `grok-4.3` with `none` reasoning effort |\n");
   assert.deepEqual(g.map((m) => [m.id, m.retires, m.routes, m.replacement, m.replacement_note]), [["grok-3", "2026-05-15", true, "grok-4.3", "reasoning_effort: none"]]);
   const c = parseCohere("### 2025-09-15: Old models\n\nEffective September 15, 2025, the following deprecations will roll out.\n\nDeprecated Models:\n\n* `command-r-03-2024`  (and the alias `command-r`)\n* `summarize` (endpoint)\n\nFor command model replacements, we recommend you use `command-r-08-2024` or `command-a-03-2025`.\n");
